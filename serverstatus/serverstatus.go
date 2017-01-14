@@ -7,21 +7,23 @@ import (
 	"time"
 )
 
+const serverAddr string = "149.202.207.235"
+
 func Start() {
 	go loop()
 }
 
 func loop() {
 	prevServerUp := true
-	elysiumPvP := portscanner.NewPortScanner("149.202.207.235", time.Second*2)
+	elysiumPvP := portscanner.NewPortScanner(serverAddr, time.Second*2)
 
 	for {
 		serverUp := elysiumPvP.IsOpen(8099)
 
 		if serverUp && serverUp != prevServerUp {
-			sendMessage("@everyone Elysium PVP is now online!")
+			sendMessage("@here Elysium PVP is now online!")
 		} else if !serverUp && serverUp != prevServerUp {
-			sendMessage("@everyone Elysium PVP is offline.")
+			sendMessage("@here Elysium PVP is now offline!")
 		}
 
 		prevServerUp = serverUp

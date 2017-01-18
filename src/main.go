@@ -22,7 +22,7 @@ func main() {
 	handlers.LoadSounds()
 
 	//add handlers
-	bot.AddHandler(handlers.AirhornHandler)
+	bot.AddHandler(handlers.SoundsHandler)
 
 	//start websock to listen for messages
 	bot.Start()

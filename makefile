@@ -14,5 +14,5 @@ copyconfig:
 	@cp config.template.json ./dist/config.json
 	@cp -r ./sounds ./dist/
 
-build: clean windows linux copyconfig
+all: windows linux copyconfig
 	

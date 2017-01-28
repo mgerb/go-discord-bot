@@ -33,6 +33,7 @@ func Connect(token string) {
 	fmt.Println("Bot connected")
 }
 
+// Start - blocking function that starts a websocket listenting for discord callbacks
 func Start() {
 	// Open the websocket and begin listening.
 	err := Session.Open()
@@ -41,7 +42,7 @@ func Start() {
 		return
 	}
 
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	fmt.Println("Bot is now running...")
 
 	// Simple way to keep program running until CTRL-C is pressed.
 	<-make(chan struct{})

@@ -7,22 +7,48 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 	"time"
 )
 
-var sounds = make(map[string][][]byte, 0)
+var (
+	sounds = make(map[string][][]byte, 0)
+
+	soundPlayingLock = false
+)
 
 const SOUNDS_DIR string = "./sounds/"
 
 func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if strings.HasPrefix(m.Content, config.Config.Activator) {
+
+	// exit function call if sound is playing
+	if soundPlayingLock {
+		fmt.Println("Exiting function call")
+		return
+	}
+
+	// check if valid command
+	if strings.HasPrefix(m.Content, config.Config.BotPrefix) {
+
+		soundName := strings.TrimPrefix(m.Content, config.Config.BotPrefix)
+
+		// check if sound exists in memory
+		if _, ok := sounds[soundName]; !ok {
+			// try to load the sound if not found in memory
+			err := loadFile(soundName)
+
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
+
 		// Find the channel that the message came from.
 		c, err := s.State.Channel(m.ChannelID)
 		if err != nil {
 			// Could not find channel.
+			fmt.Println("User channel not found.")
 			return
 		}
 
@@ -36,7 +62,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Look for the message sender in that guilds current voice states.
 		for _, vs := range g.VoiceStates {
 			if vs.UserID == m.Author.ID {
-				err = playSound(s, g.ID, vs.ChannelID, strings.TrimPrefix(m.Content, config.Config.Activator))
+				err = playSound(s, g.ID, vs.ChannelID, soundName)
 				if err != nil {
 					fmt.Println("Error playing sound:", err)
 				}
@@ -47,35 +73,18 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-// loadSound attempts to load an encoded sound file from disk.
-func LoadSounds() error {
-
-	files, _ := ioutil.ReadDir(SOUNDS_DIR)
-
-	for _, file := range files {
-		fmt.Println(file.Name())
-		err := loadFile(file.Name())
-
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-
-	}
-
-	return nil
-}
-
+// load dca file into memory
 func loadFile(fileName string) error {
+	fmt.Println("Loading file: " + fileName + ".dca")
 
-	trimmedName := strings.TrimSuffix(fileName, ".dca")
-	sounds[trimmedName] = make([][]byte, 0)
-
-	file, err := os.Open(SOUNDS_DIR + fileName)
+	file, err := os.Open(SOUNDS_DIR + fileName + ".dca")
 
 	if err != nil {
 		fmt.Println("Error opening dca file :", err)
 		return err
 	}
+
+	sounds[fileName] = make([][]byte, 0)
 
 	var opuslen int16
 
@@ -84,12 +93,13 @@ func loadFile(fileName string) error {
 		err = binary.Read(file, binary.LittleEndian, &opuslen)
 
 		// If this is the end of the file, just return.
-		if err == io.EOF || err == io.ErrUnexpectedEOF {
+		if err != nil {
 			file.Close()
-			if err != nil {
+			if err == io.EOF {
+				return nil
+			} else if err == io.ErrUnexpectedEOF {
 				return err
 			}
-			return nil
 		}
 
 		if err != nil {
@@ -107,7 +117,7 @@ func loadFile(fileName string) error {
 			return err
 		}
 
-		sounds[trimmedName] = append(sounds[trimmedName], InBuf)
+		sounds[fileName] = append(sounds[fileName], InBuf)
 	}
 
 }
@@ -118,6 +128,9 @@ func playSound(s *discordgo.Session, guildID, channelID string, sound string) (e
 	if _, ok := sounds[sound]; !ok {
 		return errors.New("Sound not found")
 	}
+
+	//prevent other sounds from interrupting
+	soundPlayingLock = true
 
 	// Join the provided voice channel.
 	vc, err := s.ChannelVoiceJoin(guildID, channelID, false, false)
@@ -144,6 +157,8 @@ func playSound(s *discordgo.Session, guildID, channelID string, sound string) (e
 
 	// Disconnect from the provided voice channel.
 	_ = vc.Disconnect()
+
+	soundPlayingLock = false
 
 	return nil
 }

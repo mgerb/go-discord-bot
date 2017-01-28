@@ -12,10 +12,10 @@ var Config configStruct
 
 type configStruct struct {
 	Token     string `json:"Token"`
-	Activator string `json:"Activator"`
+	BotPrefix string `json:"BotPrefix"` //prefix to use for bot commands
 }
 
-func Configure() {
+func Init() {
 
 	log.Println("Reading config file...")
 

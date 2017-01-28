@@ -4,26 +4,22 @@ import (
 	"./bot"
 	"./config"
 	"./handlers"
-)
-
-// Variables used for command line parameters
-var (
-	BotID string
+	"./webserver"
 )
 
 func main() {
 	//read config file
-	config.Configure()
+	config.Init()
 
 	//connect bot to account with token
 	bot.Connect(config.Config.Token)
 
-	//load sound files into memory
-	handlers.LoadSounds()
-
 	//add handlers
 	bot.AddHandler(handlers.SoundsHandler)
 
-	//start websock to listen for messages
-	bot.Start()
+	// start new go routine for the discord websockets
+	go bot.Start()
+
+	// start the web server
+	webserver.Start()
 }

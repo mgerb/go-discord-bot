@@ -14,7 +14,7 @@ clean:
 	rm -rf ./dist
 
 copyconfig:
-	cp config.template.json ./dist/config.json
+	cp config.template.json ./dist/config.template.json
 	cp -r ./sounds ./dist/
 
 all: linux mac windows copyconfig

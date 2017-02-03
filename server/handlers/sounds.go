@@ -7,16 +7,23 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 	"time"
 )
 
 var (
-	sounds = make(map[string][][]byte, 0)
+	sounds = make(map[string]*AudioClip, 0)
 
 	soundPlayingLock = false
 )
+
+type AudioClip struct {
+	Name      string
+	Extension string
+	Content   [][]byte
+}
 
 const SOUNDS_DIR string = "./sounds/"
 
@@ -77,6 +84,26 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 func loadFile(fileName string) error {
 	fmt.Println("Loading file: " + fileName + ".dca")
 
+	// scan directory for file
+	files, _ := ioutil.ReadDir("./sounds")
+	var fextension string
+	var fname string
+	for _, f := range files {
+		fname = strings.Split(f.Name(), ".")[0]
+		fextension = "." + strings.Split(f.Name(), ".")[1]
+
+		if fname == fileName {
+			break
+		}
+
+		fname = ""
+	}
+
+	if fname == "" {
+		return errors.New("File not found")
+	}
+
+	// open file and load into memory
 	file, err := os.Open(SOUNDS_DIR + fileName + ".dca")
 
 	if err != nil {
@@ -84,7 +111,11 @@ func loadFile(fileName string) error {
 		return err
 	}
 
-	sounds[fileName] = make([][]byte, 0)
+	sounds[fileName] = &AudioClip{
+		Content:   make([][]byte, 0),
+		Name:      fileName,
+		Extension: fextension,
+	}
 
 	var opuslen int16
 
@@ -102,11 +133,6 @@ func loadFile(fileName string) error {
 			}
 		}
 
-		if err != nil {
-			fmt.Println("Error reading from dca file :", err)
-			return err
-		}
-
 		// Read encoded pcm from dca file.
 		InBuf := make([]byte, opuslen)
 		err = binary.Read(file, binary.LittleEndian, &InBuf)
@@ -117,7 +143,7 @@ func loadFile(fileName string) error {
 			return err
 		}
 
-		sounds[fileName] = append(sounds[fileName], InBuf)
+		sounds[fileName].Content = append(sounds[fileName].Content, InBuf)
 	}
 
 }
@@ -145,7 +171,7 @@ func playSound(s *discordgo.Session, guildID, channelID string, sound string) (e
 	_ = vc.Speaking(true)
 
 	// Send the buffer data.
-	for _, buff := range sounds[sound] {
+	for _, buff := range sounds[sound].Content {
 		vc.OpusSend <- buff
 	}
 

@@ -13,6 +13,7 @@ export default class Soundboard extends React.Component {
         this.state = {
             uploaded: false,
             percentCompleted: 0,
+            password: "",
         }
         self = this;
     }
@@ -40,16 +41,19 @@ export default class Soundboard extends React.Component {
         let formData = new FormData();
         formData.append("name", file.name);
         formData.append("file", file);
+        formData.append("password", this.state.password);
         
         axios.put("/upload", formData, this.config)
-            .then(() => {
+            .then((response) => {
                 this.setState({
+                    password: "",
                     percentCompleted: 0,
                     uploaded: true,
                     uploadError: undefined,
                 });
             }).catch((err) => {
                 this.setState({
+                    password: "",
                     percentCompleted: 0,
                     uploaded: false,
                     uploadError: "Upload error.",
@@ -57,9 +61,22 @@ export default class Soundboard extends React.Component {
             });
     }
     
+    passwordOnChange(event) {
+        this.setState({
+            password: event.target.value,
+        });
+    }
+    
     render() {
         return (
             <div className="Soundboard">
+            
+            <input className="Soundboard__input"
+                    type="password"
+                    placeholder="Password"
+                    value={this.state.password}
+                    onChange={this.passwordOnChange.bind(this)}></input>
+            <div>
                 <Dropzone className="Dropzone"
                         activeClassName="Dropzone--active"
                         onDrop={this.onDrop}
@@ -71,6 +88,7 @@ export default class Soundboard extends React.Component {
                     {this.state.uploaded ? <div>File uploded!</div> : ""}
                     {this.state.uploadError ? <div>{this.state.uploadError}</div> : ""}
                 </Dropzone>
+            </div>
             </div>
         )
     }

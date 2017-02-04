@@ -2,20 +2,29 @@ package handlers
 
 import (
 	"../config"
+	"bufio"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"io"
 	"io/ioutil"
-	"os"
+	"layeh.com/gopus"
+	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 )
 
-var (
-	sounds = make(map[string]*AudioClip, 0)
+const (
+	channels  int = 2                   // 1 for mono, 2 for stereo
+	frameRate int = 48000               // audio sampling rate
+	frameSize int = 960                 // uint16 size of each audio frame
+	maxBytes  int = (frameSize * 2) * 2 // max size of opus data
+)
 
+var (
+	sounds           = make(map[string]*AudioClip, 0)
 	soundPlayingLock = false
 )
 
@@ -31,7 +40,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// exit function call if sound is playing
 	if soundPlayingLock {
-		fmt.Println("Exiting function call")
+		fmt.Println("Function in progress, exiting function call...")
 		return
 	}
 
@@ -82,10 +91,9 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // load dca file into memory
 func loadFile(fileName string) error {
-	fmt.Println("Loading file: " + fileName + ".dca")
 
 	// scan directory for file
-	files, _ := ioutil.ReadDir("./sounds")
+	files, _ := ioutil.ReadDir(config.Config.SoundsPath)
 	var fextension string
 	var fname string
 	for _, f := range files {
@@ -103,12 +111,30 @@ func loadFile(fileName string) error {
 		return errors.New("File not found")
 	}
 
-	// open file and load into memory
-	file, err := os.Open(SOUNDS_DIR + fileName + ".dca")
+	fmt.Println("Loading file: " + fname + fextension)
+
+	// use ffmpeg to convert file into a format we can use
+	cmd := exec.Command("ffmpeg", "-i", config.Config.SoundsPath+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(frameRate), "-ac", strconv.Itoa(channels), "pipe:1")
+
+	ffmpegout, err := cmd.StdoutPipe()
 
 	if err != nil {
-		fmt.Println("Error opening dca file :", err)
-		return err
+		return errors.New("Stdout error.")
+	}
+
+	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16348)
+
+	err = cmd.Start()
+
+	if err != nil {
+		return errors.New("CMD Start error.")
+	}
+
+	// crate encoder to convert audio to opus codec
+	opusEncoder, err := gopus.NewEncoder(frameRate, channels, gopus.Audio)
+
+	if err != nil {
+		return errors.New("NewEncoder error.")
 	}
 
 	sounds[fileName] = &AudioClip{
@@ -117,35 +143,28 @@ func loadFile(fileName string) error {
 		Extension: fextension,
 	}
 
-	var opuslen int16
-
 	for {
-		// Read opus frame length from dca file.
-		err = binary.Read(file, binary.LittleEndian, &opuslen)
-
-		// If this is the end of the file, just return.
+		// read data from ffmpeg stdout
+		audiobuf := make([]int16, frameSize*channels)
+		err = binary.Read(ffmpegbuf, binary.LittleEndian, &audiobuf)
+		if err == io.EOF || err == io.ErrUnexpectedEOF {
+			return nil
+		}
 		if err != nil {
-			file.Close()
-			if err == io.EOF {
-				return nil
-			} else if err == io.ErrUnexpectedEOF {
-				return err
-			}
+			return errors.New("Error reading from ffmpeg stdout.")
 		}
 
-		// Read encoded pcm from dca file.
-		InBuf := make([]byte, opuslen)
-		err = binary.Read(file, binary.LittleEndian, &InBuf)
-
-		// Should not be any end of file errors
+		// convert audio to opus codec
+		opus, err := opusEncoder.Encode(audiobuf, frameSize, maxBytes)
 		if err != nil {
-			fmt.Println("Error reading from dca file :", err)
-			return err
+			return errors.New("Encoding error.")
 		}
 
-		sounds[fileName].Content = append(sounds[fileName].Content, InBuf)
+		// append sound bytes to the content for this audio file
+		sounds[fileName].Content = append(sounds[fileName].Content, opus)
 	}
 
+	return nil
 }
 
 // playSound plays the current buffer to the provided channel.
@@ -165,7 +184,7 @@ func playSound(s *discordgo.Session, guildID, channelID string, sound string) (e
 	}
 
 	// Sleep for a specified amount of time before playing the sound
-	time.Sleep(250 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 
 	// Start speaking.
 	_ = vc.Speaking(true)

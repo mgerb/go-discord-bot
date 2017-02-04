@@ -15,7 +15,5 @@ clean:
 
 copyfiles:
 	cp config.template.json ./dist/config.template.json
-	cp -r ./sounds ./dist/
-	cp ./dca-rs ./dist/
 
 all: linux mac windows copyfiles

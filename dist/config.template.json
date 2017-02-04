@@ -2,5 +2,6 @@
     "Token": "",
     "BotPrefix": "#",
     "SoundsPath": "./sounds/",
-    "UploadPassword": ""
+    "UploadPassword": "",
+    "ServerAddr": ":80"
 }

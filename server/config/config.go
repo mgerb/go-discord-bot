@@ -11,8 +11,11 @@ import (
 var Config configStruct
 
 type configStruct struct {
-	Token     string `json:"Token"`
-	BotPrefix string `json:"BotPrefix"` //prefix to use for bot commands
+	Token          string `json:"Token"`
+	BotPrefix      string `json:"BotPrefix"` //prefix to use for bot commands
+	SoundsPath     string `json:"SoundsPath"`
+	UploadPassword string `json:"UploadPassword"`
+	ServerAddr     string `json:"ServerAddr`
 }
 
 func Init() {

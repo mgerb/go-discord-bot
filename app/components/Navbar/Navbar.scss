@@ -11,14 +11,24 @@
     background-color: $gray2;
     border-right: 1px solid darken($gray2, 2%);
     overflow-y: auto;
+    padding-bottom: 10px;
+    
+    .link {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        justify-content: flex-end;
+        text-align: center;
+    }
 }
 
 .Navbar__header {
+    font-size: 25px;
     min-height: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: $gray2;
+    background-color: $primaryBlue;
     border-bottom: 1px solid $gray3;
 }
 
@@ -31,6 +41,7 @@
     text-align: center;
     color: $white;
     transition: background-color 0.1s linear;
+    transition: color 0.1s linear;
     
     &:hover {
         background-color: $gray1; 
@@ -45,4 +56,5 @@
 .Navbar__item--active {
     padding-left: 4px;
     border-right: 4px solid $primaryBlue;
+    color: $primaryBlue !important;
 }

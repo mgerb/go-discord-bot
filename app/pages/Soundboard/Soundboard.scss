@@ -1,0 +1,25 @@
+@import '../../scss/variables';
+
+.Soundboard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.Dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid lighten($gray1, 10%);
+    padding: 20px;
+    color: lighten($gray1, 15%);
+    border-radius: 1em;
+    width: 200px;
+    height: 200px;
+}
+
+.Dropzone--active {
+    background-color: lighten($gray1, 20%);
+}

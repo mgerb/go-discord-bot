@@ -6,7 +6,7 @@ export default class Home extends React.Component {
     render() {
         return (
             <div className="Home">
-                GoBot Home Page
+                GoBot Early Access Pre Pre Alpha
             </div>
         );
     }

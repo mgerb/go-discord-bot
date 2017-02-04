@@ -26,10 +26,12 @@
     padding: 20px;
     color: lighten($gray1, 15%);
     border-radius: 1em;
-    width: 200px;
-    height: 200px;
+    width: 300px;
+    height: 300px;
+    background-color: $gray2;
+    transition: background-color 0.1s linear;
 }
 
 .Dropzone--active {
-    background-color: lighten($gray1, 20%);
+    background-color: $primaryBlue;
 }

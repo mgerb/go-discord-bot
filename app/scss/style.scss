@@ -1,9 +1,46 @@
+* {
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: none;    
+    color: $primaryBlue;
+    transition: color 0.1s linear;
+    
+    &:hover {
+        color: darken(white, 10%);
+    }
+}
+
+i {
+    margin-left: 5px;    
+    margin-right: 5px;    
+}
+
 body {
     background-color: $gray1;
     color: $white;
     padding-left: $navbarWidth;
 }
 
-.content {
+.Content {
     padding: 10px;
+}
+
+.Card {
+    background-color: $gray2;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.Card__header {
+    margin: -10px -10px 10px -10px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 50px;
+    border-radius: 5px 5px 0 0;
+    font-size: 25px;
+    background-color: $gray3;
 }

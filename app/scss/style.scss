@@ -26,7 +26,9 @@ body {
 .Card {
     background-color: $gray2;
     border-radius: 5px;
+    max-width: 800px;
     padding: 10px;
+    border: 1px solid $gray3;
 }
 
 .Card__header {
@@ -39,4 +41,12 @@ body {
     border-radius: 5px 5px 0 0;
     font-size: 25px;
     background-color: $gray3;
+}
+
+.column {
+    flex: 1;
+    
+    & + .column {
+        margin-left: 10px;
+    }
 }

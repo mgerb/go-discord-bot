@@ -16,4 +16,4 @@ clean:
 copyfiles:
 	cp config.template.json ./dist/config.template.json
 
-all: linux mac windows copyfiles
+all: linux copyfiles

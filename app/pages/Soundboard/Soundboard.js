@@ -54,6 +54,10 @@ export default class Soundboard extends React.Component {
                     uploaded: true,
                     uploadError: " ",
                 });
+                
+                // reset sound list cache and load the new list
+                this.refs.SoundList.soundListCache = undefined;
+                this.refs.SoundList.getSoundList();
             }).catch((err) => {
                 this.setState({
                     percentCompleted: 0,
@@ -73,7 +77,7 @@ export default class Soundboard extends React.Component {
         return (
             <div className="Soundboard">
                 <div className="column">
-                    <SoundList/>
+                    <SoundList ref="SoundList"/>
                 </div>
             
                 <div className="column">

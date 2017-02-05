@@ -3,8 +3,6 @@ import axios from 'axios';
 
 import './SoundList.scss';
 
-let soundListCache;
-
 export default class SoundList extends React.Component {
     
     constructor() {
@@ -19,10 +17,10 @@ export default class SoundList extends React.Component {
     }
     
     getSoundList() {
-        if (!soundListCache) {
+        if (!this.soundListCache) {
             axios.get("/soundlist")
                 .then((response) => {
-                    soundListCache = response.data;
+                    this.soundListCache = response.data;
                     this.setState({
                         soundList: response.data,
                     });
@@ -31,13 +29,12 @@ export default class SoundList extends React.Component {
                 });
         } else {
             this.setState({
-                soundList: soundListCache,
+                soundList: this.soundListCache,
             });
         }
     }
     
     checkExtension(extension) {
-        console.log(extension);
         switch(extension) {
             case "wav":
                 return true;

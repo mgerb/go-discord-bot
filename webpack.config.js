@@ -10,7 +10,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: '/static/[name].js'
+        filename: '/static/[name].[hash].js'
     },
     module: {
         rules: [{
@@ -47,7 +47,7 @@ module.exports = {
     },
     plugins: [
         new ExtractTextPlugin({
-            filename: '/static/[name].css',
+            filename: '/static/[name].[hash].css',
             disable: false,
             allChunks: true
         }),

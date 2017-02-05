@@ -37,13 +37,12 @@ export default class SoundList extends React.Component {
     }
     
     checkExtension(extension) {
-        console.log(extension);
         switch(extension) {
             case "wav":
                 return true;
-            case "wav":
+            case "mp3":
                 return true;
-            case "wav":
+            case "mpeg":
                 return true;
             default:
                 console.log("not working");

@@ -1,4 +1,4 @@
-package handlers
+package bothandlers
 
 import (
 	"../config"

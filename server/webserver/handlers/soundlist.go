@@ -9,7 +9,13 @@ import (
 	"strings"
 )
 
-var soundList = make([]string, 0)
+var soundList []sound
+
+type sound struct {
+	Prefix    string `json:"prefix"`
+	Name      string `json:"name"`
+	Extension string `json:"extension"`
+}
 
 func SoundList(ctx *fasthttp.RequestCtx) {
 
@@ -35,9 +41,8 @@ func SoundList(ctx *fasthttp.RequestCtx) {
 func PopulateSoundList() error {
 	fmt.Println("Populating sound list.")
 
-	soundList = make([]string, 0)
+	soundList = []sound{}
 
-	var fileName string
 	files, err := ioutil.ReadDir(config.Config.SoundsPath)
 
 	if err != nil {
@@ -45,8 +50,16 @@ func PopulateSoundList() error {
 	}
 
 	for _, f := range files {
-		fileName = config.Config.BotPrefix + strings.Split(f.Name(), ".")[0]
-		soundList = append(soundList, fileName)
+		fileName := strings.Split(f.Name(), ".")[0]
+		extension := strings.Split(f.Name(), ".")[1]
+
+		listItem := sound{
+			Name:      fileName,
+			Extension: extension,
+			Prefix:    config.Config.BotPrefix,
+		}
+
+		soundList = append(soundList, listItem)
 	}
 
 	return nil

@@ -28,6 +28,7 @@ func registerRoutes(router *fasthttprouter.Router) {
 	router.PUT("/upload", handlers.FileUpload)
 
 	router.ServeFiles("/static/*filepath", "./static")
+	router.ServeFiles("/sounds/*filepath", "./sounds")
 
 	router.NotFound = func(ctx *fasthttp.RequestCtx) {
 		fasthttp.ServeFile(ctx, "./index.html")

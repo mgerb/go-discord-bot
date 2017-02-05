@@ -1,4 +1,5 @@
 config.json
 dist/config.json
+dist/sounds
 node_modules
 yarn-error*

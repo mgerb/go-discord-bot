@@ -2,6 +2,8 @@ import React from 'react';
 import Dropzone from 'react-dropzone';
 import axios from 'axios';
 
+import SoundList from './SoundList.component';
+
 import './Soundboard.scss';
 
 let self;
@@ -11,9 +13,10 @@ export default class Soundboard extends React.Component {
     constructor() {
         super();
         this.state = {
-            uploaded: false,
             percentCompleted: 0,
             password: "",
+            uploaded: false,
+            uploadError: " ",
         }
         self = this;
     }
@@ -49,14 +52,13 @@ export default class Soundboard extends React.Component {
                     password: "",
                     percentCompleted: 0,
                     uploaded: true,
-                    uploadError: undefined,
+                    uploadError: " ",
                 });
             }).catch((err) => {
                 this.setState({
-                    password: "",
                     percentCompleted: 0,
                     uploaded: false,
-                    uploadError: "Upload error.",
+                    uploadError: err.response.data,
                 });
             });
     }
@@ -70,25 +72,33 @@ export default class Soundboard extends React.Component {
     render() {
         return (
             <div className="Soundboard">
+                <div className="column">
+                    <SoundList/>
+                </div>
             
-            <input className="Soundboard__input"
-                    type="password"
-                    placeholder="Password"
-                    value={this.state.password}
-                    onChange={this.passwordOnChange.bind(this)}></input>
-            <div>
-                <Dropzone className="Dropzone"
-                        activeClassName="Dropzone--active"
-                        onDrop={this.onDrop}
-                        multiple={false}
-                        accept={"audio/*"}>
-                        
-                    <div>Drop file here to upload.</div>
-                    {this.state.percentCompleted > 0 ? <div>Progress: {this.state.percentCompleted}</div> : ""}
-                    {this.state.uploaded ? <div>File uploded!</div> : ""}
-                    {this.state.uploadError ? <div>{this.state.uploadError}</div> : ""}
-                </Dropzone>
-            </div>
+                <div className="column">
+                    <div>
+                        <Dropzone className="Dropzone"
+                                activeClassName="Dropzone--active"
+                                onDrop={this.onDrop}
+                                multiple={false}
+                                disableClick={true}
+                                maxSize={10000000000}
+                                accept={"audio/*"}>
+                                
+                            <input className="Soundboard__input"
+                                    type="password"
+                                    placeholder="Password"
+                                    value={this.state.password}
+                                    onChange={this.passwordOnChange.bind(this)}/>
+                                
+                            <div style={{fontSize: "20px"}}>Drop file here to upload.</div>
+                            {this.state.percentCompleted > 0 ? <div>Uploading: {this.state.percentCompleted}</div> : ""}
+                            {this.state.uploaded ? <div style={{color: 'green'}}>File uploded!</div> : ""}
+                            <div style={{color: '#f95f59'}}>{this.state.uploadError}</div>
+                        </Dropzone>
+                    </div>
+                </div>
             </div>
         )
     }

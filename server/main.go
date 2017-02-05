@@ -2,8 +2,8 @@ package main
 
 import (
 	"./bot"
+	"./bothandlers"
 	"./config"
-	"./handlers"
 	"./webserver"
 )
 
@@ -15,7 +15,7 @@ func main() {
 	bot.Connect(config.Config.Token)
 
 	//add handlers
-	bot.AddHandler(handlers.SoundsHandler)
+	bot.AddHandler(bothandlers.SoundsHandler)
 
 	// start new go routine for the discord websockets
 	go bot.Start()

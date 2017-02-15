@@ -5,7 +5,7 @@ My experimental Discord bot
 ### Cross Compiling
 The gopus library uses the CGO package, therefore building both Mac and Linux require `CGO_ENABLED=1`.
 
-< Work in progress
+> Work in progress
 
 Other libraries are needed in order for CGO work properly cross platform.
 

@@ -1,18 +1,34 @@
-# GoBot
+# Discord Sound Bot
 
-My experimental Discord bot
+This is a soundboard bot for discord. The back end is in GoLang and the front end uses React.
 
-### Cross Compiling
-The gopus library uses the CGO package, therefore building both Mac and Linux require `CGO_ENABLED=1`.
+<img src="http://i.imgur.com/jtAyJZ1.png"/>
 
-> Work in progress
+## Dependencies
+- Go
+- Yarn (or npm - makefile will need to be adjusted)
+- make
 
-Other libraries are needed in order for CGO work properly cross platform.
+## How to use
 
-```
-sudo apt-get install gcc-multilib
-apt-get install libpango1.0
-```
+- Make sure dependencies are installed
+- `make all`
+- Rename the `config.template.json` to `config.json`
+- add configurations to `config.json`
+- run the executable
+- open a browser `localhost:<port>`
+- upload files
+- success!
 
-This are some packages I came across as suggestions after a little browsing. Doesn't seem to be working currently.
-This is something I need to investigate more on in the future.
+### NOTE
+
+If you get a permissions error with ffmpeg:
+`sudo chmod +x dist/ffmpeg`
+
+Sounds are stored in the `dist/sounds` directory. You may copy files directly to this folder rather than uploading through the site.
+
+### Windows
+I've only compiled and run this on linux, but it should work on windows with little changes.
+An ffmpeg executable is required. The linux executable is included.
+If running on windows ffmpeg.exe must be downloaded.
+Check line 116 in server/bothandlers/sounds.go

@@ -6,14 +6,10 @@ import Wrapper from './Wrapper';
 import Soundboard from './pages/Soundboard/Soundboard';
 import NotFound from './pages/NotFound/NotFound';
 
-//pages
-import Home from './pages/Home/Home';
-
 ReactDOM.render(
     <Router history={browserHistory}>
         <Route path="/" component={Wrapper}>
-            <IndexRoute component={Home}/>
-            <Route path="/soundboard" component={Soundboard}/>
+            <IndexRoute component={Soundboard}/>
             <Route path="*" component={NotFound}/>
         </Route>
     </Router>

@@ -77,6 +77,18 @@ export default class Soundboard extends React.Component {
         return (
             <div className="Soundboard">
                 <div className="column">
+                    <div className="Card">
+                        <div className="Card__header">
+                            Discord Sound Bot
+                        </div>
+                        <p>Drag and drop files to upload. The sounds can then be played in discord by typing the commands below.</p>
+                        <p>Check out the source code on 
+                            <a href="https://github.com/mgerb/GoBot" target="_blank"> GitHub 
+                                <i className="fa fa-github" aria-hidden="true"></i>
+                            </a>
+                        </p>
+                        <p>Follow the readme to set up your own bot!</p>
+                    </div>
                     <SoundList ref="SoundList"/>
                 </div>
             

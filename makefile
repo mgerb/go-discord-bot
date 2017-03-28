@@ -5,7 +5,7 @@ install:
 	go get ./server && yarn install
 
 build:
-	go build -o ./dist/GoBot ./server/main.go
+	go build -o ./dist/soundbot ./server/main.go
 
 clean:
 	rm -rf ./dist

@@ -113,8 +113,9 @@ func loadFile(fileName string) error {
 
 	fmt.Println("Loading file: " + fname + fextension)
 
+	// TODO - check if windows and use "./ffmpeg.exe" - change this if you wish to run on windows
 	// use ffmpeg to convert file into a format we can use
-	cmd := exec.Command("ffmpeg", "-i", config.Config.SoundsPath+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(frameRate), "-ac", strconv.Itoa(channels), "pipe:1")
+	cmd := exec.Command("./ffmpeg", "-i", config.Config.SoundsPath+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(frameRate), "-ac", strconv.Itoa(channels), "pipe:1")
 
 	ffmpegout, err := cmd.StdoutPipe()
 

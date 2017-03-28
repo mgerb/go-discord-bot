@@ -4,7 +4,7 @@
   "description": "A seed for a simple react application",
   "scripts": {
     "build": "webpack -p --progress --colors",
-    "dev": "webpack-dev-server --inline --hot --history-api-fallback",
+    "dev": "webpack --watch",
     "c9": "webpack-dev-server --host 0.0.0.0 --port 8080 --inline --hot --history-api-fallback"
   },
   "author": "Mitchell Gerber",

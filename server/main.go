@@ -16,6 +16,7 @@ func main() {
 
 	//add handlers
 	bot.AddHandler(bothandlers.SoundsHandler)
+	bot.AddHandler(bothandlers.GifHandler)
 
 	// start new go routine for the discord websockets
 	go bot.Start()

@@ -2,8 +2,10 @@ package bothandlers
 
 import (
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/tidwall/gjson"
@@ -12,7 +14,7 @@ import (
 const (
 	gifPrefix string = "!gif "
 	userAgent string = "go-discord-bot"
-	giphyURL  string = "http://api.giphy.com/v1/stickers/random?api_key=dc6zaTOxFJmzC&rating=r&tag="
+	giphyURL  string = "http://api.giphy.com/v1/stickers/search?&api_key=dc6zaTOxFJmzC&limit=10&q="
 )
 
 // GifHandler - handler for giphy api
@@ -36,6 +38,9 @@ func GifHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // send http request to reddit
 func getGiphy(searchTerm string) string {
+
+	rand.Seed(time.Now().UnixNano())
+
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", giphyURL+searchTerm, nil)
@@ -52,7 +57,11 @@ func getGiphy(searchTerm string) string {
 		return err.Error()
 	}
 
-	data := gjson.Get(string(body), "data.url")
+	data := gjson.Get(string(body), "data").Array()
 
-	return data.String()
+	if len(data) < 1 {
+		return "null"
+	}
+
+	return data[rand.Intn(len(data))].Get("images.fixed_height.url").String()
 }

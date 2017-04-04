@@ -14,7 +14,7 @@ import (
 const (
 	gifPrefix string = "!gif "
 	userAgent string = "go-discord-bot"
-	giphyURL  string = "http://api.giphy.com/v1/stickers/search?&api_key=dc6zaTOxFJmzC&limit=10&q="
+	giphyURL  string = "http://api.giphy.com/v1/gifs/search?&api_key=dc6zaTOxFJmzC&limit=10&q="
 )
 
 // GifHandler - handler for giphy api

@@ -1,3 +1,4 @@
+// IMPORTANT - rename this file to config.json and remove this line
 {
     "Token": "",
     "BotPrefix": "#",

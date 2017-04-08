@@ -9,6 +9,7 @@ export default class SoundList extends React.Component {
         super();
         this.state = {
             soundList: [],
+            showAudioControls: [],
         };
     }
     
@@ -18,15 +19,14 @@ export default class SoundList extends React.Component {
     
     getSoundList() {
         if (!this.soundListCache) {
-            axios.get("/soundlist")
-                .then((response) => {
-                    this.soundListCache = response.data;
-                    this.setState({
-                        soundList: response.data,
-                    });
-                }).catch((error) => {
-                    console.warn(error.response.data);
+            axios.get("/soundlist").then((response) => {
+                this.soundListCache = response.data;
+                this.setState({
+                    soundList: response.data,
                 });
+            }).catch(() => {
+                //console.warn(error.response.data);
+            });
         } else {
             this.setState({
                 soundList: this.soundListCache,
@@ -36,15 +36,24 @@ export default class SoundList extends React.Component {
     
     checkExtension(extension) {
         switch(extension) {
-            case "wav":
-                return true;
-            case "mp3":
-                return true;
-            case "mpeg":
-                return true;
-            default:
-                return false;
+        case "wav":
+            return true;
+        case "mp3":
+            return true;
+        case "mpeg":
+            return true;
+        default:
+            return false;
         }
+    }
+
+    handleShowAudio(index) {
+        let temp = this.state.showAudioControls;
+        temp[index] = true;
+
+        this.setState({
+            showAudioControls: temp,
+        });
     }
     
     render() {
@@ -52,21 +61,23 @@ export default class SoundList extends React.Component {
             <div className="Card">
                 <div className="Card__header">
                     Sounds
-                <i className="fa fa fa-volume-up" aria-hidden="true"></i>
+                <i className="fa fa fa-volume-up" aria-hidden="true"/>
                 </div>
                 
                 {this.state.soundList.length > 0 ? this.state.soundList.map((sound, index) => {
-                    return <div key={index} className="SoundList__item">
-                        <div>
-                            {sound.prefix + sound.name}
+                    return (
+                        <div key={index} className="SoundList__item">
+                            <div>
+                                {sound.prefix + sound.name}
+                            </div>
+                            
+                            {this.checkExtension(sound.extension) && this.state.showAudioControls[index] ?
+                            <audio controls src={"/sounds/" + sound.name + "." + sound.extension}
+                                    type={"audio/" + sound.extension}
+                                    style={{width: "100px"}}/>
+                            : <i className="fa fa-play link" aria-hidden="true" onClick={() => this.handleShowAudio(index)}/> }
                         </div>
-                        
-                        {this.checkExtension(sound.extension) ?
-                        <audio controls src={"/sounds/" + sound.name + "." + sound.extension}
-                                type={"audio/" + sound.extension}
-                                style={{width: "100px"}}/>
-                        : null}
-                    </div>
+                    );
                 }) : null}
             </div>
         );

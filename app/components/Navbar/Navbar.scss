@@ -33,8 +33,7 @@
     justify-content: center;
     text-align: center;
     color: $white;
-    transition: background-color 0.1s linear;
-    transition: color 0.1s linear;
+    transition: background-color 0.1s linear, color 0.2s linear;
     
     &:hover {
         background-color: $gray1; 

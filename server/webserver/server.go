@@ -1,11 +1,12 @@
 package webserver
 
 import (
+	"log"
+
 	"../config"
 	"./handlers"
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
-	"log"
 )
 
 func logger(next fasthttp.RequestHandler) fasthttp.RequestHandler {
@@ -28,7 +29,7 @@ func registerRoutes(router *fasthttprouter.Router) {
 	router.PUT("/upload", handlers.FileUpload)
 
 	router.ServeFiles("/static/*filepath", "./static")
-	router.ServeFiles("/sounds/*filepath", "./sounds")
+	router.ServeFiles("/sounds/*filepath", config.Config.SoundsPath)
 
 	router.NotFound = func(ctx *fasthttp.RequestCtx) {
 		fasthttp.ServeFile(ctx, "./index.html")

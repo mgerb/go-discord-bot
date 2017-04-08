@@ -2,10 +2,11 @@
     box-sizing: border-box;
 }
 
-a {
+a, .link {
     text-decoration: none;    
     color: $primaryBlue;
     transition: color 0.1s linear;
+    cursor: pointer;
     
     &:hover {
         color: darken(white, 10%);

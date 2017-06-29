@@ -2,17 +2,19 @@ run:
 	go run ./server/main.go
 
 install:
-	go get ./server && yarn install
+	glide install && yarn install
 
 build:
-	go build -o ./dist/bot ./server/main.go
+	go build -o ./dist/linux ./server/main.go
 
 clean:
 	rm -rf ./dist
 
 copyfiles:
 	cp config.template.json ./dist/config.template.json
-	cp ffmpeg ./dist/ffmpeg
+	cp ffmpeg_linux ./dist/
+	cp ffmpeg_mac ./dist/
+	cp ffmpeg_windows.exe ./dist/
 
 all: install build copyfiles
 	yarn run build

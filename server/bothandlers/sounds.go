@@ -1,19 +1,21 @@
 package bothandlers
 
 import (
-	"../config"
 	"bufio"
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/bwmarrin/discordgo"
 	"io"
 	"io/ioutil"
-	"layeh.com/gopus"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
+
+	"../config"
+	"github.com/bwmarrin/discordgo"
+	"layeh.com/gopus"
 )
 
 const (
@@ -113,14 +115,24 @@ func loadFile(fileName string) error {
 
 	fmt.Println("Loading file: " + fname + fextension)
 
-	// TODO - check if windows and use "./ffmpeg.exe" - change this if you wish to run on windows
+	var ffmpegExecutable string
+
+	switch runtime.GOOS {
+	case "darwin":
+		ffmpegExecutable = "./ffmpeg_mac"
+	case "linux":
+		ffmpegExecutable = "./ffmpeg_linux"
+	case "windows":
+		ffmpegExecutable = "ffmpeg_windows.exe"
+	}
+
 	// use ffmpeg to convert file into a format we can use
-	cmd := exec.Command("./ffmpeg", "-i", config.Config.SoundsPath+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(frameRate), "-ac", strconv.Itoa(channels), "pipe:1")
+	cmd := exec.Command(ffmpegExecutable, "-i", config.Config.SoundsPath+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(frameRate), "-ac", strconv.Itoa(channels), "pipe:1")
 
 	ffmpegout, err := cmd.StdoutPipe()
 
 	if err != nil {
-		return errors.New("Stdout error.")
+		return errors.New("Unable to execute ffmpeg. To set permissions on this file run chmod +x ffmpeg_linux (or ffmpeg_mac depending which operating system you are on)")
 	}
 
 	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16348)
@@ -128,7 +140,7 @@ func loadFile(fileName string) error {
 	err = cmd.Start()
 
 	if err != nil {
-		return errors.New("CMD Start error.")
+		return errors.New("Unable to execute ffmpeg. To set permissions on this file run chmod +x ffmpeg_linux (or ffmpeg_mac depending which operating system you are on)")
 	}
 
 	// crate encoder to convert audio to opus codec

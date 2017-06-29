@@ -2,6 +2,8 @@ package bot
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -17,14 +19,16 @@ func Connect(token string) {
 	Session, err = discordgo.New("Bot " + token)
 
 	if err != nil {
-		fmt.Println("error creating Discord session,", err)
-		return
+		log.Println(err)
+		log.Fatal("Error creating Discord session.", err)
 	}
 
 	// Get the account information.
 	u, err := Session.User("@me")
+
 	if err != nil {
-		fmt.Println("error obtaining account details,", err)
+		log.Println("Error obtaining account details. Make sure you have the correct bot token.")
+		log.Fatal(err)
 	}
 
 	// Store the account ID for later use.

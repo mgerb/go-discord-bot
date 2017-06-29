@@ -24,12 +24,14 @@ Sounds are stored in the `dist/sounds` directory. You may copy files directly to
 
 ### Dependencies
 - Go
+- Glide - [GoLang package manager](https://glide.sh/)
 - Yarn (or npm - makefile will need to be adjusted)
 - make
 
 ### Compiling
 - Make sure dependencies are installed
 - `make all`
+- cd into ./dist
 - Rename the `config.template.json` to `config.json`
 - add configurations to `config.json`
 - run the executable
@@ -38,7 +40,4 @@ Sounds are stored in the `dist/sounds` directory. You may copy files directly to
 - success!
 
 ### Windows
-I've only compiled and run this on linux, but it should work on windows with little changes.
-An ffmpeg executable is required. The linux executable is included.
-If running on windows ffmpeg.exe must be downloaded.
-Check line 116 in server/bothandlers/sounds.go
+I've only compiled and run this on linux so far, but I've recently added cross platform support.

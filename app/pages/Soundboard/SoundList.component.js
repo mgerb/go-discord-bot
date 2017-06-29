@@ -59,9 +59,13 @@ export default class SoundList extends React.Component {
     render() {
         return (
             <div className="Card">
-                <div className="Card__header">
-                    Sounds
-                <i className="fa fa fa-volume-up" aria-hidden="true"/>
+                <div className="Card__header" style={{display:'flex'}}>
+                    <div>
+                        Sounds
+                        <i className="fa fa fa-volume-up" aria-hidden="true"/>
+                    </div>
+                    <div style={{flex:1}}/>
+                    <div>({this.state.soundList.length})</div>
                 </div>
                 
                 {this.state.soundList.length > 0 ? this.state.soundList.map((sound, index) => {

@@ -5,7 +5,7 @@ install:
 	glide install && yarn install
 
 build:
-	go build -o ./dist/linux ./server/main.go
+	go build -o ./dist/bot ./server/main.go
 
 clean:
 	rm -rf ./dist

@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	"../../config"
 	"encoding/json"
 	"fmt"
-	"github.com/valyala/fasthttp"
 	"io/ioutil"
 	"strings"
+
+	"github.com/mgerb/go-discord-bot/server/config"
+	"github.com/valyala/fasthttp"
 )
 
 var soundList []sound

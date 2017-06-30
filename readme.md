@@ -24,7 +24,7 @@ Sounds are stored in the `dist/sounds` directory. You may copy files directly to
 
 ### Dependencies
 - Go
-- Glide - [GoLang package manager](https://glide.sh/)
+- Godep - [Godep package manager](https://github.com/tools/godep)
 - Yarn (or npm - makefile will need to be adjusted)
 - make
 

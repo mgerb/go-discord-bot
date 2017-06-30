@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	"../../config"
-	"github.com/valyala/fasthttp"
 	"io"
 	"os"
+
+	"github.com/mgerb/go-discord-bot/server/config"
+	"github.com/valyala/fasthttp"
 )
 
 func FileUpload(ctx *fasthttp.RequestCtx) {

@@ -2,7 +2,7 @@ run:
 	go run ./server/main.go
 
 install:
-	glide install && yarn install
+	go get ./server && yarn install
 
 build:
 	go build -o ./dist/bot ./server/main.go

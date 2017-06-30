@@ -1,10 +1,10 @@
 package main
 
 import (
-	"./bot"
-	"./bothandlers"
-	"./config"
-	"./webserver"
+	"github.com/mgerb/go-discord-bot/server/bot"
+	"github.com/mgerb/go-discord-bot/server/bothandlers"
+	"github.com/mgerb/go-discord-bot/server/config"
+	"github.com/mgerb/go-discord-bot/server/webserver"
 )
 
 func main() {

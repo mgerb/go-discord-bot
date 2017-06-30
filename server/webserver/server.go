@@ -3,9 +3,9 @@ package webserver
 import (
 	"log"
 
-	"../config"
-	"./handlers"
 	"github.com/buaazp/fasthttprouter"
+	"github.com/mgerb/go-discord-bot/server/config"
+	"github.com/mgerb/go-discord-bot/server/webserver/handlers"
 	"github.com/valyala/fasthttp"
 )
 

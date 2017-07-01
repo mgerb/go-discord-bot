@@ -1,20 +1,16 @@
 run:
-	go run ./server/main.go
+	go run ./main.go
 
 install:
-	go get ./server && yarn install
+	go get && cd client && yarn install
 
-build:
-	go build -o ./dist/bot ./server/main.go
+build-server:
+	go build -o bot ./main.go
+
+build-client:
+	cd client && yarn run build
 
 clean:
-	rm -rf ./dist
+	rm -rf bot ./dist
 
-copyfiles:
-	cp config.template.json ./dist/config.template.json
-	cp ffmpeg_linux ./dist/
-	cp ffmpeg_mac ./dist/
-	cp ffmpeg_windows.exe ./dist/
-
-all: install build copyfiles
-	yarn run build
+all: install build-server build-client

@@ -28,11 +28,11 @@ func registerRoutes(router *fasthttprouter.Router) {
 	router.GET("/soundlist", handlers.SoundList)
 	router.PUT("/upload", handlers.FileUpload)
 
-	router.ServeFiles("/static/*filepath", "./static")
+	router.ServeFiles("/static/*filepath", "./dist/static")
 	router.ServeFiles("/sounds/*filepath", config.Config.SoundsPath)
 
 	router.NotFound = func(ctx *fasthttp.RequestCtx) {
-		fasthttp.ServeFile(ctx, "./index.html")
+		fasthttp.ServeFile(ctx, "./dist/index.html")
 	}
 }
 

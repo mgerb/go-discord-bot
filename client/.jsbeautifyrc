@@ -1,0 +1,15 @@
+{
+    "indent_size": 4,
+    "beautify.language": {
+        "js": {
+            "type": ["javascript", "json", "jsx"],
+            "filename": [".jshintrc", ".jsbeautify"],
+            "e4x": true
+                // "ext": ["js", "json"]
+                // ^^ to set extensions to be beautified using the javascript beautifier
+        },
+        "css": ["css", "scss"],
+        "html": ["htm", "html"]
+            // ^^ providing just an array sets the VS Code file type
+    }
+}

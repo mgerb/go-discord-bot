@@ -26,22 +26,49 @@ const (
 	maxBytes  int = (frameSize * 2) * 2 // max size of opus data
 )
 
+// store our connection objects in a map tied to a guild id
+var activeConnections = make(map[string]*audioConnection)
+
+type audioConnection struct {
+	guild           *discordgo.Guild
+	sounds          map[string]*audioClip
+	soundQueue      chan string
+	voiceConnection *discordgo.VoiceConnection
+}
+
 var (
-	sounds           = make(map[string]*AudioClip, 0)
+	sounds           = make(map[string]*audioClip, 0)
 	soundQueue       = []string{}
 	soundPlayingLock = false
 	voiceConnection  *discordgo.VoiceConnection
 )
 
-type AudioClip struct {
+type audioClip struct {
 	Name      string
 	Extension string
 	Content   [][]byte
 }
 
-const SOUNDS_DIR string = "./sounds/"
-
+// SoundsHandler -
 func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	// get guild ID and check for connection instance
+	c, err := s.State.Channel(m.ChannelID)
+	if err != nil {
+		// Could not find channel.
+		fmt.Println("Unable to find channel.")
+		return
+	}
+
+	if _, ok := activeConnections[c.GuildID]; !ok {
+		newConnectionInstance, err := getNewConnectionInstance(s, m)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		activeConnections[c.GuildID] = newConnectionInstance
+	}
 
 	// check if valid command
 	if strings.HasPrefix(m.Content, config.Config.BotPrefix) {
@@ -60,6 +87,10 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			playAudio(command, s, m)
 		}
 	}
+}
+
+func getNewConnectionInstance(s *discordgo.Session, m *discordgo.MessageCreate) (*audioConnection, error) {
+	return &audioConnection{}, nil
 }
 
 func dismiss() {
@@ -213,7 +244,7 @@ func loadFile(fileName string) error {
 		return errors.New("NewEncoder error.")
 	}
 
-	sounds[fileName] = &AudioClip{
+	sounds[fileName] = &audioClip{
 		Content:   make([][]byte, 0),
 		Name:      fileName,
 		Extension: fextension,
@@ -249,7 +280,7 @@ func playSounds(s *discordgo.Session, guildID, channelID string) (err error) {
 	soundPlayingLock = true
 
 	// Join the channel the user issued the command from if not in it
-	if voiceConnection == nil || voiceConnection.ChannelID != channelID {
+	if voiceConnection == nil || !voiceConnection.Ready {
 		var err error
 		voiceConnection, err = s.ChannelVoiceJoin(guildID, channelID, false, false)
 		if err != nil {

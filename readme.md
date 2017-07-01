@@ -15,23 +15,21 @@ NOTE: Currently the binaries in the release package only run on linux. Check the
 
 ### NOTE
 
-If you get a permissions error with ffmpeg:
-`sudo chmod +x dist/ffmpeg`
+If you get a permissions error with ffmpeg on mac or linux:
+`sudo chmod +x dist/ffmpeg_linux`
 
-Sounds are stored in the `dist/sounds` directory. You may copy files directly to this folder rather than uploading through the site.
+Sounds are stored in the `sounds` directory. You may copy files directly to this folder rather than uploading through the site.
 
 ## Building from Source
 
 ### Dependencies
 - Go
-- Godep - [Godep package manager](https://github.com/tools/godep)
 - Yarn (or npm - makefile will need to be adjusted)
 - make
 
 ### Compiling
 - Make sure dependencies are installed
 - `make all`
-- cd into ./dist
 - Rename the `config.template.json` to `config.json`
 - add configurations to `config.json`
 - run the executable

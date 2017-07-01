@@ -14,16 +14,18 @@ import (
 	"strings"
 	"time"
 
+	"layeh.com/gopus"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/mgerb/go-discord-bot/server/config"
-	"layeh.com/gopus"
 )
 
 const (
-	channels  int = 2                   // 1 for mono, 2 for stereo
-	frameRate int = 48000               // audio sampling rate
-	frameSize int = 960                 // uint16 size of each audio frame
-	maxBytes  int = (frameSize * 2) * 2 // max size of opus data
+	channels      int = 2                   // 1 for mono, 2 for stereo
+	frameRate     int = 48000               // audio sampling rate
+	frameSize     int = 960                 // uint16 size of each audio frame
+	maxBytes      int = (frameSize * 2) * 2 // max size of opus data
+	maxSoundQueue int = 10                  // max amount of sounds that can be queued at one time
 )
 
 // store our connection objects in a map tied to a guild id
@@ -31,17 +33,11 @@ var activeConnections = make(map[string]*audioConnection)
 
 type audioConnection struct {
 	guild           *discordgo.Guild
+	session         *discordgo.Session
 	sounds          map[string]*audioClip
 	soundQueue      chan string
 	voiceConnection *discordgo.VoiceConnection
 }
-
-var (
-	sounds           = make(map[string]*audioClip, 0)
-	soundQueue       = []string{}
-	soundPlayingLock = false
-	voiceConnection  *discordgo.VoiceConnection
-)
 
 type audioClip struct {
 	Name      string
@@ -52,7 +48,7 @@ type audioClip struct {
 // SoundsHandler -
 func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	// get guild ID and check for connection instance
+	// get channel state to get guild id
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		// Could not find channel.
@@ -60,15 +56,35 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// check to see if active connection object exists
 	if _, ok := activeConnections[c.GuildID]; !ok {
-		newConnectionInstance, err := getNewConnectionInstance(s, m)
+
+		// Find the guild for that channel.
+		newGuild, err := s.State.Guild(c.GuildID)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		activeConnections[c.GuildID] = newConnectionInstance
+		// create new connection instance
+		newInstance := &audioConnection{
+			guild:      newGuild,
+			session:    s,
+			sounds:     make(map[string]*audioClip, 0),
+			soundQueue: make(chan string, maxSoundQueue),
+		}
+
+		activeConnections[c.GuildID] = newInstance
+
+		// start listening on the sound channel
+		go activeConnections[c.GuildID].playSounds()
 	}
+
+	// start new go routine handling the message
+	go activeConnections[c.GuildID].handleMessage(m)
+}
+
+func (conn *audioConnection) handleMessage(m *discordgo.MessageCreate) {
 
 	// check if valid command
 	if strings.HasPrefix(m.Content, config.Config.BotPrefix) {
@@ -78,34 +94,30 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		switch command {
 
 		case "summon":
-			summon(s, m)
+			conn.summon(m)
 
 		case "dismiss":
-			dismiss()
+			conn.dismiss()
 
 		default:
-			playAudio(command, s, m)
+			conn.playAudio(command, m)
 		}
 	}
 }
 
-func getNewConnectionInstance(s *discordgo.Session, m *discordgo.MessageCreate) (*audioConnection, error) {
-	return &audioConnection{}, nil
-}
-
-func dismiss() {
-	if voiceConnection != nil {
-		voiceConnection.Disconnect()
+func (conn *audioConnection) dismiss() {
+	if conn.voiceConnection != nil {
+		conn.voiceConnection.Disconnect()
 	}
 }
 
-func summon(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (conn *audioConnection) summon(m *discordgo.MessageCreate) {
 	// Join the channel the user issued the command from if not in it
-	if voiceConnection == nil || voiceConnection.ChannelID != m.ChannelID {
+	if conn.voiceConnection == nil || conn.voiceConnection.ChannelID != m.ChannelID {
 		var err error
 
 		// Find the channel that the message came from.
-		c, err := s.State.Channel(m.ChannelID)
+		c, err := conn.session.State.Channel(m.ChannelID)
 		if err != nil {
 			// Could not find channel.
 			fmt.Println("User channel not found.")
@@ -113,7 +125,7 @@ func summon(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		// Find the guild for that channel.
-		g, err := s.State.Guild(c.GuildID)
+		g, err := conn.session.State.Guild(c.GuildID)
 		if err != nil {
 			log.Println(err)
 			return
@@ -123,7 +135,7 @@ func summon(s *discordgo.Session, m *discordgo.MessageCreate) {
 		for _, vs := range g.VoiceStates {
 			if vs.UserID == m.Author.ID {
 
-				voiceConnection, err = s.ChannelVoiceJoin(g.ID, vs.ChannelID, false, false)
+				conn.voiceConnection, err = conn.session.ChannelVoiceJoin(g.ID, vs.ChannelID, false, false)
 
 				if err != nil {
 					log.Println(err)
@@ -136,12 +148,12 @@ func summon(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func playAudio(soundName string, s *discordgo.Session, m *discordgo.MessageCreate) {
+func (conn *audioConnection) playAudio(soundName string, m *discordgo.MessageCreate) {
 
 	// check if sound exists in memory
-	if _, ok := sounds[soundName]; !ok {
+	if _, ok := conn.sounds[soundName]; !ok {
 		// try to load the sound if not found in memory
-		err := loadFile(soundName)
+		err := conn.loadFile(soundName)
 
 		if err != nil {
 			fmt.Println(err)
@@ -149,44 +161,21 @@ func playAudio(soundName string, s *discordgo.Session, m *discordgo.MessageCreat
 		}
 	}
 
-	// add sound to queue
-	soundQueue = append(soundQueue, soundName)
+	// summon bot to channel
+	conn.summon(m)
 
-	// return if a sound is playing - it will play if it's in the queue
-	if soundPlayingLock {
+	// add sound to queue if queue isn't full
+	select {
+	case conn.soundQueue <- soundName:
+
+	default:
 		return
 	}
 
-	// Find the channel that the message came from.
-	c, err := s.State.Channel(m.ChannelID)
-	if err != nil {
-		// Could not find channel.
-		fmt.Println("User channel not found.")
-		return
-	}
-
-	// Find the guild for that channel.
-	g, err := s.State.Guild(c.GuildID)
-	if err != nil {
-		// Could not find guild.
-		return
-	}
-
-	// Look for the message sender in that guilds current voice states.
-	for _, vs := range g.VoiceStates {
-		if vs.UserID == m.Author.ID {
-			err = playSounds(s, g.ID, vs.ChannelID)
-			if err != nil {
-				fmt.Println("Error playing sound:", err)
-			}
-
-			return
-		}
-	}
 }
 
 // load dca file into memory
-func loadFile(fileName string) error {
+func (conn *audioConnection) loadFile(fileName string) error {
 
 	// scan directory for file
 	files, _ := ioutil.ReadDir(config.Config.SoundsPath)
@@ -244,7 +233,7 @@ func loadFile(fileName string) error {
 		return errors.New("NewEncoder error.")
 	}
 
-	sounds[fileName] = &audioClip{
+	conn.sounds[fileName] = &audioClip{
 		Content:   make([][]byte, 0),
 		Name:      fileName,
 		Extension: fextension,
@@ -268,51 +257,34 @@ func loadFile(fileName string) error {
 		}
 
 		// append sound bytes to the content for this audio file
-		sounds[fileName].Content = append(sounds[fileName].Content, opus)
+		conn.sounds[fileName].Content = append(conn.sounds[fileName].Content, opus)
 	}
 
 }
 
 // playSounds - plays the current buffer to the provided channel.
-func playSounds(s *discordgo.Session, guildID, channelID string) (err error) {
+func (conn *audioConnection) playSounds() (err error) {
 
-	//prevent other sounds from interrupting
-	soundPlayingLock = true
+	for {
+		newSoundName := <-conn.soundQueue
 
-	// Join the channel the user issued the command from if not in it
-	if voiceConnection == nil || !voiceConnection.Ready {
-		var err error
-		voiceConnection, err = s.ChannelVoiceJoin(guildID, channelID, false, false)
-		if err != nil {
-			return err
+		if !conn.voiceConnection.Ready {
+			continue
 		}
-	}
-
-	// keep playing sounds as long as they exist in queue
-	for len(soundQueue) > 0 {
-
-		// Sleep for a specified amount of time before playing the sound
-		time.Sleep(50 * time.Millisecond)
 
 		// Start speaking.
-		_ = voiceConnection.Speaking(true)
+		_ = conn.voiceConnection.Speaking(true)
 
 		// Send the buffer data.
-		for _, buff := range sounds[soundQueue[0]].Content {
-			voiceConnection.OpusSend <- buff
+		for _, buff := range conn.sounds[newSoundName].Content {
+			conn.voiceConnection.OpusSend <- buff
 		}
 
 		// Stop speaking
-		_ = voiceConnection.Speaking(false)
+		_ = conn.voiceConnection.Speaking(false)
 
 		// Sleep for a specificed amount of time before ending.
 		time.Sleep(50 * time.Millisecond)
-
-		soundQueue = append(soundQueue[1:])
-
 	}
 
-	soundPlayingLock = false
-
-	return nil
 }

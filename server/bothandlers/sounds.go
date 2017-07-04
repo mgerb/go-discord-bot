@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"layeh.com/gopus"
@@ -32,11 +33,13 @@ const (
 var activeConnections = make(map[string]*audioConnection)
 
 type audioConnection struct {
-	guild           *discordgo.Guild
-	session         *discordgo.Session
-	sounds          map[string]*audioClip
-	soundQueue      chan string
-	voiceConnection *discordgo.VoiceConnection
+	guild            *discordgo.Guild
+	session          *discordgo.Session
+	sounds           map[string]*audioClip
+	soundQueue       chan string
+	voiceConnection  *discordgo.VoiceConnection
+	soundPlayingLock bool
+	mutex            *sync.Mutex // mutex for single audio connection
 }
 
 type audioClip struct {
@@ -72,6 +75,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			session:    s,
 			sounds:     make(map[string]*audioClip, 0),
 			soundQueue: make(chan string, maxSoundQueue),
+			mutex:      &sync.Mutex{},
 		}
 
 		activeConnections[c.GuildID] = newInstance
@@ -106,7 +110,7 @@ func (conn *audioConnection) handleMessage(m *discordgo.MessageCreate) {
 }
 
 func (conn *audioConnection) dismiss() {
-	if conn.voiceConnection != nil {
+	if conn.voiceConnection != nil && !conn.soundPlayingLock && len(conn.soundQueue) == 0 {
 		conn.voiceConnection.Disconnect()
 	}
 }
@@ -268,6 +272,8 @@ func (conn *audioConnection) playSounds() (err error) {
 	for {
 		newSoundName := <-conn.soundQueue
 
+		conn.toggleSoundPlayingLock(true)
+
 		if !conn.voiceConnection.Ready {
 			continue
 		}
@@ -285,6 +291,14 @@ func (conn *audioConnection) playSounds() (err error) {
 
 		// Sleep for a specificed amount of time before ending.
 		time.Sleep(50 * time.Millisecond)
+
+		conn.toggleSoundPlayingLock(false)
 	}
 
+}
+
+func (conn *audioConnection) toggleSoundPlayingLock(playing bool) {
+	conn.mutex.Lock()
+	conn.soundPlayingLock = playing
+	conn.mutex.Unlock()
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/mgerb/go-discord-bot/server/config"
 )
 
+// FileUpload
 func FileUpload(w http.ResponseWriter, r *http.Request) {
 
 	password := r.FormValue("password")

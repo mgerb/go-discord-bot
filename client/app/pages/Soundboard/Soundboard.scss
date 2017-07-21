@@ -12,14 +12,9 @@
 .Soundboard__input {
     display: block;
     width: 200px;
-    border-radius: 3px;
-    border: 1px solid lighten($gray1, 5%);
     margin-bottom: 10px;
     margin-right: auto;
     margin-left: auto;
-    padding-left: 5px;
-    padding-right: 5px;
-    height: 30px;
 }
 
 .Dropzone {
@@ -32,7 +27,7 @@
     padding: 20px;
     margin-right: auto;
     margin-left: auto;
-    color: lighten($gray1, 15%);
+    color: $lightGray;
     width: 400px;
     height: 400px;
     background-color: $gray2;

@@ -1,0 +1,16 @@
+.Downloader {
+    padding: 10px;
+}
+
+.Downloader__input {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.Downloader__button {
+
+    & + & {
+        margin-left: 10px;
+    }
+}

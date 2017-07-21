@@ -11,6 +11,7 @@ export default class Navbar extends React.Component {
                 <div className="Navbar__header">Go Discord Bot</div>
                 <Link to="/" className="Navbar__item" onlyActiveOnIndex activeClassName="Navbar__item--active">Home</Link>
                 <Link to="/soundboard" className="Navbar__item" activeClassName="Navbar__item--active">Soundboard</Link>
+                <Link to="/downloader" className="Navbar__item" activeClassName="Navbar__item--active">Youtube Downloader</Link>
             </div>
         );
     }

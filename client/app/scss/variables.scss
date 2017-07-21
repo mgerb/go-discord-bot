@@ -3,7 +3,7 @@ $navbarWidth: 200px;
 
 // colors
 $primaryBlue: #7289da;
-$white: darken(white, 10%);
+$white: darken(white, 20%);
 
 $gray1: #2e3136;
 $gray2: #2a2d32;
@@ -11,3 +11,5 @@ $gray3: #23262a;
 $gray4: #2e3136;
 $gray5: #282b30;
 $gray6: #1e2124;
+
+$lightGray: lighten($gray1, 15%);

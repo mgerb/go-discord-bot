@@ -76,7 +76,7 @@ export default class SoundList extends React.Component {
                             </div>
                             
                             {this.checkExtension(sound.extension) && this.state.showAudioControls[index] ?
-                            <audio controls src={"/sounds/" + sound.name + "." + sound.extension}
+                            <audio controls src={"/public/sounds/" + sound.name + "." + sound.extension}
                                     type={"audio/" + sound.extension}
                                     style={{width: "100px"}}/>
                             : <i className="fa fa-play link" aria-hidden="true" onClick={() => this.handleShowAudio(index)}/> }

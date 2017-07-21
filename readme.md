@@ -19,6 +19,10 @@ NOTE: Currently the binaries in the release package only run on linux. Check the
 
 > -tls, run with auto tls
 
+## Setting up Youtube downloader
+
+- Install [youtube-dl](https://github.com/rg3/youtube-dl/blob/master/README.md#installation)
+
 ### NOTE
 
 If you get a permissions error with ffmpeg on mac or linux:

@@ -17,7 +17,8 @@ export default class Soundboard extends React.Component {
             password: "",
             uploaded: false,
             uploadError: " ",
-        }
+        },
+
         self = this;
     }
     
@@ -34,7 +35,7 @@ export default class Soundboard extends React.Component {
         };
     }
     
-    onDrop(acceptedFiles, rejectedFiles) {
+    onDrop(acceptedFiles) {
         if (acceptedFiles.length > 0) {
             self.uploadFile(acceptedFiles[0]);
         }
@@ -90,7 +91,7 @@ export default class Soundboard extends React.Component {
                                 maxSize={10000000000}
                                 accept={"audio/*"}>
                                 
-                            <input className="Soundboard__input"
+                            <input className="input Soundboard__input"
                                     type="password"
                                     placeholder="Password"
                                     value={this.state.password}
@@ -104,6 +105,6 @@ export default class Soundboard extends React.Component {
                     </div>
                 </div>
             </div>
-        )
+        );
     }
 }

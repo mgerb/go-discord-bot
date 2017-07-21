@@ -13,6 +13,12 @@ NOTE: Currently the binaries in the release package only run on linux. Check the
 - add your bot token and preferred upload password (leave as is for no password)
 - run the bot with `./bot` (you may need to use sudo if you leave it on port 80)
 
+## Flags
+
+> -p, run in production mode
+
+> -tls, run with auto tls
+
 ### NOTE
 
 If you get a permissions error with ffmpeg on mac or linux:

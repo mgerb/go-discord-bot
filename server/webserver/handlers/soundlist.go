@@ -1,13 +1,14 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"strings"
 
+	"net/http"
+
+	"github.com/mgerb/chi_auth_server/response"
 	"github.com/mgerb/go-discord-bot/server/config"
-	"github.com/valyala/fasthttp"
 )
 
 var soundList []sound
@@ -18,27 +19,21 @@ type sound struct {
 	Extension string `json:"extension"`
 }
 
-func SoundList(ctx *fasthttp.RequestCtx) {
+// SoundList -
+func SoundList(w http.ResponseWriter, r *http.Request) {
 
 	if len(soundList) < 1 {
 		err := PopulateSoundList()
 		if err != nil {
-			ctx.Error(err.Error(), 400)
+			response.ERR(w, http.StatusInternalServerError, []byte(response.DefaultInternalError))
 			return
 		}
 	}
 
-	response, err := json.Marshal(soundList)
-
-	if err != nil {
-		ctx.Error("Error marshaling json", 400)
-		return
-	}
-
-	ctx.SetContentType("application/json")
-	ctx.Write(response)
+	response.JSON(w, soundList)
 }
 
+// PopulateSoundList -
 func PopulateSoundList() error {
 	fmt.Println("Populating sound list.")
 

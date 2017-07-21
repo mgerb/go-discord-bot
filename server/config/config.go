@@ -2,15 +2,19 @@ package config
 
 import (
 	"encoding/json"
+	"flag"
 	"io/ioutil"
 	"log"
 	"os"
 )
 
 // Variables used for command line parameters
-var Config configStruct
+var (
+	Config configFile
+	Flags  configFlags
+)
 
-type configStruct struct {
+type configFile struct {
 	Token          string `json:"Token"`
 	BotPrefix      string `json:"BotPrefix"` //prefix to use for bot commands
 	SoundsPath     string `json:"SoundsPath"`
@@ -18,7 +22,20 @@ type configStruct struct {
 	ServerAddr     string `json:"ServerAddr`
 }
 
+type configFlags struct {
+	Prod bool
+	TLS  bool
+}
+
+// Init -
 func Init() {
+
+	parseConfig()
+	parseFlags()
+
+}
+
+func parseConfig() {
 
 	log.Println("Reading config file...")
 
@@ -35,6 +52,24 @@ func Init() {
 
 	if err != nil {
 		log.Println(err)
+	}
+}
+
+func parseFlags() {
+
+	Flags.Prod = false
+	Flags.TLS = false
+
+	prod := flag.Bool("p", false, "Run in production")
+	tls := flag.Bool("tls", false, "Use TLS")
+
+	flag.Parse()
+
+	Flags.Prod = *prod
+	Flags.TLS = *tls
+
+	if *prod {
+		log.Println("Running in production mode")
 	}
 
 }

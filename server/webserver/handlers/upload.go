@@ -4,27 +4,32 @@ import (
 	"io"
 	"os"
 
+	"net/http"
+
+	"github.com/mgerb/chi_auth_server/response"
 	"github.com/mgerb/go-discord-bot/server/config"
-	"github.com/valyala/fasthttp"
 )
 
-func FileUpload(ctx *fasthttp.RequestCtx) {
-	password := ctx.FormValue("password")
+func FileUpload(w http.ResponseWriter, r *http.Request) {
+
+	password := r.FormValue("password")
 
 	if string(password) != config.Config.UploadPassword {
-		ctx.Error("Invalid password.", 400)
+		response.ERR(w, http.StatusInternalServerError, []byte("Invalid password."))
 		return
 	}
 
-	file, err := ctx.FormFile("file")
+	file, header, err := r.FormFile("file")
 	if err != nil {
-		ctx.Error("Error reading file.", 400)
+		response.ERR(w, http.StatusInternalServerError, []byte("Error reading file."))
 		return
 	}
 
-	src, err := file.Open()
+	defer file.Close()
+
+	src, err := header.Open()
 	if err != nil {
-		ctx.Error("Error opening file.", 400)
+		response.ERR(w, http.StatusInternalServerError, []byte("Error opening file."))
 		return
 	}
 
@@ -36,21 +41,21 @@ func FileUpload(ctx *fasthttp.RequestCtx) {
 	}
 
 	// check if file already exists
-	if _, err := os.Stat(config.Config.SoundsPath + file.Filename); err == nil {
-		ctx.Error("File already exists.", 400)
+	if _, err := os.Stat(config.Config.SoundsPath + header.Filename); err == nil {
+		response.ERR(w, http.StatusInternalServerError, []byte("File already exists."))
 		return
 	}
 
-	dst, err := os.Create(config.Config.SoundsPath + file.Filename)
+	dst, err := os.Create(config.Config.SoundsPath + header.Filename)
 	if err != nil {
-		ctx.Error("Error creating file.", 400)
+		response.ERR(w, http.StatusInternalServerError, []byte("Error creating file."))
 		return
 	}
 
 	defer dst.Close()
 
 	if _, err = io.Copy(dst, src); err != nil {
-		ctx.Error("Error writing file.", 400)
+		response.ERR(w, http.StatusInternalServerError, []byte("Error writing file."))
 		return
 	}
 
@@ -58,9 +63,9 @@ func FileUpload(ctx *fasthttp.RequestCtx) {
 	err = PopulateSoundList()
 
 	if err != nil {
-		ctx.Error("File uploaded, but error populating sound list.", 400)
+		response.ERR(w, http.StatusInternalServerError, []byte("Error populating sound list."))
 		return
 	}
 
-	ctx.Success("application/json", []byte("Success!"))
+	response.JSON(w, []byte("Success"))
 }

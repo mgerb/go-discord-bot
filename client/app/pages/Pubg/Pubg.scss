@@ -1,0 +1,19 @@
+@import "../../scss/variables";
+
+.pubg__container {
+    padding: 10px;
+}
+
+.pubg__table {
+    border-collapse: collapse;
+    width: 100%;
+    text-align: left;
+
+    tr {
+        border-top: 1px solid $gray3;
+    }
+
+    td, th {
+        padding: 5px;
+    }
+}

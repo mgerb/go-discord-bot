@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/mgerb/go-discord-bot/server/config"
 	"github.com/mgerb/go-discord-bot/server/webserver/handlers"
+	"github.com/mgerb/go-discord-bot/server/webserver/pubg"
 )
 
 func getRouter() *chi.Mux {
@@ -40,12 +41,19 @@ func getRouter() *chi.Mux {
 	r.Get("/soundlist", handlers.SoundList)
 	r.Put("/upload", handlers.FileUpload)
 	r.Get("/ytdownloader", handlers.Downloader)
+	r.Get("/stats/pubg", pubg.Handler)
 
 	return r
 }
 
 // Start -
 func Start() {
+
+	// start gathering pubg data from the api
+	if config.Config.Pubg.Enabled {
+		pubg.Start(config.Config.Pubg.APIKey, config.Config.Pubg.Players)
+	}
+
 	router := getRouter()
 
 	if config.Flags.TLS {

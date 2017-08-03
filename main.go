@@ -16,11 +16,9 @@ func main() {
 
 	//add handlers
 	bot.AddHandler(bothandlers.SoundsHandler)
-	// remove gif functionality for not
-	//bot.AddHandler(bothandlers.GifHandler)
 
-	// start new go routine for the discord websockets
-	go bot.Start()
+	// start the bot
+	bot.Start()
 
 	// start the web server
 	webserver.Start()

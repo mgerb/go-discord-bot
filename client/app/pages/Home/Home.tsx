@@ -2,7 +2,16 @@ import React from 'react';
 
 import './Home.scss';
 
-export default class Home extends React.Component {
+interface Props {
+
+}
+
+interface State {
+
+}
+
+export class Home extends React.Component<Props, State> {
+
     render() {
         return (
             <div className="Home">

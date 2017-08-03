@@ -3,9 +3,23 @@ import axios from 'axios';
 
 import './Downloader.scss';
 
-export default class Downloader extends React.Component {
+interface Props {
 
-    constructor(props) {
+}
+
+interface State {
+    fileType: string;
+    url: string;
+    message: string;
+    downloadLink: string;
+    downLoadFileName: string;
+    dataLoading: boolean;
+    dataLoaded: boolean;
+}
+
+export class Downloader extends React.Component<Props, State> {
+
+    constructor(props: Props) {
         super(props);
         this.state = {
             fileType: "mp3",

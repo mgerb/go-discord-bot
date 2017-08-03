@@ -3,8 +3,23 @@ import axios from 'axios';
 
 import './SoundList.scss';
 
-export default class SoundList extends React.Component {
+interface Props {
+
+}
+
+interface State {
+    showAudioControls: boolean[];
+    soundList: {
+        extension: string;
+        name: string;
+        prefix: string;
+    }[];
+}
+
+export class SoundList extends React.Component<Props, State> {
     
+    private soundListCache: any;
+
     constructor() {
         super();
         this.state = {
@@ -34,7 +49,7 @@ export default class SoundList extends React.Component {
         }
     }
     
-    checkExtension(extension) {
+    checkExtension(extension: string) {
         switch(extension) {
         case "wav":
             return true;
@@ -47,7 +62,7 @@ export default class SoundList extends React.Component {
         }
     }
 
-    handleShowAudio(index) {
+    handleShowAudio(index: any) {
         let temp = this.state.showAudioControls;
         temp[index] = true;
 
@@ -77,7 +92,7 @@ export default class SoundList extends React.Component {
                             
                             {this.checkExtension(sound.extension) && this.state.showAudioControls[index] ?
                             <audio controls src={"/public/sounds/" + sound.name + "." + sound.extension}
-                                    type={"audio/" + sound.extension}
+                                    itemType={"audio/" + sound.extension}
                                     style={{width: "100px"}}/>
                             : <i className="fa fa-play link" aria-hidden="true" onClick={() => this.handleShowAudio(index)}/> }
                         </div>

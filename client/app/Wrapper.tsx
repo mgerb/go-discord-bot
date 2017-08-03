@@ -1,10 +1,22 @@
 import React from 'react';
-import Navbar from './components/Navbar/Navbar.component';
+import { Navbar } from './components/Navbar/Navbar.component';
 
 //styling
 import './scss/index.scss';
 
-export default class Wrapper extends React.Component {
+interface Props {
+
+}
+
+interface State {
+
+}
+
+export class Wrapper extends React.Component<Props, State> {
+
+    constructor() {
+        super();
+    }
 
     render() {
         return (
@@ -17,7 +29,3 @@ export default class Wrapper extends React.Component {
         );
     }
 }
-
-Wrapper.propTypes = {
-    children: React.PropTypes.node,
-};

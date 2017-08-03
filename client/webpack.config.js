@@ -5,18 +5,24 @@ const webpack = require('webpack');
 
 module.exports = {
     entry: {
-        app: './app/app.js',
+        app: './app/app.tsx',
         vendor: ['react', 'react-dom']
     },
     output: {
         path: path.resolve(__dirname, '../dist'),
-        filename: '/static/[name].[hash].js'
+        filename: './static/[name].[hash].js'
+    },
+    resolve: {
+        extensions: ['.ts', '.tsx', '.js']
     },
     module: {
         rules: [{
             test: /\.(js|jsx)$/,
             loaders: ['babel-loader']
         }, {
+            test: /\.ts(x)?$/,
+            loaders: ['babel-loader', 'ts-loader']
+        },{
             test: /\.scss$/,
             loader: ExtractTextPlugin.extract({
                 fallbackLoader: 'style-loader',

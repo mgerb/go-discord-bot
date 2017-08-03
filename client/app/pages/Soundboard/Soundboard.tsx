@@ -1,15 +1,29 @@
 import React from 'react';
 import Dropzone from 'react-dropzone';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
-import SoundList from './SoundList.component';
+import { SoundList } from './SoundList.component';
 
 import './Soundboard.scss';
 
-let self;
+let self: any;
 
-export default class Soundboard extends React.Component {
+interface Props {
+
+}
+
+interface State {
+    percentCompleted: number;
+    password: string;
+    uploaded: boolean;
+    uploadError: string;
+}
+
+export class Soundboard extends React.Component<Props, State> {
     
+    private config: AxiosRequestConfig;
+    public refs: any;
+
     constructor() {
         super();
         this.state = {
@@ -35,13 +49,13 @@ export default class Soundboard extends React.Component {
         };
     }
     
-    onDrop(acceptedFiles) {
+    onDrop(acceptedFiles: any) {
         if (acceptedFiles.length > 0) {
             self.uploadFile(acceptedFiles[0]);
         }
     }
     
-    uploadFile(file) {
+    uploadFile(file: any) {
         let formData = new FormData();
         formData.append("name", file.name);
         formData.append("file", file);
@@ -68,7 +82,7 @@ export default class Soundboard extends React.Component {
             });
     }
     
-    passwordOnChange(event) {
+    passwordOnChange(event: any) {
         this.setState({
             password: event.target.value,
         });

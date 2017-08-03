@@ -1,7 +1,15 @@
 import React from 'react';
 import './NotFound.scss';
 
-export default class Default extends React.Component {
+interface Props {
+
+}
+
+interface State {
+
+}
+
+export class NotFound extends React.Component<Props, State> {
     render() {
         return (
             <div className="NotFound">

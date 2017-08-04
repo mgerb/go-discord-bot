@@ -9,6 +9,9 @@ interface Props {
 
 interface State {
     players: Player[];
+    selectedRegion: string;
+    selectedMatch: string;
+    statList: string[];
 }
 
 interface Player {
@@ -25,79 +28,113 @@ export class Pubg extends React.Component<Props, State> {
         super();
         this.state = {
             players: [],
+            selectedRegion: 'agg',
+            selectedMatch: 'squad',
+            statList: [],
         };
     }
 
     componentDidMount() {
         axios.get("/stats/pubg").then((res) => {
 
-        console.log(res.data);
             this.setState({
-                players: this.filterData(res.data),
+                players: _.map(res.data) as any,
             });
 
-            console.log(this.state.players);
+            this.setStatList();
         });
     }
 
-    filterData(data: any): Player[] {
-        return _.map(_.values(data), (data: any) => {
+    // get stat list
+    setStatList() {
+        
+        // hacky way to find existing content -- to tired to make it pretty
+        let i = 0;
+        let stats;
+        while (!stats) {
+            if (i > this.state.players.length) {
+                return;
+            }
 
-            let regions: any = _.chain(data.Stats).groupBy('Region')
-            /*
-            .mapValues((val: any) => {
-                return  _.groupBy(val, 'Match');
-            })
-            */
-            .value();
+            stats = _.find(_.get(this.state, `players[${i}].Stats`), (s: any) => s.Match === this.state.selectedMatch.toLowerCase());
+            i++;
+        }
 
-
-            _.forIn(regions, (val: any, key: string) => {
-                regions[key] = _.groupBy(val, 'Match');
-
-                _.forIn(regions[key], (val2: any, key2: string) => {
-                    //regions[key][key2] = _.groupBy(regions[key][key2][0].Stats, 'field');
-                    regions[key][key2] = _.groupBy(_.flatten(regions[key][key2][0].Stats), 'field');
-                    _.each(regions[key][key2], s => s = _.flatten(s));
-
-                    //console.log(regions[key][key2][0]);
-
-                });
+        if (stats) {
+            this.setState({
+                statList: _.sortBy(_.map(stats.Stats, 'field')) as any,
             });
-
-            //console.log(regions);
-
-            return {
-                ...{ PlayerName: data.PlayerName },
-                ...regions,
-            };
-        });
+        }
     }
 
-    insertTableData() {
-
-        return this.state.players.map((stat: any, index: number) => {
+    insertRows(): any {
+        return this.state.statList.map((val: any, index: any) => {
             return (
                 <tr key={index}>
-                    <td>{stat.PlayerName}</td>
+                    <td>{val}</td>
+                    {this.state.players.map((player: any, i: number) => {
+                        // find player stats for field
+                        let playerStat = _.find(player.Stats, (p: any) => {
+                            return p.Match === this.state.selectedMatch.toLowerCase() && p.Region === this.state.selectedRegion.toLowerCase();
+                        });
+
+                        return <td key={i}>{_.get(_.find(_.get(playerStat, 'Stats'), (p: any) => p.field === val), 'displayValue')}</td>
+                    })}
                 </tr>
             );
         });
     }
 
+    buttonRegion(title: string) {
+        let lowerTitle = title === 'All' ? 'agg' : title.toLowerCase()
+        return (
+            <button className={`button ${lowerTitle === this.state.selectedRegion ? 'button--primary' : ''}`}
+                onClick={() => {
+                    this.setState({selectedRegion: lowerTitle});
+                    this.setStatList();
+                    }}>{title}</button>
+        );
+    }
+
+    buttonMatch(title: string) {
+        let lowerTitle = title.toLowerCase()
+        return (
+            <button className={`button ${lowerTitle === this.state.selectedMatch ? 'button--primary' : ''}`}
+                onClick={() => {
+                    this.setState({selectedMatch: lowerTitle});
+                    this.setStatList();
+                    }}>{title}</button>
+        );
+    }
+
     render() {
         return (
             <div className="pubg__container">
-                <div className="card">
+                <div className="card" style={{maxWidth:'initial'}}>
                     <div className="card__header">PUBG Stats</div>
+
+                    <div className="pubg__button-row">
+                        {this.buttonMatch('Solo')}
+                        {this.buttonMatch('Duo')}
+                        {this.buttonMatch('Squad')}
+                    </div>
+
+                    <div className="pubg__button-row">
+                        {this.buttonRegion('All')}
+                        {this.buttonRegion('Na')}
+                        {this.buttonRegion('As')}
+                        {this.buttonRegion('Au')}
+                    </div>
+
                     <table className="pubg__table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                            </tr>
-                        </thead>
                         <tbody>
-                            {this.insertTableData()}
+                            <tr>
+                                <th></th>
+                                {this.state.players.map((val: any, index: number) => {
+                                    return <th key={index}>{val.PlayerName}</th>;
+                                })}
+                            </tr>
+                            {this.insertRows()}
                         </tbody>
                     </table>
 

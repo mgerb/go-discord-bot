@@ -39,18 +39,22 @@ func Connect(token string) {
 
 // Start - blocking function that starts a websocket listenting for discord callbacks
 func Start() {
-	// Open the websocket and begin listening.
-	err := Session.Open()
-	if err != nil {
-		fmt.Println("error opening connection,", err)
+
+	// start new non blocking go routine
+	go func() {
+		// Open the websocket and begin listening.
+		err := Session.Open()
+		if err != nil {
+			fmt.Println("error opening connection,", err)
+			return
+		}
+
+		fmt.Println("Bot is now running...")
+
+		// Simple way to keep program running until CTRL-C is pressed.
+		<-make(chan struct{})
 		return
-	}
-
-	fmt.Println("Bot is now running...")
-
-	// Simple way to keep program running until CTRL-C is pressed.
-	<-make(chan struct{})
-	return
+	}()
 }
 
 func AddHandler(handler interface{}) {

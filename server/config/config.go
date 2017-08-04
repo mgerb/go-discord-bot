@@ -20,6 +20,11 @@ type configFile struct {
 	SoundsPath     string `json:"SoundsPath"`
 	UploadPassword string `json:"UploadPassword"`
 	ServerAddr     string `json:"ServerAddr`
+	Pubg           struct {
+		Enabled bool     `json:"enabled"`
+		APIKey  string   `json:"apiKey"`
+		Players []string `json:"players"`
+	} `json:"pubg"`
 }
 
 type configFlags struct {

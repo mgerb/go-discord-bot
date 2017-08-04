@@ -3,5 +3,10 @@
     "BotPrefix": "#",
     "SoundsPath": "./sounds/",
     "UploadPassword": "",
-    "ServerAddr": ":80"
+    "ServerAddr": ":80",
+    "pubg": {
+        "apiKey": "",
+        "enabled": true,
+        "players": ["player1"]
+    }
 }

@@ -28,13 +28,22 @@ func Start(key string, players []string) {
 
 func fetchStats(players []string) {
 
-	api := pubgClient.New(apiKey)
+	api, err := pubgClient.New(apiKey)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// fetch new stats every 30 seconds
 	for {
 
 		for _, player := range players {
-			newStats := api.GetPlayer(player)
+			newStats, err := api.GetPlayer(player)
+
+			if err != nil {
+				log.Println(err)
+				continue
+			}
 
 			mut.Lock()
 			stats[player] = newStats

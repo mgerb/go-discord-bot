@@ -3,6 +3,7 @@ package handlers
 import (
 	"io"
 	"os"
+	"strings"
 
 	"net/http"
 
@@ -40,6 +41,9 @@ func FileUpload(w http.ResponseWriter, r *http.Request) {
 	if _, err := os.Stat(config.Config.SoundsPath); os.IsNotExist(err) {
 		os.Mkdir(config.Config.SoundsPath, os.ModePerm)
 	}
+
+	// convert file name to lower case
+	header.Filename = strings.ToLower(header.Filename)
 
 	// check if file already exists
 	if _, err := os.Stat(config.Config.SoundsPath + header.Filename); err == nil {

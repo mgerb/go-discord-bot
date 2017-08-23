@@ -42,8 +42,9 @@ func FileUpload(w http.ResponseWriter, r *http.Request) {
 		os.Mkdir(config.Config.SoundsPath, os.ModePerm)
 	}
 
-	// convert file name to lower case
+	// convert file name to lower case and trim spaces
 	header.Filename = strings.ToLower(header.Filename)
+	header.Filename = strings.Replace(header.Filename, " ", "", -1)
 
 	// check if file already exists
 	if _, err := os.Stat(config.Config.SoundsPath + header.Filename); err == nil {

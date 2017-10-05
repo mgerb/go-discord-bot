@@ -21,6 +21,7 @@ export class Navbar extends React.Component<Props, State> {
                 <Link to="/soundboard" className="Navbar__item" activeClassName="Navbar__item--active">Soundboard</Link>
                 <Link to="/downloader" className="Navbar__item" activeClassName="Navbar__item--active">Youtube Downloader</Link>
                 <Link to="/pubg" className="Navbar__item" activeClassName="Navbar__item--active">Pubg</Link>
+                <Link to="/clips" className="Navbar__item" activeClassName="Navbar__item--active">Clips</Link>
             </div>
         );
     }

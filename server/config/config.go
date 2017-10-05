@@ -18,6 +18,7 @@ type configFile struct {
 	Token          string `json:"Token"`
 	BotPrefix      string `json:"BotPrefix"` //prefix to use for bot commands
 	SoundsPath     string `json:"SoundsPath"`
+	ClipsPath      string `json:"ClipsPath"`
 	UploadPassword string `json:"UploadPassword"`
 	ServerAddr     string `json:"ServerAddr`
 	Pubg           struct {

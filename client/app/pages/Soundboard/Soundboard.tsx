@@ -2,7 +2,7 @@ import React from 'react';
 import Dropzone from 'react-dropzone';
 import axios, { AxiosRequestConfig } from 'axios';
 
-import { SoundList } from './SoundList.component';
+import { SoundList, SoundType } from '../../components/SoundList';
 
 import './Soundboard.scss';
 
@@ -17,12 +17,13 @@ interface State {
     password: string;
     uploaded: boolean;
     uploadError: string;
+    soundList: SoundType[];
 }
 
 export class Soundboard extends React.Component<Props, State> {
     
     private config: AxiosRequestConfig;
-    public refs: any;
+    private soundListCache: any;
 
     constructor() {
         super();
@@ -31,6 +32,7 @@ export class Soundboard extends React.Component<Props, State> {
             password: "",
             uploaded: false,
             uploadError: " ",
+            soundList: [],
         },
 
         self = this;
@@ -47,8 +49,27 @@ export class Soundboard extends React.Component<Props, State> {
                 });
             }
         };
+
+        this.getSoundList();
     }
     
+    private getSoundList() {
+        if (!this.soundListCache) {
+            axios.get("/api/soundlist").then((response) => {
+                this.soundListCache = response.data;
+                this.setState({
+                    soundList: response.data,
+                });
+            }).catch((error: any) => {
+                console.error(error.response.data);
+            });
+        } else {
+            this.setState({
+                soundList: this.soundListCache,
+            });
+        }
+    }
+
     onDrop(acceptedFiles: any) {
         if (acceptedFiles.length > 0) {
             self.uploadFile(acceptedFiles[0]);
@@ -61,7 +82,7 @@ export class Soundboard extends React.Component<Props, State> {
         formData.append("file", file);
         formData.append("password", this.state.password);
         
-        axios.put("/upload", formData, this.config)
+        axios.put("/api/upload", formData, this.config)
             .then(() => {
                 this.setState({
                     password: "",
@@ -70,9 +91,8 @@ export class Soundboard extends React.Component<Props, State> {
                     uploadError: " ",
                 });
                 
-                // reset sound list cache and load the new list
-                this.refs.SoundList.soundListCache = undefined;
-                this.refs.SoundList.getSoundList();
+                this.soundListCache = undefined;
+                this.getSoundList();
             }).catch((err) => {
                 this.setState({
                     percentCompleted: 0,
@@ -89,10 +109,11 @@ export class Soundboard extends React.Component<Props, State> {
     }
     
     render() {
+        const { soundList } = this.state;
         return (
             <div className="Soundboard">
                 <div className="column">
-                    <SoundList ref="SoundList"/>
+                    <SoundList soundList={soundList} type="Sounds"/>
                 </div>
             
                 <div className="column">

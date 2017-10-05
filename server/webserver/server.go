@@ -30,18 +30,22 @@ func getRouter() *chi.Mux {
 	workDir, _ := os.Getwd()
 
 	FileServer(r, "/static", http.Dir(filepath.Join(workDir, "./dist/static")))
-	FileServer(r, "/public/sounds", http.Dir(filepath.Join(workDir, "./sounds")))
+	FileServer(r, "/public/sounds", http.Dir(filepath.Join(workDir, config.Config.SoundsPath)))
 	FileServer(r, "/public/youtube", http.Dir(filepath.Join(workDir, "./youtube")))
+	FileServer(r, "/public/clips", http.Dir(filepath.Join(workDir, config.Config.ClipsPath)))
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./dist/index.html")
 	})
 
-	// configure end points
-	r.Get("/soundlist", handlers.SoundList)
-	r.Put("/upload", handlers.FileUpload)
-	r.Get("/ytdownloader", handlers.Downloader)
-	r.Get("/stats/pubg", pubg.Handler)
+	r.Route("/api", func(r chi.Router) {
+		// configure api end points
+		r.Get("/soundlist", handlers.SoundList)
+		r.Get("/cliplist", handlers.ClipList)
+		r.Put("/upload", handlers.FileUpload)
+		r.Get("/ytdownloader", handlers.Downloader)
+		r.Get("/stats/pubg", pubg.Handler)
+	})
 
 	return r
 }

@@ -2,6 +2,7 @@
     "Token": "",
     "BotPrefix": "#",
     "SoundsPath": "./sounds/",
+    "ClipsPath": "./clips/",
     "UploadPassword": "",
     "ServerAddr": ":80",
     "pubg": {

@@ -35,7 +35,7 @@ export class Pubg extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        axios.get("/stats/pubg").then((res) => {
+        axios.get("/api/stats/pubg").then((res) => {
 
             this.setState({
                 players: _.map(res.data) as any,

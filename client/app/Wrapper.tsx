@@ -1,31 +1,20 @@
 import React from 'react';
-import { Navbar } from './components/Navbar/Navbar.component';
+import { Navbar } from './components/Navbar';
 
 //styling
 import './scss/index.scss';
 
-interface Props {
+export class Wrapper extends React.Component<any, any> {
+  constructor() {
+    super();
+  }
 
-}
-
-interface State {
-
-}
-
-export class Wrapper extends React.Component<Props, State> {
-
-    constructor() {
-        super();
-    }
-
-    render() {
-        return (
-            <div>
-                <Navbar/>
-                <div>
-                    {this.props.children}
-                </div>
-            </div>
-        );
-    }
+  render() {
+    return (
+      <div>
+        <Navbar />
+        <div>{this.props.children}</div>
+      </div>
+    );
+  }
 }

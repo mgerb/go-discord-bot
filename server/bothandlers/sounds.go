@@ -28,9 +28,8 @@ const (
 	maxBytes      int = (frameSize * 2) * 2 // max size of opus data
 	maxSoundQueue int = 10                  // max amount of sounds that can be queued at one time
 
-	sampleRate               int    = 96000 // rate at which wav writer need to make audio up to speed
-	voiceClipQueuePacketSize int    = 2000  // this packet size equates to roughly 40 seconds of audio
-	voiceClipDirectory       string = "./clips"
+	sampleRate               int = 96000 // rate at which wav writer need to make audio up to speed
+	voiceClipQueuePacketSize int = 2000  // this packet size equates to roughly 40 seconds of audio
 )
 
 // store our connection objects in a map tied to a guild id
@@ -292,13 +291,13 @@ func (conn *audioConnection) clipAudio(m *discordgo.MessageCreate) {
 func writePacketsToFile(username string, packets chan *discordgo.Packet) {
 
 	// create clips folder if it does not exist
-	if _, err := os.Stat(voiceClipDirectory); os.IsNotExist(err) {
-		os.Mkdir(voiceClipDirectory, os.ModePerm)
+	if _, err := os.Stat(config.Config.ClipsPath); os.IsNotExist(err) {
+		os.Mkdir(config.Config.ClipsPath, os.ModePerm)
 	}
 
 	// construct filename
 	timestamp := time.Now().UTC().Format("2006-01-02") + "-" + strconv.Itoa(int(time.Now().Unix()))
-	wavOut, err := os.Create(voiceClipDirectory + "/" + timestamp + "-" + username + ".wav")
+	wavOut, err := os.Create(config.Config.ClipsPath + timestamp + "-" + username + ".wav")
 
 	checkErr(err)
 	defer wavOut.Close()

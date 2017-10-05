@@ -1,52 +1,30 @@
 import React from 'react';
-import axios from 'axios';
 
 import './SoundList.scss';
 
 interface Props {
-
+    soundList: SoundType[];
+    type: string;
 }
 
 interface State {
     showAudioControls: boolean[];
-    soundList: {
-        extension: string;
-        name: string;
-        prefix: string;
-    }[];
+}
+
+export interface SoundType {
+    extension: string;
+    name: string;
+    prefix?: string;
 }
 
 export class SoundList extends React.Component<Props, State> {
     
-    private soundListCache: any;
 
     constructor() {
         super();
         this.state = {
-            soundList: [],
             showAudioControls: [],
         };
-    }
-    
-    componentDidMount() {
-        this.getSoundList();
-    }
-    
-    getSoundList() {
-        if (!this.soundListCache) {
-            axios.get("/soundlist").then((response) => {
-                this.soundListCache = response.data;
-                this.setState({
-                    soundList: response.data,
-                });
-            }).catch(() => {
-                //console.warn(error.response.data);
-            });
-        } else {
-            this.setState({
-                soundList: this.soundListCache,
-            });
-        }
     }
     
     checkExtension(extension: string) {
@@ -72,26 +50,27 @@ export class SoundList extends React.Component<Props, State> {
     }
     
     render() {
+
+        const { soundList, type } = this.props;
+
         return (
             <div className="Card">
                 <div className="Card__header" style={{display:'flex'}}>
                     <div>
-                        Sounds
+                        <span>{type}</span>
                         <i className="fa fa fa-volume-up" aria-hidden="true"/>
                     </div>
                     <div style={{flex:1}}/>
-                    <div>({this.state.soundList.length})</div>
+                    <div>({soundList.length})</div>
                 </div>
                 
-                {this.state.soundList.length > 0 ? this.state.soundList.map((sound, index) => {
+                {soundList.length > 0 ? soundList.map((sound: SoundType, index: number) => {
                     return (
                         <div key={index} className="SoundList__item">
-                            <div>
-                                {sound.prefix + sound.name}
-                            </div>
+                            <div>{(sound.prefix || '') + sound.name}</div>
                             
                             {this.checkExtension(sound.extension) && this.state.showAudioControls[index] ?
-                            <audio controls src={"/public/sounds/" + sound.name + "." + sound.extension}
+                            <audio controls src={`/public/${type.toLowerCase()}/` + sound.name + "." + sound.extension}
                                     itemType={"audio/" + sound.extension}
                                     style={{width: "100px"}}/>
                             : <i className="fa fa-play link" aria-hidden="true" onClick={() => this.handleShowAudio(index)}/> }

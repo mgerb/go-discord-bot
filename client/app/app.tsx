@@ -8,6 +8,7 @@ import { Soundboard } from './pages/Soundboard/Soundboard';
 import { NotFound } from './pages/NotFound/NotFound';
 import { Downloader } from './pages/Downloader/Downloader';
 import { Pubg } from './pages/Pubg/Pubg';
+import { Clips } from './pages/Clips';
 
 ReactDOM.render(
     <Router history={browserHistory}>
@@ -16,6 +17,7 @@ ReactDOM.render(
             <Route path="/soundboard" component={Soundboard}/>
             <Route path="/downloader" component={Downloader}/>
             <Route path="/pubg" component={Pubg}/>
+            <Route path="/clips" component={Clips}/>
             <Route path="*" component={NotFound}/>
         </Route>
     </Router>

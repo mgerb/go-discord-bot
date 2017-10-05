@@ -48,7 +48,7 @@ export class Downloader extends React.Component<Props, State> {
             dataLoading: true,
         });
 
-        axios.get(`/ytdownloader`, {
+        axios.get(`/api/ytdownloader`, {
             params: {
                 fileType: this.state.fileType,
                 url: this.state.url,
@@ -81,14 +81,6 @@ export class Downloader extends React.Component<Props, State> {
                             value={this.state.url}
                             onChange={(event) => this.setState({url: event.target.value})}/>
 
-                    {/*<div style={{marginBottom:'10px'}}>
-                        <button className={"button Downloader__button" + (this.state.fileType === "mp3" ? " button--primary" : "")}
-                            onClick={() => this.setState({fileType:"mp3"})}>mp3</button>
-                        <button className={"button Downloader__button" + (this.state.fileType=== "mp4" ? " button--primary" : "")}
-                            onClick={() => this.setState({fileType:"mp4"})}>mp4</button>
-                    </div>*/}
-
-                    
                     <div style={{marginBottom:'10px'}}>
                         <button className="button button--primary"
                                 style={{width: '100px', height: '40px', fontSize: 'large'}}

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"io/ioutil"
+	"log"
 	"strings"
 
 	"net/http"
@@ -57,4 +58,32 @@ func PopulateSoundList() error {
 	}
 
 	return nil
+}
+
+// ClipList -
+func ClipList(w http.ResponseWriter, r *http.Request) {
+
+	clipList := []sound{}
+
+	files, err := ioutil.ReadDir(config.Config.ClipsPath)
+
+	if err != nil {
+		log.Println(err)
+		response.ERR(w, 500, response.DefaultInternalError)
+		return
+	}
+
+	for _, f := range files {
+		fileName := strings.Split(f.Name(), ".")[0]
+		extension := strings.Split(f.Name(), ".")[1]
+
+		listItem := sound{
+			Name:      fileName,
+			Extension: extension,
+		}
+
+		clipList = append(clipList, listItem)
+	}
+
+	response.JSON(w, clipList)
 }

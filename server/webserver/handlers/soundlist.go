@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -35,7 +34,6 @@ func SoundList(w http.ResponseWriter, r *http.Request) {
 
 // PopulateSoundList -
 func PopulateSoundList() error {
-	fmt.Println("Populating sound list.")
 
 	soundList = []sound{}
 

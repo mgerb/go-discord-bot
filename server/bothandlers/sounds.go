@@ -4,12 +4,11 @@ import (
 	"bufio"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"os/exec"
-	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -18,28 +17,36 @@ import (
 	"layeh.com/gopus"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/cryptix/wav"
 	"github.com/mgerb/go-discord-bot/server/config"
 )
 
 const (
 	channels      int = 2                   // 1 for mono, 2 for stereo
-	frameRate     int = 48000               // audio sampling rate
+	frameRate     int = 48000               // audio sampling rate - apparently a standard for opus
 	frameSize     int = 960                 // uint16 size of each audio frame
 	maxBytes      int = (frameSize * 2) * 2 // max size of opus data
 	maxSoundQueue int = 10                  // max amount of sounds that can be queued at one time
+
+	sampleRate               int    = 96000 // rate at which wav writer need to make audio up to speed
+	voiceClipQueuePacketSize int    = 2000  // this packet size equates to roughly 40 seconds of audio
+	voiceClipDirectory       string = "./clips"
 )
 
 // store our connection objects in a map tied to a guild id
 var activeConnections = make(map[string]*audioConnection)
 
 type audioConnection struct {
-	guild            *discordgo.Guild
-	session          *discordgo.Session
-	sounds           map[string]*audioClip
-	soundQueue       chan string
-	voiceConnection  *discordgo.VoiceConnection
-	soundPlayingLock bool
-	mutex            *sync.Mutex // mutex for single audio connection
+	guild             *discordgo.Guild
+	session           *discordgo.Session
+	voiceConnection   *discordgo.VoiceConnection
+	currentChannel    *discordgo.Channel
+	sounds            map[string]*audioClip
+	soundQueue        chan string
+	voiceClipQueue    chan *discordgo.Packet
+	soundPlayingLock  bool
+	audioListenerLock bool
+	mutex             *sync.Mutex // mutex for single audio connection
 }
 
 type audioClip struct {
@@ -55,7 +62,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		// Could not find channel.
-		fmt.Println("Unable to find channel.")
+		log.Println("Unable to find channel.")
 		return
 	}
 
@@ -71,11 +78,12 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// create new connection instance
 		newInstance := &audioConnection{
-			guild:      newGuild,
-			session:    s,
-			sounds:     make(map[string]*audioClip, 0),
-			soundQueue: make(chan string, maxSoundQueue),
-			mutex:      &sync.Mutex{},
+			guild:             newGuild,
+			session:           s,
+			sounds:            make(map[string]*audioClip, 0),
+			soundQueue:        make(chan string, maxSoundQueue),
+			mutex:             &sync.Mutex{},
+			audioListenerLock: false,
 		}
 
 		activeConnections[c.GuildID] = newInstance
@@ -103,28 +111,35 @@ func (conn *audioConnection) handleMessage(m *discordgo.MessageCreate) {
 		case "dismiss":
 			conn.dismiss()
 
+		case "clip":
+			conn.clipAudio(m)
+
 		default:
 			conn.playAudio(command, m)
 		}
 	}
 }
 
+// dismiss bot from currnet channel if it's in one
 func (conn *audioConnection) dismiss() {
 	if conn.voiceConnection != nil && !conn.soundPlayingLock && len(conn.soundQueue) == 0 {
 		conn.voiceConnection.Disconnect()
 	}
 }
 
+// summon bot to channel that user is currently in
 func (conn *audioConnection) summon(m *discordgo.MessageCreate) {
+
 	// Join the channel the user issued the command from if not in it
 	if conn.voiceConnection == nil || conn.voiceConnection.ChannelID != m.ChannelID {
+
 		var err error
 
 		// Find the channel that the message came from.
 		c, err := conn.session.State.Channel(m.ChannelID)
 		if err != nil {
 			// Could not find channel.
-			fmt.Println("User channel not found.")
+			log.Println("User channel not found.")
 			return
 		}
 
@@ -135,7 +150,7 @@ func (conn *audioConnection) summon(m *discordgo.MessageCreate) {
 			return
 		}
 
-		// Look for the message sender in that guilds current voice states.
+		// Look for the message sender in that guilds current voice states
 		for _, vs := range g.VoiceStates {
 			if vs.UserID == m.Author.ID {
 
@@ -145,6 +160,15 @@ func (conn *audioConnection) summon(m *discordgo.MessageCreate) {
 					log.Println(err)
 				}
 
+				// set the current channel
+				conn.currentChannel = c
+
+				// start listening to audio if not locked
+				if !conn.audioListenerLock {
+					go conn.startAudioListener()
+					conn.audioListenerLock = true
+				}
+
 				return
 			}
 		}
@@ -152,6 +176,7 @@ func (conn *audioConnection) summon(m *discordgo.MessageCreate) {
 	}
 }
 
+// play audio in channel that user is in
 func (conn *audioConnection) playAudio(soundName string, m *discordgo.MessageCreate) {
 
 	// check if sound exists in memory
@@ -160,7 +185,7 @@ func (conn *audioConnection) playAudio(soundName string, m *discordgo.MessageCre
 		err := conn.loadFile(soundName)
 
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return
 		}
 	}
@@ -178,7 +203,7 @@ func (conn *audioConnection) playAudio(soundName string, m *discordgo.MessageCre
 
 }
 
-// load dca file into memory
+// load audio file into memory
 func (conn *audioConnection) loadFile(fileName string) error {
 
 	// scan directory for file
@@ -200,21 +225,10 @@ func (conn *audioConnection) loadFile(fileName string) error {
 		return errors.New("File not found")
 	}
 
-	fmt.Println("Loading file: " + fname + fextension)
-
-	var ffmpegExecutable string
-
-	switch runtime.GOOS {
-	case "darwin":
-		ffmpegExecutable = "./ffmpeg_mac"
-	case "linux":
-		ffmpegExecutable = "./ffmpeg_linux"
-	case "windows":
-		ffmpegExecutable = "ffmpeg_windows.exe"
-	}
+	log.Println("Loading file: " + fname + fextension)
 
 	// use ffmpeg to convert file into a format we can use
-	cmd := exec.Command(ffmpegExecutable, "-i", config.Config.SoundsPath+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(frameRate), "-ac", strconv.Itoa(channels), "pipe:1")
+	cmd := exec.Command("ffmpeg", "-i", config.Config.SoundsPath+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(frameRate), "-ac", strconv.Itoa(channels), "pipe:1")
 
 	ffmpegout, err := cmd.StdoutPipe()
 
@@ -266,6 +280,112 @@ func (conn *audioConnection) loadFile(fileName string) error {
 
 }
 
+func (conn *audioConnection) clipAudio(m *discordgo.MessageCreate) {
+	if len(conn.voiceClipQueue) < 10 {
+		conn.session.ChannelMessageSend(m.ChannelID, "Clip failed.")
+	} else {
+		writePacketsToFile(m.Author.Username, conn.voiceClipQueue)
+		conn.session.ChannelMessageSend(m.ChannelID, "Sound clipped!")
+	}
+}
+
+func writePacketsToFile(username string, packets chan *discordgo.Packet) {
+
+	// create clips folder if it does not exist
+	if _, err := os.Stat(voiceClipDirectory); os.IsNotExist(err) {
+		os.Mkdir(voiceClipDirectory, os.ModePerm)
+	}
+
+	// construct filename
+	timestamp := time.Now().UTC().Format("2006-01-02") + "-" + strconv.Itoa(int(time.Now().Unix()))
+	wavOut, err := os.Create(voiceClipDirectory + "/" + timestamp + "-" + username + ".wav")
+
+	checkErr(err)
+	defer wavOut.Close()
+
+	meta := wav.File{
+		Channels:        1,
+		SampleRate:      uint32(sampleRate),
+		SignificantBits: 16,
+	}
+
+	writer, err := meta.NewWriter(wavOut)
+	checkErr(err)
+	defer writer.Close()
+
+	// grab everything from the voice packet channel and dump it to the file
+	// close when there is nothing left
+loop:
+	for {
+		select {
+		case p := <-packets:
+			for _, pcm := range p.PCM {
+				err := writer.WriteInt32(int32(pcm))
+				checkErr(err)
+			}
+		default:
+			break loop
+		}
+	}
+}
+
+// start listening to the voice channel
+func (conn *audioConnection) startAudioListener() {
+
+	if conn.voiceClipQueue == nil {
+		conn.voiceClipQueue = make(chan *discordgo.Packet, voiceClipQueuePacketSize)
+	}
+
+	speakers := make(map[uint32]*gopus.Decoder)
+	var err error
+
+loop:
+	for {
+
+		select {
+		// grab incomming audio
+		case opusChannel, ok := <-conn.voiceConnection.OpusRecv:
+			if !ok {
+				continue
+			}
+
+			_, ok = speakers[opusChannel.SSRC]
+
+			if !ok {
+				speakers[opusChannel.SSRC], err = gopus.NewDecoder(frameRate, 1)
+				if err != nil {
+					log.Println("error creating opus decoder", err)
+					continue
+				}
+			}
+
+			opusChannel.PCM, err = speakers[opusChannel.SSRC].Decode(opusChannel.Opus, frameSize, false)
+			if err != nil {
+				log.Println("Error decoding opus data", err)
+				continue
+			}
+
+			// if channel is full trim off from beginning
+			if len(conn.voiceClipQueue) == cap(conn.voiceClipQueue) {
+				<-conn.voiceClipQueue
+			}
+
+			// add current packet to channel queue
+			conn.voiceClipQueue <- opusChannel
+
+		// check if voice connection fails then break out of audio listener
+		default:
+			if !conn.voiceConnection.Ready {
+				break loop
+			}
+		}
+
+	}
+
+	// remove lock upon exit
+	conn.audioListenerLock = false
+}
+
 // playSounds - plays the current buffer to the provided channel.
 func (conn *audioConnection) playSounds() (err error) {
 
@@ -301,4 +421,10 @@ func (conn *audioConnection) toggleSoundPlayingLock(playing bool) {
 	conn.mutex.Lock()
 	conn.soundPlayingLock = playing
 	conn.mutex.Unlock()
+}
+
+func checkErr(err error) {
+	if err != nil {
+		log.Println(err)
+	}
 }

@@ -1,5 +1,7 @@
 package bothandlers
 
+/***** DEPRECATED *****/
+
 import (
 	"io/ioutil"
 	"math/rand"

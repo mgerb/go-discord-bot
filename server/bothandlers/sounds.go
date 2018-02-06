@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -19,6 +18,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/cryptix/wav"
 	"github.com/mgerb/go-discord-bot/server/config"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -61,7 +61,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
 		// Could not find channel.
-		log.Println("Unable to find channel.")
+		log.Error("Unable to find channel.")
 		return
 	}
 
@@ -71,7 +71,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Find the guild for that channel.
 		newGuild, err := s.State.Guild(c.GuildID)
 		if err != nil {
-			log.Println(err)
+			log.Error(err)
 			return
 		}
 
@@ -138,14 +138,14 @@ func (conn *audioConnection) summon(m *discordgo.MessageCreate) {
 		c, err := conn.session.State.Channel(m.ChannelID)
 		if err != nil {
 			// Could not find channel.
-			log.Println("User channel not found.")
+			log.Error("User channel not found.")
 			return
 		}
 
 		// Find the guild for that channel.
 		g, err := conn.session.State.Guild(c.GuildID)
 		if err != nil {
-			log.Println(err)
+			log.Error(err)
 			return
 		}
 
@@ -156,7 +156,7 @@ func (conn *audioConnection) summon(m *discordgo.MessageCreate) {
 				conn.voiceConnection, err = conn.session.ChannelVoiceJoin(g.ID, vs.ChannelID, false, false)
 
 				if err != nil {
-					log.Println(err)
+					log.Error(err)
 				}
 
 				// set the current channel
@@ -184,7 +184,7 @@ func (conn *audioConnection) playAudio(soundName string, m *discordgo.MessageCre
 		err := conn.loadFile(soundName)
 
 		if err != nil {
-			log.Println(err)
+			log.Error(err)
 			return
 		}
 	}
@@ -224,7 +224,7 @@ func (conn *audioConnection) loadFile(fileName string) error {
 		return errors.New("File not found")
 	}
 
-	log.Println("Loading file: " + fname + fextension)
+	log.Debug("Loading file: " + fname + fextension)
 
 	// use ffmpeg to convert file into a format we can use
 	cmd := exec.Command("ffmpeg", "-i", config.Config.SoundsPath+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(frameRate), "-ac", strconv.Itoa(channels), "pipe:1")
@@ -353,14 +353,14 @@ loop:
 			if !ok {
 				speakers[opusChannel.SSRC], err = gopus.NewDecoder(frameRate, 1)
 				if err != nil {
-					log.Println("error creating opus decoder", err)
+					log.Error("error creating opus decoder", err)
 					continue
 				}
 			}
 
 			opusChannel.PCM, err = speakers[opusChannel.SSRC].Decode(opusChannel.Opus, frameSize, false)
 			if err != nil {
-				log.Println("Error decoding opus data", err)
+				log.Error("Error decoding opus data", err)
 				continue
 			}
 
@@ -424,6 +424,6 @@ func (conn *audioConnection) toggleSoundPlayingLock(playing bool) {
 
 func checkErr(err error) {
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 }

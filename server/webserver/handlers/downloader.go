@@ -2,19 +2,18 @@ package handlers
 
 import (
 	"bytes"
-	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"regexp"
 
-	"github.com/mgerb/chi_auth_server/response"
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 // Downloader -
-func Downloader(w http.ResponseWriter, r *http.Request) {
-	url := r.FormValue("url")
-	fileType := r.FormValue("fileType")
+func Downloader(c *gin.Context) {
+	url := c.Query("url")
+	fileType := c.Query("fileType")
 
 	// create youtube folder if it does not exist
 	if _, err := os.Stat("youtube"); os.IsNotExist(err) {
@@ -29,8 +28,8 @@ func Downloader(w http.ResponseWriter, r *http.Request) {
 	err := titleCmd.Run()
 
 	if err != nil {
-		log.Println(err)
-		response.ERR(w, http.StatusInternalServerError, response.DefaultInternalError)
+		log.Error(err)
+		c.JSON(400, err)
 		return
 	}
 
@@ -40,7 +39,7 @@ func Downloader(w http.ResponseWriter, r *http.Request) {
 
 	// remove all special characters from title
 	cleanTitle := cleanseTitle(titleOut.String())
-	log.Println(cleanTitle)
+	log.Debug(cleanTitle)
 
 	cmd := exec.Command("youtube-dl", "-x", "--audio-format", "mp3", "-o", "./youtube/"+cleanTitle+".%(ext)s", url)
 
@@ -50,13 +49,13 @@ func Downloader(w http.ResponseWriter, r *http.Request) {
 	err = cmd.Run()
 
 	if err != nil {
-		log.Println(out.String())
-		log.Println(err)
-		response.ERR(w, http.StatusInternalServerError, response.DefaultInternalError)
+		log.Error(out.String())
+		log.Error(err)
+		c.JSON(400, err)
 		return
 	}
 
-	response.JSON(w, map[string]interface{}{"fileName": cleanTitle + "." + fileType})
+	c.JSON(200, map[string]interface{}{"fileName": cleanTitle + "." + fileType})
 }
 
 func cleanseTitle(title string) string {
@@ -64,7 +63,7 @@ func cleanseTitle(title string) string {
 	// Make a Regex to say we only want
 	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 
 	return reg.ReplaceAllString(title, "")

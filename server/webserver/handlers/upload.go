@@ -1,41 +1,32 @@
 package handlers
 
 import (
-	"io"
 	"os"
 	"strings"
 
 	"net/http"
 
-	"github.com/mgerb/chi_auth_server/response"
+	"github.com/gin-gonic/gin"
 	"github.com/mgerb/go-discord-bot/server/config"
+	log "github.com/sirupsen/logrus"
 )
 
 // FileUpload
-func FileUpload(w http.ResponseWriter, r *http.Request) {
+func FileUpload(c *gin.Context) {
 
-	password := r.FormValue("password")
+	password := c.PostForm("password")
 
 	if string(password) != config.Config.UploadPassword {
-		response.ERR(w, http.StatusInternalServerError, []byte("Invalid password."))
+		c.JSON(http.StatusInternalServerError, "Invalid password.")
 		return
 	}
 
-	file, header, err := r.FormFile("file")
+	file, err := c.FormFile("file")
 	if err != nil {
-		response.ERR(w, http.StatusInternalServerError, []byte("Error reading file."))
+		log.Error(err)
+		c.JSON(http.StatusInternalServerError, "Error reading file.")
 		return
 	}
-
-	defer file.Close()
-
-	src, err := header.Open()
-	if err != nil {
-		response.ERR(w, http.StatusInternalServerError, []byte("Error opening file."))
-		return
-	}
-
-	defer src.Close()
 
 	// create uploads folder if it does not exist
 	if _, err := os.Stat(config.Config.SoundsPath); os.IsNotExist(err) {
@@ -43,25 +34,21 @@ func FileUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// convert file name to lower case and trim spaces
-	header.Filename = strings.ToLower(header.Filename)
-	header.Filename = strings.Replace(header.Filename, " ", "", -1)
+	file.Filename = strings.ToLower(file.Filename)
+	file.Filename = strings.Replace(file.Filename, " ", "", -1)
 
 	// check if file already exists
-	if _, err := os.Stat(config.Config.SoundsPath + header.Filename); err == nil {
-		response.ERR(w, http.StatusInternalServerError, []byte("File already exists."))
+	if _, err := os.Stat(config.Config.SoundsPath + file.Filename); err == nil {
+		c.JSON(http.StatusInternalServerError, "File already exists.")
 		return
 	}
 
-	dst, err := os.Create(config.Config.SoundsPath + header.Filename)
+	err = c.SaveUploadedFile(file, config.Config.SoundsPath+file.Filename)
+	log.Debug("Saving file", config.Config.SoundsPath+file.Filename)
+
 	if err != nil {
-		response.ERR(w, http.StatusInternalServerError, []byte("Error creating file."))
-		return
-	}
-
-	defer dst.Close()
-
-	if _, err = io.Copy(dst, src); err != nil {
-		response.ERR(w, http.StatusInternalServerError, []byte("Error writing file."))
+		log.Error(err)
+		c.JSON(http.StatusInternalServerError, "Error creating file.")
 		return
 	}
 
@@ -69,9 +56,10 @@ func FileUpload(w http.ResponseWriter, r *http.Request) {
 	err = PopulateSoundList()
 
 	if err != nil {
-		response.ERR(w, http.StatusInternalServerError, []byte("Error populating sound list."))
+		log.Error(err)
+		c.JSON(http.StatusInternalServerError, "Error populating sound list.")
 		return
 	}
 
-	response.JSON(w, []byte("Success"))
+	c.JSON(200, "Success")
 }

@@ -1,13 +1,12 @@
 package pubg
 
 import (
-	"log"
-	"net/http"
 	"sync"
 	"time"
 
-	"github.com/mgerb/chi_auth_server/response"
+	"github.com/gin-gonic/gin"
 	pubgClient "github.com/mgerb/go-pubg"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -21,7 +20,7 @@ func Start(key string, players []string) {
 
 	apiKey = key
 
-	log.Println("Gathering pubg data...")
+	log.Debug("Gathering pubg data...")
 
 	go fetchStats(players)
 }
@@ -41,7 +40,7 @@ func fetchStats(players []string) {
 			newStats, err := api.GetPlayer(player)
 
 			if err != nil {
-				log.Println(err)
+				log.Error(err)
 				continue
 			}
 
@@ -58,6 +57,6 @@ func fetchStats(players []string) {
 }
 
 // Handler - returns the pubg stats
-func Handler(w http.ResponseWriter, r *http.Request) {
-	response.JSON(w, stats)
+func Handler(c *gin.Context) {
+	c.JSON(200, stats)
 }

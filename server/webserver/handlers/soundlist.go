@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"io/ioutil"
-	"log"
 	"strings"
 
 	"net/http"
 
-	"github.com/mgerb/chi_auth_server/response"
+	"github.com/gin-gonic/gin"
 	"github.com/mgerb/go-discord-bot/server/config"
+	log "github.com/sirupsen/logrus"
 )
 
 var soundList []sound
@@ -20,17 +20,17 @@ type sound struct {
 }
 
 // SoundList -
-func SoundList(w http.ResponseWriter, r *http.Request) {
+func SoundList(c *gin.Context) {
 
 	if len(soundList) < 1 {
 		err := PopulateSoundList()
 		if err != nil {
-			response.ERR(w, http.StatusInternalServerError, []byte(response.DefaultInternalError))
+			c.JSON(http.StatusInternalServerError, err)
 			return
 		}
 	}
 
-	response.JSON(w, soundList)
+	c.JSON(200, soundList)
 }
 
 // PopulateSoundList -
@@ -61,15 +61,15 @@ func PopulateSoundList() error {
 }
 
 // ClipList -
-func ClipList(w http.ResponseWriter, r *http.Request) {
+func ClipList(c *gin.Context) {
 
 	clipList := []sound{}
 
 	files, err := ioutil.ReadDir(config.Config.ClipsPath)
 
 	if err != nil {
-		log.Println(err)
-		response.ERR(w, 500, response.DefaultInternalError)
+		log.Error(err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -85,5 +85,5 @@ func ClipList(w http.ResponseWriter, r *http.Request) {
 		clipList = append(clipList, listItem)
 	}
 
-	response.JSON(w, clipList)
+	c.JSON(200, clipList)
 }

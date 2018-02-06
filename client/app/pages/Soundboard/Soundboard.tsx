@@ -82,7 +82,7 @@ export class Soundboard extends React.Component<Props, State> {
         formData.append("file", file);
         formData.append("password", this.state.password);
         
-        axios.put("/api/upload", formData, this.config)
+        axios.post("/api/upload", formData, this.config)
             .then(() => {
                 this.setState({
                     password: "",

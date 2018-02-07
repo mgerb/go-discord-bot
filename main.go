@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mgerb/go-discord-bot/server/bot"
-	"github.com/mgerb/go-discord-bot/server/bothandlers"
 	"github.com/mgerb/go-discord-bot/server/config"
 	"github.com/mgerb/go-discord-bot/server/webserver"
 	log "github.com/sirupsen/logrus"
@@ -34,14 +33,8 @@ func init() {
 
 func main() {
 
-	//connect bot to account with token
-	bot.Connect(config.Config.Token)
-
-	//add handlers
-	bot.AddHandler(bothandlers.SoundsHandler)
-
 	// start the bot
-	bot.Start()
+	bot.Start(config.Config.Token)
 
 	// start the web server
 	webserver.Start()

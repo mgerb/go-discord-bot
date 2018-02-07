@@ -2,19 +2,28 @@ package bot
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/mgerb/go-discord-bot/server/bothandlers"
 	log "github.com/sirupsen/logrus"
 )
 
-// Variables used for command line parameters
-var (
-	BotID   string
-	Session *discordgo.Session
-)
+func Start(token string) {
+	// initialize connection
+	session := connect(token)
 
-func Connect(token string) {
+	// add bot handlers
+	addHandler(session, bothandlers.SoundsHandler)
+
+	// start listening for commands
+	startListener(session)
+}
+
+func addHandler(session *discordgo.Session, handler interface{}) {
+	session.AddHandler(handler)
+}
+
+func connect(token string) *discordgo.Session {
 	// Create a new Discord session using the provided bot token.
-	var err error
-	Session, err = discordgo.New("Bot " + token)
+	session, err := discordgo.New("Bot " + token)
 
 	if err != nil {
 		log.Error(err)
@@ -22,26 +31,23 @@ func Connect(token string) {
 	}
 
 	// Get the account information.
-	u, err := Session.User("@me")
+	_, err = session.User("@me")
 
 	if err != nil {
 		log.Error("Error obtaining account details. Make sure you have the correct bot token.")
 		log.Fatal(err)
 	}
 
-	// Store the account ID for later use.
-	BotID = u.ID
-
 	log.Debug("Bot connected")
+
+	return session
 }
 
-// Start - blocking function that starts a websocket listenting for discord callbacks
-func Start() {
-
+func startListener(session *discordgo.Session) {
 	// start new non blocking go routine
 	go func() {
 		// Open the websocket and begin listening.
-		err := Session.Open()
+		err := session.Open()
 		if err != nil {
 			log.Error("error opening connection,", err)
 			return
@@ -53,8 +59,4 @@ func Start() {
 		<-make(chan struct{})
 		return
 	}()
-}
-
-func AddHandler(handler interface{}) {
-	Session.AddHandler(handler)
 }

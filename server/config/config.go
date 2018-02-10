@@ -3,8 +3,9 @@ package config
 import (
 	"encoding/json"
 	"flag"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Variables used for command line parameters
@@ -14,15 +15,18 @@ var (
 )
 
 type configFile struct {
-	Token          string `json:"Token"`
-	BotPrefix      string `json:"BotPrefix"` //prefix to use for bot commands
-	SoundsPath     string `json:"SoundsPath"`
-	ClipsPath      string `json:"ClipsPath"`
-	UploadPassword string `json:"UploadPassword"`
-	ServerAddr     string `json:"ServerAddr`
+	Token          string `json:"token"`
+	ClientId       string `json:"client_id"`
+	ClientSecret   string `json:"client_secret"`
+	RedirectUri    string `json:"redirect_uri"`
+	BotPrefix      string `json:"bot_prefix"` //prefix to use for bot commands
+	SoundsPath     string `json:"sounds_path"`
+	ClipsPath      string `json:"clips_path"`
+	UploadPassword string `json:"upload_password"`
+	ServerAddr     string `json:"server_addr"`
 	Pubg           struct {
 		Enabled bool     `json:"enabled"`
-		APIKey  string   `json:"apiKey"`
+		APIKey  string   `json:"api_key"`
 		Players []string `json:"players"`
 	} `json:"pubg"`
 }

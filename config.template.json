@@ -1,13 +1,16 @@
 {
-    "Token": "",
-    "BotPrefix": "#",
-    "SoundsPath": "./sounds/",
-    "ClipsPath": "./clips/",
-    "UploadPassword": "",
-    "ServerAddr": ":80",
+    "token": "",
+    "client_id": "",
+    "client_secret": "",
+    "redirect_uri": "",
+    "bot_prefix": "#",
+    "sounds_path": "./sounds/",
+    "clips_path": "./clips/",
+    "upload_password": "",
+    "server_addr": "0.0.0.0:80",
     "pubg": {
-        "apiKey": "",
-        "enabled": true,
+        "api_key": "",
+        "enabled": false,
         "players": ["player1"]
     }
 }

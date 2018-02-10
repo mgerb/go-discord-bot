@@ -25,6 +25,7 @@ func getRouter() *gin.Engine {
 	api.GET("/soundlist", handlers.SoundList)
 	api.GET("/cliplist", handlers.ClipList)
 	api.POST("/upload", handlers.FileUpload)
+	api.POST("/oauth", handlers.Oauth)
 
 	return router
 }

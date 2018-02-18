@@ -15,16 +15,20 @@ var (
 )
 
 type configFile struct {
-	Token          string `json:"token"`
-	ClientId       string `json:"client_id"`
-	ClientSecret   string `json:"client_secret"`
-	RedirectUri    string `json:"redirect_uri"`
-	BotPrefix      string `json:"bot_prefix"` //prefix to use for bot commands
-	SoundsPath     string `json:"sounds_path"`
-	ClipsPath      string `json:"clips_path"`
+	Token        string `json:"token"`
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	RedirectURI  string `json:"redirect_uri"`
+
+	GuildID        string `json:"guild_id"`
 	UploadPassword string `json:"upload_password"`
-	ServerAddr     string `json:"server_addr"`
-	Pubg           struct {
+
+	BotPrefix  string `json:"bot_prefix"` //prefix to use for bot commands
+	SoundsPath string `json:"sounds_path"`
+	ClipsPath  string `json:"clips_path"`
+	ServerAddr string `json:"server_addr"`
+
+	Pubg struct {
 		Enabled bool     `json:"enabled"`
 		APIKey  string   `json:"api_key"`
 		Players []string `json:"players"`

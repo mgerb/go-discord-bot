@@ -3,10 +3,10 @@
     "client_id": "",
     "client_secret": "",
     "redirect_uri": "",
+    "upload_password": "",
     "bot_prefix": "#",
     "sounds_path": "./sounds/",
     "clips_path": "./clips/",
-    "upload_password": "",
     "server_addr": "0.0.0.0:80",
     "pubg": {
         "api_key": "",

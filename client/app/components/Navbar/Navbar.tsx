@@ -5,7 +5,7 @@ import './Navbar.scss';
 
 // TODO: change url for build
 const redirectUri = 'https://localhost/oauth';
-const oauthUrl = `https://discordapp.com/api/oauth2/authorize?client_id=410818759746650140&redirect_uri=${redirectUri}&response_type=code&scope=email`;
+const oauthUrl = `https://discordapp.com/api/oauth2/authorize?client_id=410818759746650140&redirect_uri=${redirectUri}&response_type=code&scope=guilds%20identify`;
 
 interface Props {
 

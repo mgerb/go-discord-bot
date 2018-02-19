@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/mgerb/go-discord-bot/server/webserver/discord"
+	"github.com/mgerb/go-discord-bot/server/webserver/middleware"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -27,6 +26,7 @@ func Oauth(c *gin.Context) {
 		return
 	}
 
+	// get users oauth code
 	oauth, err := discord.Oauth(json.Code)
 
 	if err != nil {
@@ -35,6 +35,7 @@ func Oauth(c *gin.Context) {
 		return
 	}
 
+	// verify and grab user information
 	user, err := discord.GetUserInfo(oauth.AccessToken)
 
 	if err != nil {
@@ -43,8 +44,14 @@ func Oauth(c *gin.Context) {
 		return
 	}
 
-	// TODO: generate jwt for user
-	fmt.Println(user)
+	// generate json web token
+	token, err := middleware.GetJWT(user)
 
-	c.JSON(200, oauth)
+	if err != nil {
+		log.Error(err)
+		c.JSON(500, err)
+		return
+	}
+
+	c.JSON(200, token)
 }

@@ -11,15 +11,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// FileUpload
+// FileUpload -
 func FileUpload(c *gin.Context) {
 
-	password := c.PostForm("password")
-
-	if string(password) != config.Config.UploadPassword {
-		c.JSON(http.StatusInternalServerError, "Invalid password.")
-		return
-	}
+	// originalClaims, _ := c.Get("claims")
+	// claims, _ := originalClaims.(*middleware.CustomClaims)
+	// TODO: verify user for upload
 
 	file, err := c.FormFile("file")
 	if err != nil {

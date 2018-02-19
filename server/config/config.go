@@ -20,13 +20,16 @@ type configFile struct {
 	ClientSecret string `json:"client_secret"`
 	RedirectURI  string `json:"redirect_uri"`
 
-	GuildID        string `json:"guild_id"`
-	UploadPassword string `json:"upload_password"`
+	GuildID string `json:"guild_id"`
 
-	BotPrefix  string `json:"bot_prefix"` //prefix to use for bot commands
+	BotPrefix string `json:"bot_prefix"` //prefix to use for bot commands
+
 	SoundsPath string `json:"sounds_path"`
 	ClipsPath  string `json:"clips_path"`
-	ServerAddr string `json:"server_addr"`
+
+	AdminEmails []string `json:"admin_emails"`
+	ServerAddr  string   `json:"server_addr"`
+	JWTKey      string   `json:"jwt_key"`
 
 	Pubg struct {
 		Enabled bool     `json:"enabled"`

@@ -1,52 +1,63 @@
 @import '../../scss/variables';
 
 .Navbar {
-    position: fixed;
-    display: flex;
-    flex-direction: column;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: $navbarWidth;
-    background-color: $gray2;
-    border-right: 1px solid darken($gray2, 2%);
-    overflow-y: auto;
-    padding-bottom: 10px;
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: $navbarWidth;
+  background-color: $gray2;
+  border-right: 1px solid darken($gray2, 2%);
+  overflow-y: auto;
+  padding-bottom: 10px;
 }
 
 .Navbar__header {
-    font-size: 25px;
-    min-height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    background-color: $primaryBlue;
-    border-bottom: 1px solid $gray3;
+  font-size: 25px;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: $primaryBlue;
+  border-bottom: 1px solid $gray3;
 }
 
 .Navbar__item {
-    min-height: 50px;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: $white;
-    transition: background-color 0.1s linear, color 0.2s linear;
-    
-    &:hover {
-        background-color: $gray1; 
-    }
-    
-    & + .Navbar__item {
-        border-top: 1px solid $gray3;
-    }
-    
+  min-height: 50px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: $white;
+  transition: background-color 0.1s linear, color 0.2s linear;
+
+  &:hover {
+    background-color: $gray1;
+  }
+
+  & + .Navbar__item {
+    border-top: 1px solid $gray3;
+  }
 }
 
 .Navbar__item--active {
-    padding-left: 4px;
-    border-right: 4px solid $primaryBlue;
-    color: $primaryBlue !important;
+  padding-left: 4px;
+  border-right: 4px solid $primaryBlue;
+  color: $primaryBlue !important;
+}
+
+.Navbar__email {
+  padding-top: 10px;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  color: $primaryBlue;
+  bottom: 2;
+  left: 2;
+  font-size: 12px;
 }

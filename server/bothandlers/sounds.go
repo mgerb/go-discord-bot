@@ -377,6 +377,9 @@ loop:
 			if !conn.voiceConnection.Ready {
 				break loop
 			}
+
+			// fix for 100% cpu usage issue
+			time.Sleep(time.Second * 5)
 		}
 
 	}

@@ -1,12 +1,15 @@
 package main
 
 import (
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mgerb/go-discord-bot/server/bot"
 	"github.com/mgerb/go-discord-bot/server/config"
+	"github.com/mgerb/go-discord-bot/server/db"
+	"github.com/mgerb/go-discord-bot/server/logger"
 	"github.com/mgerb/go-discord-bot/server/webserver"
 	log "github.com/sirupsen/logrus"
-	"os"
 )
 
 func init() {
@@ -22,6 +25,11 @@ func init() {
 		gin.SetMode(gin.ReleaseMode)
 		// Only log the warning severity or above.
 		log.SetLevel(log.WarnLevel)
+	}
+
+	if config.Config.Logger {
+		db.Init()
+		db.Conn.AutoMigrate(&logger.Message{}, &logger.Attachment{}, &logger.User{})
 	}
 }
 

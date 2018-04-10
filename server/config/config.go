@@ -31,7 +31,8 @@ type configFile struct {
 	ServerAddr  string   `json:"server_addr"`
 	JWTKey      string   `json:"jwt_key"`
 
-	Logging bool `json:"logging"`
+	Logger   bool   `json:"logger"`
+	Database string `json:"database"`
 }
 
 type configFlags struct {

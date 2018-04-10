@@ -3,18 +3,26 @@ package bot
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/mgerb/go-discord-bot/server/bothandlers"
+	"github.com/mgerb/go-discord-bot/server/config"
 	log "github.com/sirupsen/logrus"
 )
 
-func Start(token string) {
+// Start the bot
+func Start(token string) *discordgo.Session {
 	// initialize connection
 	session := connect(token)
 
 	// add bot handlers
 	addHandler(session, bothandlers.SoundsHandler)
 
+	if config.Config.Logger {
+		addHandler(session, bothandlers.LoggerHandler)
+	}
+
 	// start listening for commands
 	startListener(session)
+
+	return session
 }
 
 func addHandler(session *discordgo.Session, handler interface{}) {

@@ -5,8 +5,8 @@ import { Navbar } from './components/Navbar';
 import './scss/index.scss';
 
 export class Wrapper extends React.Component<any, any> {
-  constructor() {
-    super();
+  constructor(props: any) {
+    super(props);
   }
 
   render() {

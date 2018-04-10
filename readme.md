@@ -34,7 +34,7 @@ Sounds are stored in the `sounds` directory. You may copy files directly to this
 
 ### Dependencies
 - Go
-- Yarn (or npm - makefile will need to be adjusted)
+- node/npm
 - make
 
 ### Compiling

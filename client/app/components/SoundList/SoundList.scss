@@ -1,12 +1,12 @@
-@import "../../scss/variables";
+@import '../../scss/variables';
 
 .SoundList__item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 50px;
-    
-    & + .SoundList__item {
-        border-top: 1px solid $gray3;
-    }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 50px;
+
+  & + .SoundList__item {
+    border-top: 1px solid $gray3;
+  }
 }

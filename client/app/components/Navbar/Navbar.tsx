@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router';
+import { NavLink } from 'react-router-dom';
 import jwt_decode from 'jwt-decode';
 
 import './Navbar.scss';
@@ -15,7 +15,6 @@ if (!process.env.NODE_ENV) {
   oauthUrl = `https://discordapp.com/api/oauth2/authorize?client_id=271998875802402816&redirect_uri=https%3A%2F%2Fcashdiscord.com%2Foauth&response_type=code&scope=identify%20guilds%20email`;
 }
 
-
 interface Props {}
 
 interface State {
@@ -24,7 +23,6 @@ interface State {
 }
 
 export class Navbar extends React.Component<Props, State> {
-
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -37,6 +35,7 @@ export class Navbar extends React.Component<Props, State> {
 
     if (token) {
       const claims: any = jwt_decode(token!);
+      console.log(claims);
       const email = claims['email'];
       this.setState({ token, email });
     }
@@ -45,23 +44,34 @@ export class Navbar extends React.Component<Props, State> {
   private logout = () => {
     localStorage.clear();
     window.location.href = '/';
-  }
+  };
 
   render() {
     return (
       <div className="Navbar">
         <div className="Navbar__header">Go Discord Bot</div>
-        <Link to="/" className="Navbar__item" onlyActiveOnIndex activeClassName="Navbar__item--active">Home</Link>
-        <Link to="/soundboard" className="Navbar__item" activeClassName="Navbar__item--active">Soundboard</Link>
-        <Link to="/downloader" className="Navbar__item" activeClassName="Navbar__item--active">Youtube Downloader</Link>
-        {/* PUBG - DEPRECATED */}
-        {/* <Link to="/pubg" className="Navbar__item" activeClassName="Navbar__item--active">Pubg</Link> */}
-        <Link to="/clips" className="Navbar__item" activeClassName="Navbar__item--active">Clips</Link>
+        <NavLink exact to="/" className="Navbar__item" activeClassName="Navbar__item--active">
+          Home
+        </NavLink>
+        <NavLink to="/soundboard" className="Navbar__item" activeClassName="Navbar__item--active">
+          Soundboard
+        </NavLink>
+        <NavLink to="/downloader" className="Navbar__item" activeClassName="Navbar__item--active">
+          Youtube Downloader
+        </NavLink>
+        <NavLink to="/clips" className="Navbar__item" activeClassName="Navbar__item--active">
+          Clips
+        </NavLink>
 
-        { !this.state.token ?
-          <a href={oauthUrl} className="Navbar__item">Login</a> :
-          <a className="Navbar__item" onClick={this.logout}>Logout</a>
-        }
+        {!this.state.token ? (
+          <a href={oauthUrl} className="Navbar__item">
+            Login
+          </a>
+        ) : (
+          <a className="Navbar__item" onClick={this.logout}>
+            Logout
+          </a>
+        )}
 
         {this.state.email && <div className="Navbar__email">{this.state.email}</div>}
       </div>

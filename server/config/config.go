@@ -31,11 +31,7 @@ type configFile struct {
 	ServerAddr  string   `json:"server_addr"`
 	JWTKey      string   `json:"jwt_key"`
 
-	Pubg struct {
-		Enabled bool     `json:"enabled"`
-		APIKey  string   `json:"api_key"`
-		Players []string `json:"players"`
-	} `json:"pubg"`
+	Logging bool `json:"logging"`
 }
 
 type configFlags struct {

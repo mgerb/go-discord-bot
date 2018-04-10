@@ -1,22 +1,18 @@
 {
-    "token": "",
-    "client_id": "",
-    "client_secret": "",
-    "redirect_uri": "",
+  "token": "",
+  "client_id": "",
+  "client_secret": "",
+  "redirect_uri": "",
 
-    "bot_prefix": "#",
+  "bot_prefix": "#",
 
-    "admin_emails": ["mail@example.com"],
+  "admin_emails": ["mail@example.com"],
 
-    "jwt_key": "",
-    "server_addr": "0.0.0.0:80",
+  "jwt_key": "",
+  "server_addr": "0.0.0.0:80",
 
-    "sounds_path": "./sounds/",
-    "clips_path": "./clips/",
+  "logging": true,
 
-    "pubg": {
-        "api_key": "",
-        "enabled": false,
-        "players": ["player1"]
-    }
+  "sounds_path": "./sounds/",
+  "clips_path": "./clips/"
 }

@@ -1,16 +1,18 @@
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
   entry: {
-    app: './app/app.tsx',
-    vendor: ['react', 'react-dom'],
+    app: ['babel-polyfill', './app/app.tsx'],
   },
   output: {
-    path: path.resolve(__dirname, '../dist'),
-    filename: './static/[name].[hash].js',
+    path: path.resolve(__dirname, '../dist/static'),
+    filename: '[name].[hash].js',
+    publicPath: 'static',
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js'],
@@ -19,56 +21,53 @@ module.exports = {
     rules: [
       {
         test: /\.(js|jsx)$/,
-        loaders: ['babel-loader'],
+        use: ['babel-loader'],
       },
       {
         test: /\.ts(x)?$/,
-        loaders: ['babel-loader', 'ts-loader'],
+        use: ['babel-loader', 'ts-loader'],
       },
       {
         test: /\.scss$/,
-        loader: ExtractTextPlugin.extract({
-          fallbackLoader: 'style-loader',
-          loader: 'css-loader!postcss-loader!sass-loader',
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: ['css-loader', 'postcss-loader', 'sass-loader'],
         }),
       },
       {
         test: /\.css$/,
-        loader: ExtractTextPlugin.extract({
-          fallbackLoader: 'style-loader',
-          loader: 'css-loader',
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: ['css-loader'],
         }),
       },
       {
-        test: /\.svg$/,
-        loader:
-          'url-loader?limit=65000&mimetype=image/svg+xml&name=static/[name].[ext]&publicPath=../',
-      },
-      {
-        test: /\.woff$/,
-        loader:
-          'url-loader?limit=65000&mimetype=application/font-woff&name=static/[name].[ext]&publicPath=../',
-      },
-      {
-        test: /\.woff2$/,
-        loader:
-          'url-loader?limit=65000&mimetype=application/font-woff2&name=static/[name].[ext]&publicPath=../',
-      },
-      {
-        test: /\.[ot]tf$/,
-        loader:
-          'url-loader?limit=65000&mimetype=application/octet-stream&name=static/[name].[ext]&publicPath=../',
-      },
-      {
-        test: /\.eot$/,
-        loader:
-          'url-loader?limit=65000&mimetype=application/vnd.ms-fontobject&name=static/[name].[ext]&publicPath=../',
+        test: /\.woff2?$|\.ttf$|\.eot$|\.svg$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: 'static/[name].[hash].[ext]',
+              publicPath: './.',
+            },
+          },
+        ],
       },
     ],
   },
+  optimization: {
+    occurrenceOrder: true,
+    splitChunks: {
+      chunks: 'all',
+    },
+  },
   plugins: [
+    new CleanWebpackPlugin(['../dist/static'], {
+      verbose: true,
+      allowExternal: true,
+    }),
     new ExtractTextPlugin({
-      filename: '/static/[name].[hash].css',
+      filename: '[name].[hash].css',
       disable: false,
       allChunks: true,
     }),
@@ -76,14 +75,12 @@ module.exports = {
       filename: 'index.html',
       template: './index.html',
     }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: ['vendor', 'manifest'],
-      minChunks: 'Infinity',
-    }),
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
       },
     }),
+    new webpack.HotModuleReplacementPlugin(),
+    new FaviconsWebpackPlugin('./favicon.png'),
   ],
 };

@@ -1,5 +1,10 @@
 package pubg
 
+/**
+ * DEPRECATED
+ * I no longer have a use for this so I'm ripping it out
+ */
+
 import (
 	"sync"
 	"time"

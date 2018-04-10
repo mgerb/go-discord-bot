@@ -1,6 +1,10 @@
 package bothandlers
 
-/***** DEPRECATED *****/
+/**
+ * DEPRECATED
+ * this was used to fetch a giphy image
+ * no longer used
+ */
 
 import (
 	"io/ioutil"

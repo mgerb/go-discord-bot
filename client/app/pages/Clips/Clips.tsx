@@ -10,8 +10,8 @@ interface State {
 }
 
 export class Clips extends React.Component<Props, State> {
-  constructor() {
-    super();
+  constructor(props: Props) {
+    super(props);
     this.state = {
       clipList: [],
     };
@@ -38,7 +38,7 @@ export class Clips extends React.Component<Props, State> {
     return (
       <div className="Soundboard">
         <div className="column">
-          <SoundList soundList={this.state.clipList} type="Clips"/>
+          <SoundList soundList={this.state.clipList} type="Clips" />
         </div>
       </div>
     );

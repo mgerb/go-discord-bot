@@ -1,85 +1,86 @@
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-a, .link {
-    text-decoration: none;    
-    color: $primaryBlue;
-    transition: color 0.1s linear;
-    cursor: pointer;
-    
-    &:hover {
-        color: $white;
-    }
+a,
+.link {
+  text-decoration: none;
+  color: $primaryBlue;
+  transition: color 0.1s linear;
+  cursor: pointer;
+
+  &:hover {
+    color: $white;
+  }
 }
 
 i {
-    margin-left: 5px;    
-    margin-right: 5px;    
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 body {
-    background-color: $gray1;
-    color: $white;
-    padding-left: $navbarWidth;
+  background-color: $gray1;
+  color: $white;
+  padding-left: $navbarWidth;
 }
 
 .input {
-    border-radius: 3px;
-    border: 1px solid $lightGray;
-    padding-left: 5px;
-    padding-right: 5px;
-    height: 30px;
-    background: $gray5;
-    color: $white;
+  border-radius: 3px;
+  border: 1px solid $lightGray;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 30px;
+  background: $gray5;
+  color: $white;
 }
 
 .button {
-    border: none;
-    border-radius: 3px;
-    color: $white;
-    background: $lightGray;
-    padding: 10px;
-    cursor: pointer;
+  border: none;
+  border-radius: 3px;
+  color: $white;
+  background: $lightGray;
+  padding: 10px;
+  cursor: pointer;
 
-    &:hover {
-        background: lighten($lightGray, 5%);
-    }
+  &:hover {
+    background: lighten($lightGray, 5%);
+  }
 }
 
 .button--primary {
-    background: $primaryBlue;
+  background: $primaryBlue;
 
-    &:hover {
-        background: lighten($primaryBlue, 2%);
-    }
+  &:hover {
+    background: lighten($primaryBlue, 2%);
+  }
 }
 
 .Card {
-    background-color: $gray2;
-    border-radius: 5px;
-    max-width: 800px;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid $gray3;
+  background-color: $gray2;
+  border-radius: 5px;
+  max-width: 800px;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid $gray3;
 }
 
 .Card__header {
-    margin: -10px -10px 10px -10px;
-    display: flex;
-    align-items: center;
-    padding-left: 10px;
-    padding-right: 10px;
-    height: 50px;
-    border-radius: 5px 5px 0 0;
-    font-size: 25px;
-    background-color: $gray3;
+  margin: -10px -10px 10px -10px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 50px;
+  border-radius: 5px 5px 0 0;
+  font-size: 25px;
+  background-color: $gray3;
 }
 
 .column {
-    flex: 1;
-    
-    & + .column {
-        margin-left: 10px;
-    }
+  flex: 1;
+
+  & + .column {
+    margin-left: 10px;
+  }
 }

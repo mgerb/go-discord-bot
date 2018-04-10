@@ -22,8 +22,8 @@ export class Soundboard extends React.Component<Props, State> {
   private config: AxiosRequestConfig;
   private soundListCache: any;
 
-  constructor() {
-    super();
+  constructor(props: Props) {
+    super(props);
     (this.state = {
       percentCompleted: 0,
       uploaded: false,
@@ -37,13 +37,11 @@ export class Soundboard extends React.Component<Props, State> {
     this.config = {
       headers: {
         'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${storage.getJWT()}`
+        Authorization: `Bearer ${storage.getJWT()}`,
       },
       onUploadProgress: progressEvent => {
         this.setState({
-          percentCompleted: Math.round(
-            progressEvent.loaded * 100 / progressEvent.total,
-          ),
+          percentCompleted: Math.round(progressEvent.loaded * 100 / progressEvent.total),
         });
       },
     };
@@ -123,16 +121,8 @@ export class Soundboard extends React.Component<Props, State> {
               accept={'audio/*'}
             >
               <div style={{ fontSize: '20px' }}>Drop file here to upload.</div>
-              {this.state.percentCompleted > 0 ? (
-                <div>Uploading: {this.state.percentCompleted}</div>
-              ) : (
-                ''
-              )}
-              {this.state.uploaded ? (
-                <div style={{ color: 'green' }}>File uploded!</div>
-              ) : (
-                ''
-              )}
+              {this.state.percentCompleted > 0 ? <div>Uploading: {this.state.percentCompleted}</div> : ''}
+              {this.state.uploaded ? <div style={{ color: 'green' }}>File uploded!</div> : ''}
               <div style={{ color: '#f95f59' }}>{this.state.uploadError}</div>
             </Dropzone>
           </div>

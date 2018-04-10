@@ -1,9 +1,10 @@
 import React from 'react';
-import { get } from 'lodash';
 import axios from 'axios';
+import queryString from 'query-string';
+import { RouteComponentProps } from 'react-router-dom';
 import { storage } from '../../storage';
 
-interface Props {}
+interface Props extends RouteComponentProps<any> {}
 
 interface State {}
 
@@ -13,11 +14,11 @@ export class Oauth extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const code = get(this, 'props.location.query.code');
+    const params = queryString.parse(this.props.location.search);
 
-    if (code) {
+    if (params['code']) {
       // do stuff here
-      this.fetchOauth(code as string);
+      this.fetchOauth(params['code']);
     }
   }
 

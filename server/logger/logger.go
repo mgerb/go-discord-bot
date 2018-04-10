@@ -14,8 +14,8 @@ type Message struct {
 	DeletedAt       *time.Time   `json:"deleted_at"`
 	ChannelID       string       `json:"channel_id"`
 	Content         string       `json:"content"`
-	Timestamp       string       `json:"timestamp"`
-	EditedTimestamp string       `json:"edited_timestamp"`
+	Timestamp       time.Time    `json:"timestamp"`
+	EditedTimestamp time.Time    `json:"edited_timestamp"`
 	MentionRoles    string       `json:"mention_roles"`
 	Tts             bool         `json:"tts"`
 	MentionEveryone bool         `json:"mention_everyone"`

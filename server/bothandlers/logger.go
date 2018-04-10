@@ -1,7 +1,6 @@
 package bothandlers
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -24,8 +23,8 @@ func LoggerHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		ID:              m.Message.ID,
 		ChannelID:       m.Message.ChannelID,
 		Content:         m.Message.Content,
-		Timestamp:       strconv.Itoa(int(timestamp.Unix())),
-		EditedTimestamp: strconv.Itoa(int(editedTimestamp.Unix())),
+		Timestamp:       timestamp,
+		EditedTimestamp: editedTimestamp,
 		MentionRoles:    strings.Join(m.Message.MentionRoles, ","),
 		Tts:             m.Message.Tts,
 		MentionEveryone: m.Message.MentionEveryone,

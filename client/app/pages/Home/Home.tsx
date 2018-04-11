@@ -9,9 +9,9 @@ interface State {}
 export class Home extends React.Component<Props, State> {
   render() {
     return (
-      <div className="Home">
-        <div className="Card">
-          <div className="Card__header">Go Discord Bot</div>
+      <div className="content">
+        <div className="card">
+          <div className="card__header">Go Discord Bot</div>
 
           <h3>04-09-18 Update</h3>
           <ul>

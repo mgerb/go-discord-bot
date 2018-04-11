@@ -51,8 +51,8 @@ export class SoundList extends React.Component<Props, State> {
     const { soundList, type } = this.props;
 
     return (
-      <div className="Card">
-        <div className="Card__header" style={{ display: 'flex' }}>
+      <div className="card">
+        <div className="card__header" style={{ display: 'flex' }}>
           <div>
             <span>{type}</span>
             <i className="fa fa fa-volume-up" aria-hidden="true" />

@@ -23,8 +23,9 @@ func getRouter() *gin.Engine {
 	api.GET("/ytdownloader", handlers.Downloader)
 	api.GET("/soundlist", handlers.SoundList)
 	api.GET("/cliplist", handlers.ClipList)
-	api.GET("/logs", handlers.GetLogs)
 	api.POST("/oauth", handlers.Oauth)
+	api.GET("/logger/messages", handlers.GetMessages)
+	api.GET("/logger/linkedmessages", handlers.GetLinkedMessages)
 
 	authorizedAPI := router.Group("/api")
 	authorizedAPI.Use(middleware.AuthorizedJWT())

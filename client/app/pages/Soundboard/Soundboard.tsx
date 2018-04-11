@@ -1,11 +1,9 @@
 import React from 'react';
 import Dropzone from 'react-dropzone';
-import axios, { AxiosRequestConfig } from 'axios';
-
+import { axios } from '../../services';
 import { SoundList, SoundType } from '../../components/SoundList';
-
 import './Soundboard.scss';
-import { storage } from '../../storage';
+import { AxiosRequestConfig } from 'axios';
 
 let self: any;
 
@@ -37,7 +35,6 @@ export class Soundboard extends React.Component<Props, State> {
     this.config = {
       headers: {
         'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${storage.getJWT()}`,
       },
       onUploadProgress: progressEvent => {
         this.setState({

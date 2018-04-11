@@ -25,6 +25,10 @@ body {
   padding-left: $navbarWidth;
 }
 
+.content {
+  padding: 10px;
+}
+
 .input {
   border-radius: 3px;
   border: 1px solid $lightGray;
@@ -56,7 +60,7 @@ body {
   }
 }
 
-.Card {
+.card {
   background-color: $gray2;
   border-radius: 5px;
   max-width: 800px;
@@ -65,7 +69,7 @@ body {
   border: 1px solid $gray3;
 }
 
-.Card__header {
+.card__header {
   margin: -10px -10px 10px -10px;
   display: flex;
   align-items: center;

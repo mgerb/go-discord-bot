@@ -9,6 +9,7 @@ import { NotFound } from './pages/NotFound/NotFound';
 import { Downloader } from './pages/Downloader/Downloader';
 import { Clips } from './pages/Clips';
 import { Oauth } from './pages/oauth/oauth';
+import { Stats } from './pages/stats/stats';
 import 'babel-polyfill';
 
 const App: any = (): any => {
@@ -21,6 +22,7 @@ const App: any = (): any => {
           <Route path="/downloader" component={Downloader} />
           <Route path="/clips" component={Clips} />
           <Route path="/oauth" component={Oauth} />
+          <Route path="/stats" component={Stats} />
           <Route component={NotFound} />
         </Switch>
       </Wrapper>

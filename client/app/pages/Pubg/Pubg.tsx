@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import axios from 'axios';
+import { axios } from '../../services';
 import * as _ from 'lodash';
 import './Pubg.scss';
 

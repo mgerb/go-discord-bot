@@ -1,9 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import jwt_decode from 'jwt-decode';
-
+import { StorageService } from '../../services';
 import './Navbar.scss';
-import { storage } from '../../storage';
 
 let oauthUrl: string;
 
@@ -31,25 +30,24 @@ export class Navbar extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const token = storage.getJWT();
+    const token = StorageService.getJWT();
 
     if (token) {
       const claims: any = jwt_decode(token!);
-      console.log(claims);
       const email = claims['email'];
       this.setState({ token, email });
     }
   }
 
   private logout = () => {
-    localStorage.clear();
+    StorageService.clear();
     window.location.href = '/';
   };
 
   render() {
     return (
       <div className="Navbar">
-        <div className="Navbar__header">Go Discord Bot</div>
+        <div className="Navbar__header">Cash</div>
         <NavLink exact to="/" className="Navbar__item" activeClassName="Navbar__item--active">
           Home
         </NavLink>
@@ -61,6 +59,9 @@ export class Navbar extends React.Component<Props, State> {
         </NavLink>
         <NavLink to="/clips" className="Navbar__item" activeClassName="Navbar__item--active">
           Clips
+        </NavLink>
+        <NavLink to="/stats" className="Navbar__item" activeClassName="Navbar__item--active">
+          Stats
         </NavLink>
 
         {!this.state.token ? (

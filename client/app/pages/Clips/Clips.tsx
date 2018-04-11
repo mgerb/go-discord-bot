@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import { axios } from '../../services';
 
 import { SoundList, SoundType } from '../../components/SoundList';
 

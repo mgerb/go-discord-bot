@@ -45,10 +45,10 @@ export class Stats extends Component<any, IState> {
       datasets: [
         {
           label: 'Count',
-          backgroundColor: 'rgba(114,137,218, 0.4)',
+          backgroundColor: 'rgba(114,137,218, 0.5)',
           borderColor: 'rgba(114,137,218, 0.9)',
           borderWidth: 1,
-          hoverBackgroundColor: 'rgba(114,137,218, 0.6)',
+          hoverBackgroundColor: 'rgba(114,137,218, 0.7)',
           hoverBorderColor: 'rgba(114,137,218, 1)',
           data: map(this.state.data, v => v.count),
         },

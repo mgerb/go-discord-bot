@@ -71,6 +71,7 @@ Check it out in the "Stats" page on the site.
 ### Compiling
 
 * Make sure dependencies are installed
+* install packr - `go get -u github.com/gobuffalo/packr/...`
 * Rename the `config.template.json` to `config.json`
 * add configurations to `config.json`
 * `cd client && npm run dev`

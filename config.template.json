@@ -9,7 +9,7 @@
   "admin_emails": ["mail@example.com"],
   "mod_emails": ["mail@example.com"],
 
-  "jwt_key": "",
+  "jwt_key": "generate a random secret string here",
   "server_addr": "0.0.0.0:80",
 
   "logger": true,

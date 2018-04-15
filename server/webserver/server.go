@@ -30,6 +30,7 @@ func getRouter() *gin.Engine {
 	api.POST("/oauth", handlers.Oauth)
 	api.GET("/logger/messages", handlers.GetMessages)
 	api.GET("/logger/linkedmessages", handlers.GetLinkedMessages)
+	api.GET("/config/client_id", handlers.GetClientID)
 
 	authorizedAPI := router.Group("/api")
 	authorizedAPI.Use(middleware.AuthorizedJWT())

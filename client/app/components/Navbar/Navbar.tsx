@@ -1,18 +1,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import jwt_decode from 'jwt-decode';
-import { StorageService } from '../../services';
+import { OauthService, StorageService } from '../../services';
 import './Navbar.scss';
-
-const baseUrl = window.location.origin + '/oauth';
-
-const oauthUrl = `https://discordapp.com/api/oauth2/authorize?client_id=410818759746650140&redirect_uri=${baseUrl}&response_type=code&scope=identify%20guilds`;
 
 interface Props {}
 
 interface State {
   token: string | null;
   email?: string;
+  oauthUrl?: string;
 }
 
 export class Navbar extends React.Component<Props, State> {
@@ -24,12 +21,22 @@ export class Navbar extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    this.loadOauthUrl();
     const token = StorageService.getJWT();
 
     if (token) {
-      const claims: any = jwt_decode(token!);
+      const claims: any = jwt_decode(token);
       const email = claims['email'];
       this.setState({ token, email });
+    }
+  }
+
+  async loadOauthUrl() {
+    try {
+      const oauthUrl = await OauthService.getOauthUrl();
+      this.setState({ oauthUrl });
+    } catch (e) {
+      console.error(e);
     }
   }
 
@@ -37,6 +44,22 @@ export class Navbar extends React.Component<Props, State> {
     StorageService.clear();
     window.location.href = '/';
   };
+
+  renderLoginButton() {
+    if (!this.state.oauthUrl) {
+      return null;
+    }
+
+    return !this.state.token ? (
+      <a href={this.state.oauthUrl} className="Navbar__item">
+        Login
+      </a>
+    ) : (
+      <a className="Navbar__item" onClick={this.logout}>
+        Logout
+      </a>
+    );
+  }
 
   render() {
     return (
@@ -58,15 +81,7 @@ export class Navbar extends React.Component<Props, State> {
           Stats
         </NavLink>
 
-        {!this.state.token ? (
-          <a href={oauthUrl} className="Navbar__item">
-            Login
-          </a>
-        ) : (
-          <a className="Navbar__item" onClick={this.logout}>
-            Logout
-          </a>
-        )}
+        {this.renderLoginButton()}
 
         {this.state.email && <div className="Navbar__email">{this.state.email}</div>}
       </div>

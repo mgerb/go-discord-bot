@@ -5,7 +5,7 @@ install:
 	go get && cd client && npm install
 
 build-server:
-	go build -o bot ./main.go
+	packr build -o bot ./main.go && packr install
 
 build-client:
 	cd client && npm run build
@@ -13,4 +13,4 @@ build-client:
 clean:
 	rm -rf bot ./dist
 
-all: install build-server build-client
+all: install build-client build-server

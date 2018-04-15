@@ -1,6 +1,8 @@
 package webserver
 
 import (
+	"github.com/gobuffalo/packr"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mgerb/go-discord-bot/server/config"
 	"github.com/mgerb/go-discord-bot/server/webserver/handlers"
@@ -10,13 +12,15 @@ import (
 func getRouter() *gin.Engine {
 	router := gin.Default()
 
-	router.Static("/static", "./dist/static")
+	box := packr.NewBox("../../dist/static")
+
+	router.StaticFS("/static", box)
 	router.Static("/public/sounds", config.Config.SoundsPath)
 	router.Static("/public/youtube", "./youtube")
 	router.Static("/public/clips", config.Config.ClipsPath)
 
 	router.NoRoute(func(c *gin.Context) {
-		c.File("./dist/static/index.html")
+		c.Data(200, "text/html", box.Bytes("index.html"))
 	})
 
 	api := router.Group("/api")

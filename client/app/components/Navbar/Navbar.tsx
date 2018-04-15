@@ -4,15 +4,9 @@ import jwt_decode from 'jwt-decode';
 import { StorageService } from '../../services';
 import './Navbar.scss';
 
-let oauthUrl: string;
+const baseUrl = window.location.origin + '/oauth';
 
-if (!process.env.NODE_ENV) {
-  // dev
-  oauthUrl = `https://discordapp.com/api/oauth2/authorize?client_id=410818759746650140&redirect_uri=https%3A%2F%2Flocalhost%2Foauth&response_type=code&scope=identify%20guilds`;
-} else {
-  // prod
-  oauthUrl = `https://discordapp.com/api/oauth2/authorize?client_id=271998875802402816&redirect_uri=https%3A%2F%2Fcashdiscord.com%2Foauth&response_type=code&scope=identify%20guilds%20email`;
-}
+const oauthUrl = `https://discordapp.com/api/oauth2/authorize?client_id=410818759746650140&redirect_uri=${baseUrl}&response_type=code&scope=identify%20guilds`;
 
 interface Props {}
 
@@ -47,7 +41,7 @@ export class Navbar extends React.Component<Props, State> {
   render() {
     return (
       <div className="Navbar">
-        <div className="Navbar__header">Cash</div>
+        <div className="Navbar__header">Sound Bot</div>
         <NavLink exact to="/" className="Navbar__item" activeClassName="Navbar__item--active">
           Home
         </NavLink>

@@ -28,6 +28,7 @@ type configFile struct {
 	ClipsPath  string `json:"clips_path"`
 
 	AdminEmails []string `json:"admin_emails"`
+	ModEmails   []string `json:"mod_emails"`
 	ServerAddr  string   `json:"server_addr"`
 	JWTKey      string   `json:"jwt_key"`
 

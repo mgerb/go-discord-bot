@@ -34,6 +34,7 @@ export class Stats extends Component<any, IState> {
         return { username: k, count: v };
       })
       .orderBy(v => v.count, 'desc')
+      .slice(0, 10)
       .value();
 
     this.setState({ data });
@@ -61,8 +62,8 @@ export class Stats extends Component<any, IState> {
     return (
       <div className="content">
         <div className="card" style={{ maxWidth: '1000px' }}>
-          <div className="card__header">Shitposts</div>
-          <HorizontalBar data={data} height={500} />
+          <div className="card__header">Posts containing links</div>
+          <HorizontalBar data={data} />
         </div>
       </div>
     );

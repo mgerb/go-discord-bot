@@ -11,27 +11,34 @@ import (
 	"gopkg.in/dgrijalva/jwt-go.v3"
 )
 
+// permission levels
+const (
+	PermAdmin = 3
+	PermMod   = 2
+	PermUser  = 1
+)
+
 // CustomClaims -
 type CustomClaims struct {
 	ID            string `json:"id"`
 	Username      string `json:"username"`
 	Discriminator string `json:"discriminator"`
 	Email         string `json:"email"`
-	Permissions   string `json:"permissions"`
+	Permissions   int    `json:"permissions"`
 	jwt.StandardClaims
 }
 
 // GetJWT - get json web token
 func GetJWT(user discord.User) (string, error) {
 
-	permissions := "user"
+	permissions := PermUser
 
-	// check if email is in config admin list
-	for _, email := range config.Config.AdminEmails {
-		if user.Email == email {
-			permissions = "admin"
-			break
-		}
+	if checkEmailPermissions(user.Email, config.Config.ModEmails) {
+		permissions = PermMod
+	}
+
+	if checkEmailPermissions(user.Email, config.Config.AdminEmails) {
+		permissions = PermAdmin
 	}
 
 	claims := CustomClaims{
@@ -50,6 +57,31 @@ func GetJWT(user discord.User) (string, error) {
 	return token.SignedString([]byte(config.Config.JWTKey))
 }
 
+func checkEmailPermissions(email string, emails []string) bool {
+	for _, e := range emails {
+		if email == e {
+			return true
+		}
+	}
+	return false
+}
+
+// AuthPermissions - secure end points based on auth levels
+func AuthPermissions(p int) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		cl, _ := c.Get("claims")
+
+		if claims, ok := cl.(*CustomClaims); ok {
+			if p <= claims.Permissions {
+				c.Next()
+				return
+			}
+		}
+
+		unauthorizedResponse(c, nil)
+	}
+}
+
 // AuthorizedJWT - jwt middleware
 func AuthorizedJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -58,8 +90,7 @@ func AuthorizedJWT() gin.HandlerFunc {
 		tokenString := strings.Split(c.GetHeader("Authorization"), " ")
 
 		if len(tokenString) != 2 {
-			c.JSON(401, "Unauthorized")
-			c.Abort()
+			unauthorizedResponse(c, nil)
 			return
 		}
 
@@ -69,9 +100,7 @@ func AuthorizedJWT() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			log.Error(err)
-			c.JSON(401, "Unauthorized")
-			c.Abort()
+			unauthorizedResponse(c, err)
 			return
 		}
 
@@ -79,12 +108,18 @@ func AuthorizedJWT() gin.HandlerFunc {
 		if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 			c.Set("claims", claims)
 		} else {
-			log.Error(err)
-			c.JSON(401, "Unauthorized")
-			c.Abort()
+			unauthorizedResponse(c, err)
 			return
 		}
 
 		c.Next()
 	}
+}
+
+func unauthorizedResponse(c *gin.Context, err error) {
+	if err != nil {
+		log.Error(err)
+	}
+	c.JSON(401, "unauthorized")
+	c.Abort()
 }

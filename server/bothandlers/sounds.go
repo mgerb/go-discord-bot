@@ -2,6 +2,7 @@ package bothandlers
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"io"
@@ -16,24 +17,22 @@ import (
 	"layeh.com/gopus"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/cryptix/wav"
 	"github.com/mgerb/go-discord-bot/server/config"
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	channels      int = 2                   // 1 for mono, 2 for stereo
-	frameRate     int = 48000               // audio sampling rate - apparently a standard for opus
-	frameSize     int = 960                 // uint16 size of each audio frame
-	maxBytes      int = (frameSize * 2) * 2 // max size of opus data
-	maxSoundQueue int = 10                  // max amount of sounds that can be queued at one time
-
-	sampleRate               int = 96000 // rate at which wav writer need to make audio up to speed
-	voiceClipQueuePacketSize int = 2000  // this packet size equates to roughly 40 seconds of audio
+	channels                 int = 2                   // 1 for mono, 2 for stereo
+	sampleRate               int = 48000               // audio sampling rate - apparently a standard for opus
+	frameSize                int = 960                 // uint16 size of each audio frame
+	maxBytes                 int = (frameSize * 2) * 2 // max size of opus data
+	maxSoundQueue            int = 10                  // max amount of sounds that can be queued at one time
+	voiceClipQueuePacketSize int = 2000                // this packet size equates to roughly 40 seconds of audio
 )
 
 // store our connection objects in a map tied to a guild id
 var activeConnections = make(map[string]*AudioConnection)
+var speakers = make(map[uint32]*gopus.Decoder)
 
 // AudioConnection -
 type AudioConnection struct {
@@ -46,6 +45,7 @@ type AudioConnection struct {
 	VoiceClipQueue    chan *discordgo.Packet     `json:"-"`
 	SoundPlayingLock  bool                       `json:"-"`
 	AudioListenerLock bool                       `json:"-"`
+	Disconnect        chan bool                  `json:"_"`
 	Mutex             *sync.Mutex                `json:"-"` // mutex for single audio connection
 }
 
@@ -84,6 +84,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			SoundQueue:        make(chan string, maxSoundQueue),
 			Mutex:             &sync.Mutex{},
 			AudioListenerLock: false,
+			Disconnect:        make(chan bool),
 		}
 
 		activeConnections[c.GuildID] = newInstance
@@ -123,6 +124,7 @@ func (conn *AudioConnection) handleMessage(m *discordgo.MessageCreate) {
 // dismiss bot from currnet channel if it's in one
 func (conn *AudioConnection) dismiss() {
 	if conn.VoiceConnection != nil && !conn.SoundPlayingLock && len(conn.SoundQueue) == 0 {
+		conn.Disconnect <- true
 		conn.VoiceConnection.Disconnect()
 	}
 }
@@ -166,7 +168,6 @@ func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
 				// start listening to audio if not locked
 				if !conn.AudioListenerLock {
 					go conn.startAudioListener()
-					conn.AudioListenerLock = true
 				}
 
 				return
@@ -228,7 +229,7 @@ func (conn *AudioConnection) loadFile(fileName string) error {
 	log.Debug("Loading file: " + fname + fextension)
 
 	// use ffmpeg to convert file into a format we can use
-	cmd := exec.Command("ffmpeg", "-i", config.Config.SoundsPath+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(frameRate), "-ac", strconv.Itoa(channels), "pipe:1")
+	cmd := exec.Command("ffmpeg", "-i", config.Config.SoundsPath+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(sampleRate), "-ac", strconv.Itoa(channels), "pipe:1")
 
 	ffmpegout, err := cmd.StdoutPipe()
 
@@ -245,7 +246,7 @@ func (conn *AudioConnection) loadFile(fileName string) error {
 	}
 
 	// crate encoder to convert audio to opus codec
-	opusEncoder, err := gopus.NewEncoder(frameRate, channels, gopus.Audio)
+	opusEncoder, err := gopus.NewEncoder(sampleRate, channels, gopus.Audio)
 
 	if err != nil {
 		return errors.New("NewEncoder error.")
@@ -298,46 +299,57 @@ func writePacketsToFile(username string, packets chan *discordgo.Packet) {
 
 	// construct filename
 	timestamp := time.Now().UTC().Format("2006-01-02") + "-" + strconv.Itoa(int(time.Now().Unix()))
-	wavOut, err := os.Create(config.Config.ClipsPath + timestamp + "-" + username + ".wav")
-
-	checkErr(err)
-	defer wavOut.Close()
-
-	meta := wav.File{
-		Channels:        1,
-		SampleRate:      uint32(sampleRate),
-		SignificantBits: 16,
-	}
-
-	writer, err := meta.NewWriter(wavOut)
-	checkErr(err)
-	defer writer.Close()
+	filename := config.Config.ClipsPath + timestamp + "-" + username + ".wav"
 
 	// grab everything from the voice packet channel and dump it to the file
 	// close when there is nothing left
+	pcmOut := make([]int16, 0)
+
 loop:
 	for {
 		select {
 		case p := <-packets:
 			for _, pcm := range p.PCM {
-				err := writer.WriteInt32(int32(pcm))
-				checkErr(err)
+				pcmOut = append(pcmOut, pcm)
 			}
 		default:
 			break loop
 		}
 	}
+
+	cmd := exec.Command("ffmpeg", "-f", "s16le", "-ar", strconv.Itoa(sampleRate), "-ac", strconv.Itoa(channels), "-i", "pipe:0", filename)
+
+	output := new(bytes.Buffer)
+
+	binary.Write(output, binary.LittleEndian, pcmOut)
+	cmd.Stdin = bytes.NewReader(output.Bytes())
+
+	err := cmd.Run()
+
+	if err != nil {
+		log.Error(err)
+	}
+
 }
 
 // start listening to the voice channel
 func (conn *AudioConnection) startAudioListener() {
 
+	conn.AudioListenerLock = true
+
 	if conn.VoiceClipQueue == nil {
 		conn.VoiceClipQueue = make(chan *discordgo.Packet, voiceClipQueuePacketSize)
 	}
 
-	speakers := make(map[uint32]*gopus.Decoder)
-	var err error
+	// exit loop if
+	go func() {
+		for {
+			if !conn.VoiceConnection.Ready {
+				conn.Disconnect <- true
+			}
+			time.Sleep(5 * time.Second)
+		}
+	}()
 
 loop:
 	for {
@@ -349,10 +361,11 @@ loop:
 				continue
 			}
 
+			var err error
 			_, ok = speakers[opusChannel.SSRC]
 
 			if !ok {
-				speakers[opusChannel.SSRC], err = gopus.NewDecoder(frameRate, 1)
+				speakers[opusChannel.SSRC], err = gopus.NewDecoder(sampleRate, channels)
 				if err != nil {
 					log.Error("error creating opus decoder", err)
 					continue
@@ -374,13 +387,8 @@ loop:
 			conn.VoiceClipQueue <- opusChannel
 
 		// check if voice connection fails then break out of audio listener
-		default:
-			if !conn.VoiceConnection.Ready {
-				break loop
-			}
-
-			// fix for 100% cpu usage issue
-			time.Sleep(time.Second * 5)
+		case <-conn.Disconnect:
+			break loop
 		}
 
 	}

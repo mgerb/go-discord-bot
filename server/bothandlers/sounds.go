@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -18,6 +19,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/mgerb/go-discord-bot/server/config"
+	"github.com/mgerb/go-discord-bot/server/rtp"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -25,6 +27,7 @@ const (
 	channels                 int = 2                   // 1 for mono, 2 for stereo
 	sampleRate               int = 48000               // audio sampling rate - apparently a standard for opus
 	frameSize                int = 960                 // uint16 size of each audio frame
+	frameSizeMs              int = 20                  // 20 milliseconds between each frame
 	maxBytes                 int = (frameSize * 2) * 2 // max size of opus data
 	maxSoundQueue            int = 10                  // max amount of sounds that can be queued at one time
 	voiceClipQueuePacketSize int = 2000                // this packet size equates to roughly 40 seconds of audio
@@ -32,7 +35,6 @@ const (
 
 // store our connection objects in a map tied to a guild id
 var activeConnections = make(map[string]*AudioConnection)
-var speakers = make(map[uint32]*gopus.Decoder)
 
 // AudioConnection -
 type AudioConnection struct {
@@ -351,6 +353,9 @@ func (conn *AudioConnection) startAudioListener() {
 		}
 	}()
 
+	var speakers = make(map[uint32]*gopus.Decoder)
+	realTimeAudio := rtp.New()
+
 loop:
 	for {
 
@@ -373,10 +378,15 @@ loop:
 			}
 
 			opusChannel.PCM, err = speakers[opusChannel.SSRC].Decode(opusChannel.Opus, frameSize, false)
+
 			if err != nil {
 				log.Error("Error decoding opus data", err)
 				continue
 			}
+
+			realTimeAudio.PushPacket(opusChannel)
+
+			fmt.Println(realTimeAudio.GetStream(opusChannel.SSRC).GetTimeOffset(realTimeAudio.StartTime.Unix()))
 
 			// if channel is full trim off from beginning
 			if len(conn.VoiceClipQueue) == cap(conn.VoiceClipQueue) {

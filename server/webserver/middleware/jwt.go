@@ -54,7 +54,7 @@ func GetJWT(user discord.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(config.Config.JWTKey))
+	return token.SignedString([]byte(config.Config.JWTSecret))
 }
 
 func checkEmailPermissions(email string, emails []string) bool {
@@ -96,7 +96,7 @@ func AuthorizedJWT() gin.HandlerFunc {
 
 		// parse and verify token
 		token, err := jwt.ParseWithClaims(tokenString[1], &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-			return []byte(config.Config.JWTKey), nil
+			return []byte(config.Config.JWTSecret), nil
 		})
 
 		if err != nil {

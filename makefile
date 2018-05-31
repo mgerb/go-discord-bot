@@ -2,10 +2,10 @@ run:
 	go run ./main.go
 
 install:
-	go get && cd client && npm install
+	go get ./server && cd client && npm install
 
 build-server:
-	packr build -o bot ./main.go && packr install
+	cd ./server && packr build -o ../bot ./main.go
 
 build-client:
 	cd client && npm run build

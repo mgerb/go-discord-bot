@@ -35,26 +35,17 @@ func FileUpload(c *gin.Context) {
 	file.Filename = strings.Replace(file.Filename, " ", "", -1)
 
 	// check if file already exists
-	if _, err := os.Stat(config.Config.SoundsPath + file.Filename); err == nil {
+	if _, err := os.Stat(config.Config.SoundsPath + "/" + file.Filename); err == nil {
 		c.JSON(http.StatusInternalServerError, "File already exists.")
 		return
 	}
 
-	err = c.SaveUploadedFile(file, config.Config.SoundsPath+file.Filename)
-	log.Debug("Saving file", config.Config.SoundsPath+file.Filename)
+	err = c.SaveUploadedFile(file, config.Config.SoundsPath+"/"+file.Filename)
+	log.Debug("Saving file", config.Config.SoundsPath+"/"+file.Filename)
 
 	if err != nil {
 		log.Error(err)
 		c.JSON(http.StatusInternalServerError, "Error creating file.")
-		return
-	}
-
-	// repopulate sound list
-	err = PopulateSoundList()
-
-	if err != nil {
-		log.Error(err)
-		c.JSON(http.StatusInternalServerError, "Error populating sound list.")
 		return
 	}
 

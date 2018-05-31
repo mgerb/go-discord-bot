@@ -7,6 +7,7 @@ import (
 	"regexp"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mgerb/go-discord-bot/server/config"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -16,8 +17,8 @@ func Downloader(c *gin.Context) {
 	fileType := c.Query("fileType")
 
 	// create youtube folder if it does not exist
-	if _, err := os.Stat("youtube"); os.IsNotExist(err) {
-		os.Mkdir("youtube", os.ModePerm)
+	if _, err := os.Stat(config.Config.YoutubePath); os.IsNotExist(err) {
+		os.Mkdir(config.Config.YoutubePath, os.ModePerm)
 	}
 
 	// get the video title
@@ -41,7 +42,7 @@ func Downloader(c *gin.Context) {
 	cleanTitle := cleanseTitle(titleOut.String())
 	log.Debug(cleanTitle)
 
-	cmd := exec.Command("youtube-dl", "-x", "--audio-format", "mp3", "-o", "./youtube/"+cleanTitle+".%(ext)s", url)
+	cmd := exec.Command("youtube-dl", "-x", "--audio-format", "mp3", "-o", config.Config.YoutubePath+"/"+cleanTitle+".%(ext)s", url)
 
 	var out bytes.Buffer
 	cmd.Stdout = &out

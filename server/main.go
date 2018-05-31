@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 
-	"github.com/gin-gonic/gin"
 	"github.com/mgerb/go-discord-bot/server/bot"
 	"github.com/mgerb/go-discord-bot/server/config"
 	"github.com/mgerb/go-discord-bot/server/db"
@@ -19,13 +18,6 @@ func init() {
 
 	//read config file
 	config.Init()
-
-	if config.Flags.Prod {
-		// prod
-		gin.SetMode(gin.ReleaseMode)
-		// Only log the warning severity or above.
-		log.SetLevel(log.WarnLevel)
-	}
 
 	if config.Config.Logger {
 		db.Init()

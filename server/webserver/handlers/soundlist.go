@@ -11,8 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var soundList []sound
-
 type sound struct {
 	Prefix    string `json:"prefix"`
 	Name      string `json:"name"`
@@ -22,26 +20,39 @@ type sound struct {
 // SoundList -
 func SoundList(c *gin.Context) {
 
-	if len(soundList) < 1 {
-		err := PopulateSoundList()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, err)
-			return
-		}
+	soundList, err := readSoundsDir(config.Config.SoundsPath)
+
+	if err != nil {
+		log.Error(err)
+		c.JSON(http.StatusInternalServerError, err)
+		return
 	}
 
 	c.JSON(200, soundList)
 }
 
-// PopulateSoundList -
-func PopulateSoundList() error {
+// ClipList -
+func ClipList(c *gin.Context) {
 
-	soundList = []sound{}
-
-	files, err := ioutil.ReadDir(config.Config.SoundsPath)
+	clipList, err := readSoundsDir(config.Config.ClipsPath)
 
 	if err != nil {
-		return err
+		log.Error(err)
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(200, clipList)
+}
+
+func readSoundsDir(dir string) ([]sound, error) {
+
+	soundList := []sound{}
+
+	files, err := ioutil.ReadDir(dir)
+
+	if err != nil {
+		return soundList, err
 	}
 
 	for _, f := range files {
@@ -57,33 +68,5 @@ func PopulateSoundList() error {
 		soundList = append(soundList, listItem)
 	}
 
-	return nil
-}
-
-// ClipList -
-func ClipList(c *gin.Context) {
-
-	clipList := []sound{}
-
-	files, err := ioutil.ReadDir(config.Config.ClipsPath)
-
-	if err != nil {
-		log.Error(err)
-		c.JSON(http.StatusInternalServerError, err)
-		return
-	}
-
-	for _, f := range files {
-		fileName := strings.Split(f.Name(), ".")[0]
-		extension := strings.Split(f.Name(), ".")[1]
-
-		listItem := sound{
-			Name:      fileName,
-			Extension: extension,
-		}
-
-		clipList = append(clipList, listItem)
-	}
-
-	c.JSON(200, clipList)
+	return soundList, nil
 }

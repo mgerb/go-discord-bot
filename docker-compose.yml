@@ -1,0 +1,9 @@
+version: "2"
+
+services:
+  go-discord-bot:
+    image: mgerb/go-discord-bot:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - ./data:/bot

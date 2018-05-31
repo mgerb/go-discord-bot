@@ -1,48 +1,28 @@
-FROM ubuntu
+FROM node:8.11.1-alpine
 
-WORKDIR /home/temp
+WORKDIR /home/client
+ADD ./client .
+RUN npm install
+RUN npm run build
 
-RUN apt-get -qq update
 
-# install git
-RUN apt-get install -y git
+FROM golang:1.10.2-alpine3.7
 
-# install Golang
-RUN apt-get install --yes curl
-RUN curl https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz | tar xvz
-RUN cp -r ./go /usr/local/
-RUN cp ./go/bin/* /usr/bin
-RUN mkdir -p /home/go/src
-RUN mkdir /home/go/bin
-RUN mkdir /home/go/pkg
-ENV GOPATH=/home/go
-ENV GOBIN=$GOPATH/bin
-RUN go env
-
-# install nodejs and npm
-RUN curl --silent --location https://deb.nodesource.com/setup_6.x | bash -
-RUN apt-get install -y nodejs
-RUN apt-get install -y build-essential
-
-# install yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update && apt-get install yarn
-RUN yarn --version
-
-# set working directory
-RUN mkdir -p /home/go/src/github.com/mgerb/go-discord-bot
-ADD . /home/go/src/github.com/mgerb/go-discord-bot
-
-# build client app
-WORKDIR /home/go/src/github.com/mgerb/go-discord-bot/client
-RUN yarn install
-RUN yarn run build
-WORKDIR /home/go/src/github.com/mgerb/go-discord-bot
-
-# build server
+WORKDIR /go/src/github.com/mgerb/go-discord-bot/server
+COPY --from=0 /home/dist /go/src/github.com/mgerb/go-discord-bot/dist
+ADD ./server .
+RUN apk add --no-cache git alpine-sdk
+RUN go get -u github.com/gobuffalo/packr/...
 RUN go get
-RUN go build -o bot ./main.go
+RUN packr build -o /build/server
 
-# Run the app
-CMD ["./bot"]
+
+FROM wernight/youtube-dl
+
+RUN apk update
+RUN apk add ca-certificates
+
+WORKDIR /bot
+COPY --from=1 /build/server /
+
+ENTRYPOINT ["/server"]

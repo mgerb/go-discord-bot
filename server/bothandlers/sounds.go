@@ -229,12 +229,12 @@ func (conn *AudioConnection) loadFile(fileName string) error {
 	log.Debug("Loading file: " + fname + fextension)
 
 	// use ffmpeg to convert file into a format we can use
-	cmd := exec.Command("ffmpeg", "-i", config.Config.SoundsPath+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(sampleRate), "-ac", strconv.Itoa(channels), "pipe:1")
+	cmd := exec.Command("ffmpeg", "-i", config.Config.SoundsPath+"/"+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(sampleRate), "-ac", strconv.Itoa(channels), "pipe:1")
 
 	ffmpegout, err := cmd.StdoutPipe()
 
 	if err != nil {
-		return errors.New("Unable to execute ffmpeg. To set permissions on this file run chmod +x ffmpeg_linux (or ffmpeg_mac depending which operating system you are on)")
+		return err
 	}
 
 	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16348)
@@ -242,7 +242,7 @@ func (conn *AudioConnection) loadFile(fileName string) error {
 	err = cmd.Start()
 
 	if err != nil {
-		return errors.New("Unable to execute ffmpeg. To set permissions on this file run chmod +x ffmpeg_linux (or ffmpeg_mac depending which operating system you are on)")
+		return err
 	}
 
 	// crate encoder to convert audio to opus codec
@@ -299,7 +299,7 @@ func writePacketsToFile(username string, packets chan *discordgo.Packet) {
 
 	// construct filename
 	timestamp := time.Now().UTC().Format("2006-01-02") + "-" + strconv.Itoa(int(time.Now().Unix()))
-	filename := config.Config.ClipsPath + timestamp + "-" + username + ".wav"
+	filename := config.Config.ClipsPath + "/" + timestamp + "-" + username + ".wav"
 
 	// grab everything from the voice packet channel and dump it to the file
 	// close when there is nothing left

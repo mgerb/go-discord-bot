@@ -2,19 +2,15 @@
   "token": "",
   "client_id": "",
   "client_secret": "",
-  "redirect_uri": "",
+  "redirect_uri": "https://localhost/oauth",
 
   "bot_prefix": "#",
 
   "admin_emails": ["mail@example.com"],
   "mod_emails": ["mail@example.com"],
 
-  "jwt_key": "generate a random secret string here",
+  "jwt_secret": "generate a random secret string here",
   "server_addr": "0.0.0.0:80",
 
-  "logger": true,
-  "database": "data.db",
-
-  "sounds_path": "./sounds/",
-  "clips_path": "./clips/"
+  "logger": true
 }

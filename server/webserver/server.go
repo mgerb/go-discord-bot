@@ -16,7 +16,7 @@ func getRouter() *gin.Engine {
 
 	router.StaticFS("/static", box)
 	router.Static("/public/sounds", config.Config.SoundsPath)
-	router.Static("/public/youtube", "./youtube")
+	router.Static("/public/youtube", config.Config.YoutubePath)
 	router.Static("/public/clips", config.Config.ClipsPath)
 
 	router.NoRoute(func(c *gin.Context) {

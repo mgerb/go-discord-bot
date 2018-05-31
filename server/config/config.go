@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"flag"
 	"io/ioutil"
 
 	log "github.com/sirupsen/logrus"
@@ -10,40 +9,34 @@ import (
 
 // Variables used for command line parameters
 var (
-	Config configFile
-	Flags  configFlags
+	Config configType
 )
 
-type configFile struct {
-	Token        string `json:"token"`
-	ClientID     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
-	RedirectURI  string `json:"redirect_uri"`
+type configType struct {
+	Token        string   `json:"token"`
+	ClientID     string   `json:"client_id"`
+	ClientSecret string   `json:"client_secret"`
+	RedirectURI  string   `json:"redirect_uri"`
+	BotPrefix    string   `json:"bot_prefix"` //prefix to use for bot commands
+	AdminEmails  []string `json:"admin_emails"`
+	ModEmails    []string `json:"mod_emails"`
+	ServerAddr   string   `json:"server_addr"`
+	JWTSecret    string   `json:"jwt_secret"`
+	Logger       bool     `json:"logger"`
 
-	GuildID string `json:"guild_id"`
-
-	BotPrefix string `json:"bot_prefix"` //prefix to use for bot commands
-
-	SoundsPath string `json:"sounds_path"`
-	ClipsPath  string `json:"clips_path"`
-
-	AdminEmails []string `json:"admin_emails"`
-	ModEmails   []string `json:"mod_emails"`
-	ServerAddr  string   `json:"server_addr"`
-	JWTKey      string   `json:"jwt_key"`
-
-	Logger   bool   `json:"logger"`
-	Database string `json:"database"`
-}
-
-type configFlags struct {
-	Prod bool
+	// hard coded folder paths
+	SoundsPath  string
+	ClipsPath   string
+	YoutubePath string
 }
 
 // Init -
 func Init() {
 	parseConfig()
-	parseFlags()
+
+	Config.SoundsPath = "./sounds"
+	Config.ClipsPath = "./clips"
+	Config.YoutubePath = "./youtube"
 }
 
 func parseConfig() {
@@ -61,22 +54,6 @@ func parseConfig() {
 	err := json.Unmarshal(file, &Config)
 
 	if err != nil {
-		log.Error(err)
+		log.Fatal(err)
 	}
-}
-
-func parseFlags() {
-
-	Flags.Prod = false
-
-	prod := flag.Bool("p", false, "Run in production")
-
-	flag.Parse()
-
-	Flags.Prod = *prod
-
-	if Flags.Prod {
-		log.Warn("Running in production mode")
-	}
-
 }

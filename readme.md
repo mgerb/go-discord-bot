@@ -11,10 +11,30 @@ A soundboard bot for discord with a Go back end and React front end.
 * Install [ffmpeg](https://www.ffmpeg.org/download.html)
 * edit your config.json file
 * run the executable
+* visit http://localhost:8080
+
+### With docker-compose
+
+Make sure to create a `config.json` file in your data volume.
+Take a look at `config.template.json` for example congurations.
+
+docker-compose.yml
+
+```
+version: "2"
+
+services:
+  go-discord-bot:
+    image: mgerb/go-discord-bot:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - <path to your data directory>:/bot
+```
 
 ### Commands
 
-* `clip` - clips the past minute of audio
+* `clip` - clips the past minute of audio (currently bugged if more than one user is speaking)
 * `summon` - summons the bot to your current channel
 * `dismiss` - dismisses the bot from the server
 * `<audio clip>` - play a named audio clip
@@ -48,12 +68,6 @@ https://<your domain name> {
 }
 ```
 
-### Clipping audio
-
-If the bot is in a channel it listens to all audio. Use the `clip` command
-to record the past minute of conversation. Access all clips in the "Clips"
-section of the site.
-
 ### Stats
 
 If logging is enabled the bot will log all messages and store in a database file. Currently the bot keeps track of
@@ -83,7 +97,3 @@ Use these commands to compile the project. The client must be built first.
 
 * `packr build`
 * `packr install`
-
-### Windows
-
-I only run this on linux. I'm not sure if it will work on windows, but it should without too much work.

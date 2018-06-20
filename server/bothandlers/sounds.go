@@ -77,7 +77,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		// create new connection instance
-		newInstance := &AudioConnection{
+		activeConnections[c.GuildID] = &AudioConnection{
 			Guild:             newGuild,
 			Session:           s,
 			Sounds:            make(map[string]*AudioClip, 0),
@@ -86,11 +86,6 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			AudioListenerLock: false,
 			Disconnect:        make(chan bool),
 		}
-
-		activeConnections[c.GuildID] = newInstance
-
-		// start listening on the sound channel
-		go activeConnections[c.GuildID].playSounds()
 	}
 
 	// start new go routine handling the message
@@ -160,20 +155,35 @@ func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
 
 				if err != nil {
 					log.Error(err)
+					return
 				}
 
 				// set the current channel
 				conn.CurrentChannel = c
 
+				go conn.watchForDisconnect()
+
+				// start go routine that plays sounds
+				go conn.playSounds()
+
 				// start listening to audio if not locked
 				if !conn.AudioListenerLock {
 					go conn.startAudioListener()
 				}
-
-				return
 			}
 		}
 
+	}
+}
+
+// update disconnect channel when voice connection becomes unready
+func (conn *AudioConnection) watchForDisconnect() {
+	for {
+		if !conn.VoiceConnection.Ready {
+			conn.Disconnect <- true
+			break
+		}
+		time.Sleep(5 * time.Second)
 	}
 }
 
@@ -329,7 +339,6 @@ loop:
 	if err != nil {
 		log.Error(err)
 	}
-
 }
 
 // start listening to the voice channel
@@ -340,16 +349,6 @@ func (conn *AudioConnection) startAudioListener() {
 	if conn.VoiceClipQueue == nil {
 		conn.VoiceClipQueue = make(chan *discordgo.Packet, voiceClipQueuePacketSize)
 	}
-
-	// exit loop if
-	go func() {
-		for {
-			if !conn.VoiceConnection.Ready {
-				conn.Disconnect <- true
-			}
-			time.Sleep(5 * time.Second)
-		}
-	}()
 
 loop:
 	for {
@@ -390,7 +389,6 @@ loop:
 		case <-conn.Disconnect:
 			break loop
 		}
-
 	}
 
 	// remove lock upon exit
@@ -401,41 +399,38 @@ loop:
 func (conn *AudioConnection) playSounds() (err error) {
 
 	for {
-		newSoundName := <-conn.SoundQueue
+		select {
+		case newSoundName := <-conn.SoundQueue:
+			conn.toggleSoundPlayingLock(true)
 
-		conn.toggleSoundPlayingLock(true)
+			if !conn.VoiceConnection.Ready {
+				continue
+			}
 
-		if !conn.VoiceConnection.Ready {
-			continue
+			// Start speaking.
+			_ = conn.VoiceConnection.Speaking(true)
+
+			// Send the buffer data.
+			for _, buff := range conn.Sounds[newSoundName].Content {
+				conn.VoiceConnection.OpusSend <- buff
+			}
+
+			// Stop speaking
+			_ = conn.VoiceConnection.Speaking(false)
+
+			// Sleep for a specificed amount of time before ending.
+			time.Sleep(50 * time.Millisecond)
+
+			conn.toggleSoundPlayingLock(false)
+
+		case <-conn.Disconnect:
+			break
 		}
-
-		// Start speaking.
-		_ = conn.VoiceConnection.Speaking(true)
-
-		// Send the buffer data.
-		for _, buff := range conn.Sounds[newSoundName].Content {
-			conn.VoiceConnection.OpusSend <- buff
-		}
-
-		// Stop speaking
-		_ = conn.VoiceConnection.Speaking(false)
-
-		// Sleep for a specificed amount of time before ending.
-		time.Sleep(50 * time.Millisecond)
-
-		conn.toggleSoundPlayingLock(false)
 	}
-
 }
 
 func (conn *AudioConnection) toggleSoundPlayingLock(playing bool) {
 	conn.Mutex.Lock()
 	conn.SoundPlayingLock = playing
 	conn.Mutex.Unlock()
-}
-
-func checkErr(err error) {
-	if err != nil {
-		log.Error(err)
-	}
 }

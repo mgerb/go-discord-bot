@@ -45,7 +45,6 @@ type AudioConnection struct {
 	VoiceClipQueue    chan *discordgo.Packet     `json:"-"`
 	SoundPlayingLock  bool                       `json:"-"`
 	AudioListenerLock bool                       `json:"-"`
-	Disconnect        chan bool                  `json:"_"`
 	Mutex             *sync.Mutex                `json:"-"` // mutex for single audio connection
 }
 
@@ -71,6 +70,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// Find the guild for that channel.
 		newGuild, err := s.State.Guild(c.GuildID)
+
 		if err != nil {
 			log.Error(err)
 			return
@@ -84,12 +84,10 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			SoundQueue:        make(chan string, maxSoundQueue),
 			Mutex:             &sync.Mutex{},
 			AudioListenerLock: false,
-			Disconnect:        make(chan bool),
 		}
 	}
 
-	// start new go routine handling the message
-	go activeConnections[c.GuildID].handleMessage(m)
+	activeConnections[c.GuildID].handleMessage(m)
 }
 
 func (conn *AudioConnection) handleMessage(m *discordgo.MessageCreate) {
@@ -119,7 +117,6 @@ func (conn *AudioConnection) handleMessage(m *discordgo.MessageCreate) {
 // dismiss bot from currnet channel if it's in one
 func (conn *AudioConnection) dismiss() {
 	if conn.VoiceConnection != nil && !conn.SoundPlayingLock && len(conn.SoundQueue) == 0 {
-		conn.Disconnect <- true
 		conn.VoiceConnection.Disconnect()
 	}
 }
@@ -161,11 +158,6 @@ func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
 				// set the current channel
 				conn.CurrentChannel = c
 
-				go conn.watchForDisconnect()
-
-				// start go routine that plays sounds
-				go conn.playSounds()
-
 				// start listening to audio if not locked
 				if !conn.AudioListenerLock {
 					go conn.startAudioListener()
@@ -173,17 +165,6 @@ func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
 			}
 		}
 
-	}
-}
-
-// update disconnect channel when voice connection becomes unready
-func (conn *AudioConnection) watchForDisconnect() {
-	for {
-		if !conn.VoiceConnection.Ready {
-			conn.Disconnect <- true
-			break
-		}
-		time.Sleep(5 * time.Second)
 	}
 }
 
@@ -209,9 +190,53 @@ func (conn *AudioConnection) playAudio(soundName string, m *discordgo.MessageCre
 	case conn.SoundQueue <- soundName:
 
 	default:
-		return
+		break
 	}
 
+	// start playing sounds in queue if not already playing
+	if !conn.SoundPlayingLock {
+		conn.playSoundsInQueue()
+	}
+
+}
+
+// playSoundsInQueue - play sounds until audio queue is empty
+func (conn *AudioConnection) playSoundsInQueue() {
+	conn.toggleSoundPlayingLock(true)
+
+	for {
+		select {
+		case newSoundName := <-conn.SoundQueue:
+
+			if !conn.VoiceConnection.Ready {
+				return
+			}
+
+			// Start speaking.
+			_ = conn.VoiceConnection.Speaking(true)
+
+			// Send the buffer data.
+			for _, buff := range conn.Sounds[newSoundName].Content {
+				conn.VoiceConnection.OpusSend <- buff
+			}
+
+			// Stop speaking
+			_ = conn.VoiceConnection.Speaking(false)
+
+			// Sleep for a specificed amount of time before ending.
+			time.Sleep(50 * time.Millisecond)
+
+		default:
+			conn.toggleSoundPlayingLock(false)
+			return
+		}
+	}
+}
+
+func (conn *AudioConnection) toggleSoundPlayingLock(playing bool) {
+	conn.Mutex.Lock()
+	conn.SoundPlayingLock = playing
+	conn.Mutex.Unlock()
 }
 
 // load audio file into memory
@@ -386,51 +411,14 @@ loop:
 			conn.VoiceClipQueue <- opusChannel
 
 		// check if voice connection fails then break out of audio listener
-		case <-conn.Disconnect:
-			break loop
+		default:
+			if !conn.VoiceConnection.Ready {
+				break loop
+			}
+			time.Sleep(time.Second * 1)
 		}
 	}
 
 	// remove lock upon exit
 	conn.AudioListenerLock = false
-}
-
-// playSounds - plays the current buffer to the provided channel.
-func (conn *AudioConnection) playSounds() (err error) {
-
-	for {
-		select {
-		case newSoundName := <-conn.SoundQueue:
-			conn.toggleSoundPlayingLock(true)
-
-			if !conn.VoiceConnection.Ready {
-				continue
-			}
-
-			// Start speaking.
-			_ = conn.VoiceConnection.Speaking(true)
-
-			// Send the buffer data.
-			for _, buff := range conn.Sounds[newSoundName].Content {
-				conn.VoiceConnection.OpusSend <- buff
-			}
-
-			// Stop speaking
-			_ = conn.VoiceConnection.Speaking(false)
-
-			// Sleep for a specificed amount of time before ending.
-			time.Sleep(50 * time.Millisecond)
-
-			conn.toggleSoundPlayingLock(false)
-
-		case <-conn.Disconnect:
-			break
-		}
-	}
-}
-
-func (conn *AudioConnection) toggleSoundPlayingLock(playing bool) {
-	conn.Mutex.Lock()
-	conn.SoundPlayingLock = playing
-	conn.Mutex.Unlock()
 }

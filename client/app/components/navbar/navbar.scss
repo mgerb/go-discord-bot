@@ -1,0 +1,57 @@
+@import '../../scss/variables';
+
+.navbar {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  left: -$navbarWidth;
+  top: 50px;
+  height: calc(100% - 50px);
+  width: $navbarWidth;
+  background-color: $gray2;
+  border-right: 1px solid darken($gray2, 2%);
+  overflow-y: auto;
+  padding-bottom: 10px;
+  transition: 0.2s left ease-in-out;
+
+  &--open {
+    left: 0;
+  }
+}
+
+.navbar__item {
+  min-height: 50px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: $white;
+  transition: background-color 0.1s linear, color 0.2s linear;
+
+  &:hover {
+    background-color: $gray1;
+  }
+
+  & + & {
+    border-top: 1px solid $gray3;
+  }
+}
+
+.navbar__item--active {
+  padding-left: 4px;
+  border-right: 4px solid $primaryBlue;
+  color: $primaryBlue !important;
+}
+
+.navbar__email {
+  padding-top: 10px;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  color: $primaryBlue;
+  bottom: 2;
+  left: 2;
+  font-size: 12px;
+}

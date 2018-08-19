@@ -1,0 +1,5 @@
+@mixin tinyScreen {
+  @media only screen and (max-width: 520px) {
+    @content;
+  }
+}

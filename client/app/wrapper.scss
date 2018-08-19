@@ -1,0 +1,16 @@
+@import './scss/variables';
+@import './scss/mixins';
+
+.wrapper {
+  padding-top: 50px;
+  transition: 0.2s padding-left ease-in-out;
+  padding-left: 0px;
+
+  &--open {
+    padding-left: $navbarWidth;
+  }
+
+  @include tinyScreen {
+    padding-left: 0px;
+  }
+}

@@ -1,3 +1,6 @@
+@import './variables.scss';
+@import './mixins.scss';
+
 html {
   font-family: 'Roboto', sans-serif;
 }
@@ -26,11 +29,18 @@ i {
 body {
   background-color: $gray1;
   color: $white;
-  padding-left: $navbarWidth;
+  // padding-left: $navbarWidth;
+}
+
+.flex {
+  display: flex;
 }
 
 .content {
-  padding: 10px;
+  padding: 20px;
+  @include tinyScreen {
+    padding: 10px;
+  }
 }
 
 .input {
@@ -43,52 +53,15 @@ body {
   color: $white;
 }
 
-.button {
-  border: none;
-  border-radius: 3px;
-  color: $white;
-  background: $lightGray;
-  padding: 10px;
-  cursor: pointer;
-
-  &:hover {
-    background: lighten($lightGray, 5%);
-  }
-}
-
-.button--primary {
-  background: $primaryBlue;
-
-  &:hover {
-    background: lighten($primaryBlue, 2%);
-  }
-}
-
-.card {
-  background-color: $gray2;
-  border-radius: 5px;
-  max-width: 800px;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: 1px solid $gray3;
-}
-
-.card__header {
-  margin: -10px -10px 10px -10px;
-  display: flex;
-  align-items: center;
-  padding-left: 10px;
-  padding-right: 10px;
-  height: 50px;
-  border-radius: 5px 5px 0 0;
-  font-size: 25px;
-  background-color: $gray3;
-}
-
 .column {
   flex: 1;
 
   & + .column {
     margin-left: 10px;
   }
+}
+
+.text-wrap {
+  word-break: break-word;
+  word-wrap: break-word;
 }

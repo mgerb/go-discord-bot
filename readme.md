@@ -2,16 +2,16 @@
 
 A soundboard bot for discord with a Go back end and React front end.
 
-![Image](https://i.imgur.com/BCoLAuK.png)
+![Image](./screenshots/sound-bot.png)
 
 ## How to use
 
-* [Download latest release here](https://github.com/mgerb/go-discord-bot/releases)
-* Install [youtube-dl](https://github.com/rg3/youtube-dl/blob/master/README.md#installation)
-* Install [ffmpeg](https://www.ffmpeg.org/download.html)
-* edit your config.json file
-* run the executable
-* visit http://localhost:8080
+- [Download latest release here](https://github.com/mgerb/go-discord-bot/releases)
+- Install [youtube-dl](https://github.com/rg3/youtube-dl/blob/master/README.md#installation)
+- Install [ffmpeg](https://www.ffmpeg.org/download.html)
+- edit your config.json file
+- run the executable
+- visit http://localhost:8080
 
 ### With docker-compose
 
@@ -26,6 +26,7 @@ version: "2"
 services:
   go-discord-bot:
     image: mgerb/go-discord-bot:latest
+    restart: unless-stopped
     ports:
       - 8080:8080
     volumes:
@@ -34,10 +35,10 @@ services:
 
 ### Commands
 
-* `clip` - clips the past minute of audio (currently bugged if more than one user is speaking)
-* `summon` - summons the bot to your current channel
-* `dismiss` - dismisses the bot from the server
-* `<audio clip>` - play a named audio clip
+- `clip` - clips the past minute of audio (currently bugged if more than one user is speaking)
+- `summon` - summons the bot to your current channel
+- `dismiss` - dismisses the bot from the server
+- `<audio clip>` - play a named audio clip
 
 ### Uploading files
 
@@ -78,22 +79,22 @@ Check it out in the "Stats" page on the site.
 
 ### Dependencies
 
-* Go
-* node/npm
-* make
+- Go
+- node/npm
+- make
 
 ### Compiling
 
-* Make sure dependencies are installed
-* install packr - `go get -u github.com/gobuffalo/packr/...`
-* Rename the `config.template.json` to `config.json`
-* add configurations to `config.json`
-* `cd client && npm run dev`
-* `go run main.go`
-* open a browser `localhost:<config_port>`
+- Make sure dependencies are installed
+- install packr - `go get -u github.com/gobuffalo/packr/...`
+- Rename the `config.template.json` to `config.json`
+- add configurations to `config.json`
+- `cd client && npm run dev`
+- `go run main.go`
+- open a browser `localhost:<config_port>`
 
 [Packr](https://github.com/gobuffalo/packr) is used to bundle the static web assets into the binary.
 Use these commands to compile the project. The client must be built first.
 
-* `packr build`
-* `packr install`
+- `packr build`
+- `packr install`

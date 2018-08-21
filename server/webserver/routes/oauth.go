@@ -1,4 +1,4 @@
-package handlers
+package routes
 
 import (
 	"github.com/gin-gonic/gin"
@@ -13,8 +13,12 @@ type oauthReq struct {
 	Code string `json:"code"`
 }
 
-// Oauth -
-func Oauth(c *gin.Context) {
+// AddOauthRoutes -
+func AddOauthRoutes(group *gin.RouterGroup) {
+	group.POST("/oauth", oauthHandler)
+}
+
+func oauthHandler(c *gin.Context) {
 
 	var json oauthReq
 

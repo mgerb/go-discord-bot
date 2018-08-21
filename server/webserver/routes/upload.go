@@ -1,4 +1,4 @@
-package handlers
+package routes
 
 import (
 	"os"
@@ -8,11 +8,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mgerb/go-discord-bot/server/config"
+	"github.com/mgerb/go-discord-bot/server/webserver/middleware"
 	log "github.com/sirupsen/logrus"
 )
 
-// FileUpload -
-func FileUpload(c *gin.Context) {
+// AddUploadRoutes - add file upload routes
+func AddUploadRoutes(group *gin.RouterGroup) {
+	group.POST("/upload", middleware.AuthorizedJWT(), fileUploadHandler)
+}
+
+func fileUploadHandler(c *gin.Context) {
 
 	// originalClaims, _ := c.Get("claims")
 	// claims, _ := originalClaims.(*middleware.CustomClaims)

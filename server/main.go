@@ -8,6 +8,7 @@ import (
 	"github.com/mgerb/go-discord-bot/server/db"
 	"github.com/mgerb/go-discord-bot/server/logger"
 	"github.com/mgerb/go-discord-bot/server/webserver"
+	"github.com/mgerb/go-discord-bot/server/webserver/model"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -20,8 +21,13 @@ func init() {
 	config.Init()
 
 	if config.Config.Logger {
-		db.Init()
-		db.Conn.AutoMigrate(&logger.Message{}, &logger.Attachment{}, &logger.User{})
+		migrations := []interface{}{
+			&logger.Message{},
+			&logger.Attachment{},
+			&logger.User{},
+			&model.VideoArchive{},
+		}
+		db.Init(migrations...)
 	}
 }
 

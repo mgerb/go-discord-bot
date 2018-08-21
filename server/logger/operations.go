@@ -15,7 +15,7 @@ var linkedPostsCache map[string]int
 // GetMessages - returns all messages - must use paging
 func GetMessages(page int) ([]Message, error) {
 	messages := []Message{}
-	err := db.Conn.Offset(page*100).Limit(100).Order("timestamp desc", true).Preload("User").Find(&messages).Error
+	err := db.GetConn().Offset(page*100).Limit(100).Order("timestamp desc", true).Preload("User").Find(&messages).Error
 	return messages, err
 }
 
@@ -28,7 +28,7 @@ func GetLinkedMessages() (map[string]int, error) {
 	}
 
 	result := []map[string]interface{}{}
-	rows, err := db.Conn.Table("messages").
+	rows, err := db.GetConn().Table("messages").
 		Select("users.username, messages.content").
 		Joins("join users on messages.user_id = users.id").
 		Rows()

@@ -1,4 +1,4 @@
-package handlers
+package routes
 
 import (
 	"bytes"
@@ -11,8 +11,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Downloader -
-func Downloader(c *gin.Context) {
+// AddDownloaderRoutes -
+func AddDownloaderRoutes(group *gin.RouterGroup) {
+	group.GET("/ytdownloader", downloaderHandler)
+}
+
+func downloaderHandler(c *gin.Context) {
 	url := c.Query("url")
 	fileType := c.Query("fileType")
 

@@ -1,4 +1,4 @@
-package handlers
+package routes
 
 import (
 	"io/ioutil"
@@ -17,8 +17,13 @@ type sound struct {
 	Extension string `json:"extension"`
 }
 
-// SoundList -
-func SoundList(c *gin.Context) {
+// AddSoundListRoutes -
+func AddSoundListRoutes(group *gin.RouterGroup) {
+	group.GET("/soundlist", soundListHandler)
+	group.GET("/cliplist", clipListHandler)
+}
+
+func soundListHandler(c *gin.Context) {
 
 	soundList, err := readSoundsDir(config.Config.SoundsPath)
 
@@ -31,8 +36,7 @@ func SoundList(c *gin.Context) {
 	c.JSON(200, soundList)
 }
 
-// ClipList -
-func ClipList(c *gin.Context) {
+func clipListHandler(c *gin.Context) {
 
 	clipList, err := readSoundsDir(config.Config.ClipsPath)
 

@@ -1,12 +1,14 @@
 package webserver
 
 import (
+	"strings"
+
 	"github.com/gobuffalo/packr"
+	"github.com/mgerb/go-discord-bot/server/webserver/response"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mgerb/go-discord-bot/server/config"
-	"github.com/mgerb/go-discord-bot/server/webserver/handlers"
-	"github.com/mgerb/go-discord-bot/server/webserver/middleware"
+	"github.com/mgerb/go-discord-bot/server/webserver/routes"
 )
 
 func getRouter() *gin.Engine {
@@ -19,29 +21,30 @@ func getRouter() *gin.Engine {
 	router.Static("/public/youtube", config.Config.YoutubePath)
 	router.Static("/public/clips", config.Config.ClipsPath)
 
-	router.NoRoute(func(c *gin.Context) {
-		c.Data(200, "text/html", box.Bytes("index.html"))
-	})
-
 	api := router.Group("/api")
-	api.GET("/ytdownloader", handlers.Downloader)
-	api.GET("/soundlist", handlers.SoundList)
-	api.GET("/cliplist", handlers.ClipList)
-	api.POST("/oauth", handlers.Oauth)
-	api.GET("/logger/messages", handlers.GetMessages)
-	api.GET("/logger/linkedmessages", handlers.GetLinkedMessages)
-	api.GET("/config/client_id", handlers.GetClientID)
 
-	authorizedAPI := router.Group("/api")
-	authorizedAPI.Use(middleware.AuthorizedJWT())
-	authorizedAPI.POST("/upload", handlers.FileUpload)
+	// add api routes
+	routes.AddSoundListRoutes(api)
+	routes.AddOauthRoutes(api)
+	routes.AddLoggerRoutes(api)
+	routes.AddDownloaderRoutes(api)
+	routes.AddConfigRoutes(api)
+	routes.AddUploadRoutes(api)
+	routes.AddVideoArchiveRoutes(api)
+
+	router.NoRoute(func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.String(), "/api/") {
+			response.BadRequest(c, "404 Not Found")
+		} else {
+			c.Data(200, "text/html", box.Bytes("index.html"))
+		}
+	})
 
 	return router
 }
 
 // Start -
 func Start() {
-
 	router := getRouter()
 	router.Run(config.Config.ServerAddr)
 }

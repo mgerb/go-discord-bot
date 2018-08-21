@@ -7,17 +7,21 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-// Conn - database connection
-var Conn *gorm.DB
+var conn *gorm.DB
 
 // Init - initialize database
-func Init() {
+func Init(migrations ...interface{}) {
 	var err error
-	Conn, err = gorm.Open("sqlite3", "data.db")
+	conn, err = gorm.Open("sqlite3", "data.db")
 
 	if err != nil {
 		panic("failed to connect database")
 	}
+	conn.DB().SetMaxIdleConns(1)
+	conn.AutoMigrate(migrations...)
+}
 
-	Conn.DB().SetMaxIdleConns(1)
+// GetConn - get db connection
+func GetConn() *gorm.DB {
+	return conn
 }

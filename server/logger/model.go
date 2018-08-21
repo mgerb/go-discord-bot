@@ -26,7 +26,7 @@ type Message struct {
 
 // Save -
 func (m *Message) Save() error {
-	return db.Conn.Save(m).Error
+	return db.GetConn().Save(m).Error
 }
 
 // Attachment - discord message attachment
@@ -55,5 +55,5 @@ type User struct {
 
 // Save -
 func (u *User) Save() error {
-	return db.Conn.Save(u).Error
+	return db.GetConn().Save(u).Error
 }

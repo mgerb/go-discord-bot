@@ -1,4 +1,4 @@
-package handlers
+package routes
 
 import (
 	"strconv"
@@ -7,8 +7,13 @@ import (
 	"github.com/mgerb/go-discord-bot/server/logger"
 )
 
-// GetMessages - get all messages
-func GetMessages(c *gin.Context) {
+// AddLoggerRoutes -
+func AddLoggerRoutes(group *gin.RouterGroup) {
+	group.GET("/logger/messages", getMessagesHandler)
+	group.GET("/logger/linkedmessages", getLinkedMessagesHandler)
+}
+
+func getMessagesHandler(c *gin.Context) {
 	page, err := strconv.Atoi(c.Query("page"))
 
 	if err != nil {
@@ -25,8 +30,7 @@ func GetMessages(c *gin.Context) {
 	c.JSON(200, messages)
 }
 
-// GetLinkedMessages -
-func GetLinkedMessages(c *gin.Context) {
+func getLinkedMessagesHandler(c *gin.Context) {
 	posts, err := logger.GetLinkedMessages()
 
 	if err != nil {

@@ -1,0 +1,14 @@
+.input {
+  line-height: 38px;
+  border-radius: 3px;
+  border: 1px solid $lightGray;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 38px;
+  background: $gray5;
+  color: $white;
+
+  &::placeholder {
+    font-size: 14px;
+  }
+}

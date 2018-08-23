@@ -13,16 +13,17 @@ var (
 )
 
 type configType struct {
-	Token        string   `json:"token"`
-	ClientID     string   `json:"client_id"`
-	ClientSecret string   `json:"client_secret"`
-	RedirectURI  string   `json:"redirect_uri"`
-	BotPrefix    string   `json:"bot_prefix"` //prefix to use for bot commands
-	AdminEmails  []string `json:"admin_emails"`
-	ModEmails    []string `json:"mod_emails"`
-	ServerAddr   string   `json:"server_addr"`
-	JWTSecret    string   `json:"jwt_secret"`
-	Logger       bool     `json:"logger"`
+	Token         string   `json:"token"`
+	ClientID      string   `json:"client_id"`
+	ClientSecret  string   `json:"client_secret"`
+	RedirectURI   string   `json:"redirect_uri"`
+	BotPrefix     string   `json:"bot_prefix"` //prefix to use for bot commands
+	AdminEmails   []string `json:"admin_emails"`
+	ModEmails     []string `json:"mod_emails"`
+	ServerAddr    string   `json:"server_addr"`
+	JWTSecret     string   `json:"jwt_secret"`
+	Logger        bool     `json:"logger"`
+	DefaultRoomID string   `json:"default_room_id"`
 
 	// hard coded folder paths
 	SoundsPath  string

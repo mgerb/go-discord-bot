@@ -3,6 +3,7 @@
   "client_id": "",
   "client_secret": "",
   "redirect_uri": "https://localhost/oauth",
+  "default_room_id": "",
 
   "bot_prefix": "#",
 

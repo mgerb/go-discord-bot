@@ -1,0 +1,13 @@
+.archive-grid {
+  display: grid;
+  grid-gap: 5px;
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+
+  @include smallScreen() {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+
+  &__item {
+    height: 300px;
+  }
+}

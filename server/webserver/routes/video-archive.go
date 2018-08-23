@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mgerb/go-discord-bot/server/bot"
 	"github.com/mgerb/go-discord-bot/server/db"
 	"github.com/mgerb/go-discord-bot/server/webserver/middleware"
 	"github.com/mgerb/go-discord-bot/server/webserver/model"
@@ -13,11 +14,11 @@ import (
 
 // AddVideoArchiveRoutes -
 func AddVideoArchiveRoutes(group *gin.RouterGroup) {
-	group.GET("/video-archives", listVideoArchivesHandler)
+	group.GET("/video-archive", listVideoArchivesHandler)
 
 	authGroup := group.Group("", middleware.AuthorizedJWT())
-	authGroup.POST("/video-archives", middleware.AuthPermissions(middleware.PermMod), postVideoArchivesHandler)
-	authGroup.DELETE("/video-archives/:id", middleware.AuthPermissions(middleware.PermAdmin), deleteVideoArchivesHandler)
+	authGroup.POST("/video-archive", middleware.AuthPermissions(middleware.PermMod), postVideoArchivesHandler)
+	authGroup.DELETE("/video-archive/:id", middleware.AuthPermissions(middleware.PermAdmin), deleteVideoArchivesHandler)
 }
 
 func listVideoArchivesHandler(c *gin.Context) {
@@ -99,6 +100,10 @@ func postVideoArchivesHandler(c *gin.Context) {
 		response.InternalError(c, err)
 		return
 	}
+
+	hostURL := "[Click here to see the full archive!](http://" + c.Request.Host + "/video-archive)"
+	youtubeURL := "https://youtu.be/" + videoArchive.YoutubeID
+	bot.SendEmbeddedNotification(videoArchive.Title, "**"+videoArchive.UploadedBy+"** archived a new video:\n"+youtubeURL+"\n\n"+hostURL)
 
 	response.Success(c, "saved")
 }

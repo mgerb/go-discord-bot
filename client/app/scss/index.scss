@@ -1,5 +1,14 @@
 @import '~normalize.css/normalize.css';
 @import '~font-awesome/css/font-awesome.css';
+@import '~nprogress/nprogress.css';
+
+@import './mixins.scss';
+@import './variables.scss';
+
 @import './style.scss';
+
 @import './button.scss';
 @import './card.scss';
+@import './input.scss';
+@import './grid.scss';
+@import './nprogress.scss';

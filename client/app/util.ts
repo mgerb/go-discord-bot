@@ -8,7 +8,7 @@ const getScreenWidth = () => {
 };
 
 const isMobileScreen = () => {
-  return getScreenWidth() < 520;
+  return getScreenWidth() < 768;
 };
 
 export const Util = {

@@ -2,8 +2,6 @@ import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { withRouter } from 'react-router';
 import { Header, Navbar } from './components';
-//styling
-import './scss/index.scss';
 import { Util } from './util';
 import './wrapper.scss';
 

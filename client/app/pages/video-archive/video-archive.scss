@@ -1,0 +1,14 @@
+.video-archive {
+  // custom card
+  &__card {
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+    padding: 0 0 10px;
+    max-width: initial;
+  }
+
+  &__text-input {
+    width: 100%;
+    max-width: 500px;
+  }
+}

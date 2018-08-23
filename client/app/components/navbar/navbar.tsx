@@ -74,6 +74,7 @@ export class Navbar extends React.Component<Props, State> {
     return (
       <div className={'navbar ' + openClass}>
         {this.renderNavLink('Soundboard', '/', { exact: true })}
+        {this.renderNavLink('Video Archive', '/video-archive')}
         {this.renderNavLink('Youtube Downloader', '/downloader')}
         {this.renderNavLink('Clips', '/clips')}
         {this.renderNavLink('Stats', '/stats')}

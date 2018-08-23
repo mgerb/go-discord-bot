@@ -7,6 +7,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var session *discordgo.Session
+
 // Start the bot
 func Start(token string) *discordgo.Session {
 	// initialize connection
@@ -25,13 +27,34 @@ func Start(token string) *discordgo.Session {
 	return session
 }
 
+// GetSession - get current discord session
+func GetSession() *discordgo.Session {
+	return session
+}
+
+// SendEmbeddedNotification - sends notification to default room
+func SendEmbeddedNotification(title, description string) {
+	if session == nil || config.Config.DefaultRoomID == "" {
+		return
+	}
+
+	embed := &discordgo.MessageEmbed{
+		Color:       0x42adf4,
+		Title:       title,
+		Description: description,
+	}
+
+	session.ChannelMessageSendEmbed(config.Config.DefaultRoomID, embed)
+}
+
 func addHandler(session *discordgo.Session, handler interface{}) {
 	session.AddHandler(handler)
 }
 
 func connect(token string) *discordgo.Session {
 	// Create a new Discord session using the provided bot token.
-	session, err := discordgo.New("Bot " + token)
+	var err error
+	session, err = discordgo.New("Bot " + token)
 
 	if err != nil {
 		log.Error(err)

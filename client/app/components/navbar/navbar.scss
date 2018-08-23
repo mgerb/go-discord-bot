@@ -13,6 +13,7 @@
   overflow-y: auto;
   padding-bottom: 10px;
   transition: 0.2s left ease-in-out;
+  z-index: 100;
 
   &--open {
     left: 0;

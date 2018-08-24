@@ -101,7 +101,7 @@ func postVideoArchivesHandler(c *gin.Context) {
 		return
 	}
 
-	hostURL := "[Click here to see the full archive!](http://" + c.Request.Host + "/video-archive)"
+	hostURL := "[Click here to see the full archive!](https://" + c.Request.Host + "/video-archive)"
 	youtubeURL := "https://youtu.be/" + videoArchive.YoutubeID
 	bot.SendEmbeddedNotification(videoArchive.Title, "**"+videoArchive.UploadedBy+"** archived a new video:\n"+youtubeURL+"\n\n"+hostURL)
 

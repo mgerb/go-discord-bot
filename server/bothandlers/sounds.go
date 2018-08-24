@@ -204,6 +204,9 @@ func (conn *AudioConnection) playAudio(soundName string, m *discordgo.MessageCre
 func (conn *AudioConnection) playSoundsInQueue() {
 	conn.toggleSoundPlayingLock(true)
 
+	// Start speaking.
+	_ = conn.VoiceConnection.Speaking(true)
+
 	for {
 		select {
 		case newSoundName := <-conn.SoundQueue:
@@ -212,21 +215,17 @@ func (conn *AudioConnection) playSoundsInQueue() {
 				return
 			}
 
-			// Start speaking.
-			_ = conn.VoiceConnection.Speaking(true)
-
 			// Send the buffer data.
 			for _, buff := range conn.Sounds[newSoundName].Content {
 				conn.VoiceConnection.OpusSend <- buff
 			}
 
-			// Stop speaking
-			_ = conn.VoiceConnection.Speaking(false)
-
 			// Sleep for a specificed amount of time before ending.
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 
 		default:
+			// Stop speaking
+			_ = conn.VoiceConnection.Speaking(false)
 			conn.toggleSoundPlayingLock(false)
 			return
 		}

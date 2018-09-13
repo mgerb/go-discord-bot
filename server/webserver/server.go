@@ -29,7 +29,7 @@ func getRouter() *gin.Engine {
 	routes.AddLoggerRoutes(api)
 	routes.AddDownloaderRoutes(api)
 	routes.AddConfigRoutes(api)
-	routes.AddUploadRoutes(api)
+	routes.AddSoundRoutes(api)
 	routes.AddVideoArchiveRoutes(api)
 
 	router.NoRoute(func(c *gin.Context) {

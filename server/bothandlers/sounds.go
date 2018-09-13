@@ -30,8 +30,9 @@ const (
 	voiceClipQueuePacketSize int = 2000                // this packet size equates to roughly 40 seconds of audio
 )
 
+// ActiveConnections - current active bot connections
 // store our connection objects in a map tied to a guild id
-var activeConnections = make(map[string]*AudioConnection)
+var ActiveConnections = make(map[string]*AudioConnection)
 var speakers = make(map[uint32]*gopus.Decoder)
 
 // AudioConnection -
@@ -66,7 +67,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// check to see if active connection object exists
-	if _, ok := activeConnections[c.GuildID]; !ok {
+	if _, ok := ActiveConnections[c.GuildID]; !ok {
 
 		// Find the guild for that channel.
 		newGuild, err := s.State.Guild(c.GuildID)
@@ -77,7 +78,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		// create new connection instance
-		activeConnections[c.GuildID] = &AudioConnection{
+		ActiveConnections[c.GuildID] = &AudioConnection{
 			Guild:             newGuild,
 			Session:           s,
 			Sounds:            make(map[string]*AudioClip, 0),
@@ -87,7 +88,7 @@ func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
-	activeConnections[c.GuildID].handleMessage(m)
+	ActiveConnections[c.GuildID].handleMessage(m)
 }
 
 func (conn *AudioConnection) handleMessage(m *discordgo.MessageCreate) {
@@ -109,7 +110,7 @@ func (conn *AudioConnection) handleMessage(m *discordgo.MessageCreate) {
 			conn.clipAudio(m)
 
 		default:
-			conn.playAudio(command, m)
+			conn.PlayAudio(command, m)
 		}
 	}
 }
@@ -168,8 +169,19 @@ func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
 	}
 }
 
-// play audio in channel that user is in
-func (conn *AudioConnection) playAudio(soundName string, m *discordgo.MessageCreate) {
+func (conn *AudioConnection) queueAudio(soundName string) {
+}
+
+// PlayAudio - play audio in channel that user is in
+// if MessageCreate is null play in current channel
+func (conn *AudioConnection) PlayAudio(soundName string, m *discordgo.MessageCreate) {
+
+	// summon bot to channel if new message passed in
+	if m != nil {
+		conn.summon(m)
+	} else if !conn.VoiceConnection.Ready {
+		return
+	}
 
 	// check if sound exists in memory
 	if _, ok := conn.Sounds[soundName]; !ok {
@@ -181,9 +193,6 @@ func (conn *AudioConnection) playAudio(soundName string, m *discordgo.MessageCre
 			return
 		}
 	}
-
-	// summon bot to channel
-	conn.summon(m)
 
 	// add sound to queue if queue isn't full
 	select {

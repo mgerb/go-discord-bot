@@ -13,10 +13,10 @@ import (
 
 // AddDownloaderRoutes -
 func AddDownloaderRoutes(group *gin.RouterGroup) {
-	group.GET("/ytdownloader", downloaderHandler)
+	group.GET("/ytdownloader", getDownloaderHandler)
 }
 
-func downloaderHandler(c *gin.Context) {
+func getDownloaderHandler(c *gin.Context) {
 	url := c.Query("url")
 	fileType := c.Query("fileType")
 

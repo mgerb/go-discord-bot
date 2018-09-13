@@ -6,7 +6,6 @@ import (
 	"github.com/mgerb/go-discord-bot/server/bot"
 	"github.com/mgerb/go-discord-bot/server/config"
 	"github.com/mgerb/go-discord-bot/server/db"
-	"github.com/mgerb/go-discord-bot/server/logger"
 	"github.com/mgerb/go-discord-bot/server/webserver"
 	"github.com/mgerb/go-discord-bot/server/webserver/model"
 	log "github.com/sirupsen/logrus"
@@ -14,21 +13,18 @@ import (
 
 func init() {
 	log.SetLevel(log.DebugLevel)
-	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
+
+	file, err := os.OpenFile("logrus.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	if err == nil {
+		log.SetOutput(file)
+	} else {
+		log.Info("Failed to log to file, using default stderr")
+	}
 
 	//read config file
 	config.Init()
-
-	if config.Config.Logger {
-		migrations := []interface{}{
-			&logger.Message{},
-			&logger.Attachment{},
-			&logger.User{},
-			&model.VideoArchive{},
-		}
-		db.Init(migrations...)
-	}
+	db.Init(model.Migrations...)
 }
 
 func main() {

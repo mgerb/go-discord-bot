@@ -7,9 +7,9 @@ import (
 
 // AddConfigRoutes -
 func AddConfigRoutes(group *gin.RouterGroup) {
-	group.GET("/config/client_id", getClientIDHandler)
+	group.GET("/config/client_id", getConfigHandler)
 }
 
-func getClientIDHandler(c *gin.Context) {
+func getConfigHandler(c *gin.Context) {
 	c.JSON(200, map[string]string{"id": config.Config.ClientID})
 }

@@ -4,6 +4,8 @@ import './sound-list.scss';
 interface Props {
   soundList: SoundType[];
   type: string;
+  onPlayDiscord?: (sound: SoundType) => void;
+  showDiscordPlay?: boolean;
 }
 
 interface State {
@@ -37,17 +39,14 @@ export class SoundList extends React.Component<Props, State> {
     }
   }
 
-  handleShowAudio(index: any) {
-    let temp = this.state.showAudioControls;
-    temp[index] = true;
-
-    this.setState({
-      showAudioControls: temp,
-    });
+  handlePlayAudioInBrowser(sound: SoundType, type: string) {
+    const url = `/public/${type.toLowerCase()}/` + sound.name + '.' + sound.extension;
+    const audio = new Audio(url);
+    audio.play();
   }
 
   render() {
-    const { soundList, type } = this.props;
+    const { onPlayDiscord, showDiscordPlay, soundList, type } = this.props;
 
     return (
       <div className="card">
@@ -74,7 +73,32 @@ export class SoundList extends React.Component<Props, State> {
                       style={{ width: '100px' }}
                     />
                   ) : (
-                    <i className="fa fa-play link" aria-hidden="true" onClick={() => this.handleShowAudio(index)} />
+                    <div>
+                      <a
+                        href={`/public/${type.toLowerCase()}/` + sound.name + '.' + sound.extension}
+                        download
+                        title="Download"
+                        className="fa fa-download link"
+                        aria-hidden="true"
+                      />
+                      <i
+                        title="Play in browser"
+                        className="fa fa-play link"
+                        aria-hidden="true"
+                        style={{ paddingLeft: '15px' }}
+                        onClick={() => this.handlePlayAudioInBrowser(sound, type)}
+                      />
+                      {showDiscordPlay &&
+                        onPlayDiscord && (
+                          <i
+                            title="Play in discord"
+                            className="fa fa-play-circle link fa-lg"
+                            aria-hidden="true"
+                            style={{ paddingLeft: '10px' }}
+                            onClick={() => onPlayDiscord!(sound)}
+                          />
+                        )}
+                    </div>
                   )}
                 </div>
               );

@@ -14,14 +14,14 @@ import (
 
 // AddVideoArchiveRoutes -
 func AddVideoArchiveRoutes(group *gin.RouterGroup) {
-	group.GET("/video-archive", listVideoArchivesHandler)
+	group.GET("/video-archive", listVideoArchiveHandler)
 
 	authGroup := group.Group("", middleware.AuthorizedJWT())
-	authGroup.POST("/video-archive", middleware.AuthPermissions(middleware.PermMod), postVideoArchivesHandler)
-	authGroup.DELETE("/video-archive/:id", middleware.AuthPermissions(middleware.PermAdmin), deleteVideoArchivesHandler)
+	authGroup.POST("/video-archive", middleware.AuthPermissions(middleware.PermMod), postVideoArchiveHandler)
+	authGroup.DELETE("/video-archive/:id", middleware.AuthPermissions(middleware.PermAdmin), deleteVideoArchiveHandler)
 }
 
-func listVideoArchivesHandler(c *gin.Context) {
+func listVideoArchiveHandler(c *gin.Context) {
 	archives, err := model.VideoArchiveList(db.GetConn())
 
 	if err != nil {
@@ -32,7 +32,7 @@ func listVideoArchivesHandler(c *gin.Context) {
 	response.Success(c, archives)
 }
 
-func deleteVideoArchivesHandler(c *gin.Context) {
+func deleteVideoArchiveHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
@@ -50,7 +50,7 @@ func deleteVideoArchivesHandler(c *gin.Context) {
 	response.Success(c, "deleted")
 }
 
-func postVideoArchivesHandler(c *gin.Context) {
+func postVideoArchiveHandler(c *gin.Context) {
 	params := struct {
 		URL string `json:"url"`
 	}{}

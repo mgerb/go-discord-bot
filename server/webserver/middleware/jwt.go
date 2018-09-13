@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mgerb/go-discord-bot/server/config"
-	"github.com/mgerb/go-discord-bot/server/webserver/discord"
+	"github.com/mgerb/go-discord-bot/server/webserver/model"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/dgrijalva/jwt-go.v3"
 )
@@ -29,7 +29,7 @@ type CustomClaims struct {
 }
 
 // GetJWT - get json web token
-func GetJWT(user discord.User) (string, error) {
+func GetJWT(user model.User) (string, error) {
 
 	permissions := PermUser
 

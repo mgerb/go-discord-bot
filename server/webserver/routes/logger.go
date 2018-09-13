@@ -4,7 +4,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mgerb/go-discord-bot/server/logger"
+	"github.com/mgerb/go-discord-bot/server/db"
+	"github.com/mgerb/go-discord-bot/server/webserver/model"
 )
 
 // AddLoggerRoutes -
@@ -20,7 +21,7 @@ func getMessagesHandler(c *gin.Context) {
 		page = 0
 	}
 
-	messages, err := logger.GetMessages(page)
+	messages, err := model.MessageGet(db.GetConn(), page)
 
 	if err != nil {
 		c.JSON(500, err)
@@ -31,7 +32,7 @@ func getMessagesHandler(c *gin.Context) {
 }
 
 func getLinkedMessagesHandler(c *gin.Context) {
-	posts, err := logger.GetLinkedMessages()
+	posts, err := model.MessageGetLinked(db.GetConn())
 
 	if err != nil {
 		c.JSON(500, err.Error())

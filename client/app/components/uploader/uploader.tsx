@@ -46,7 +46,7 @@ export class Uploader extends React.Component<IProps, IState> {
     formData.append('file', file);
 
     axios
-      .post('/api/upload', formData, this.config)
+      .post('/api/sound', formData, this.config)
       .then(() => {
         this.setState({
           percentCompleted: 0,

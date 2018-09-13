@@ -2,8 +2,10 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/mgerb/go-discord-bot/server/db"
 	"github.com/mgerb/go-discord-bot/server/webserver/discord"
 	"github.com/mgerb/go-discord-bot/server/webserver/middleware"
+	"github.com/mgerb/go-discord-bot/server/webserver/model"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -55,6 +57,13 @@ func oauthHandler(c *gin.Context) {
 		log.Error(err)
 		c.JSON(500, err)
 		return
+	}
+
+	// save/update user in database
+	err = model.UserSave(db.GetConn(), &user)
+
+	if err != nil {
+		log.Error(err)
 	}
 
 	c.JSON(200, token)

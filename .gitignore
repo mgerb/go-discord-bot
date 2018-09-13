@@ -15,3 +15,5 @@ tmp
 
 /data
 /data.db
+
+/logrus.log

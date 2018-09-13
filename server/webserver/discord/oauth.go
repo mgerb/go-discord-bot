@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/mgerb/go-discord-bot/server/config"
+	"github.com/mgerb/go-discord-bot/server/webserver/model"
+	log "github.com/sirupsen/logrus"
 )
 
 const discordAPI = "https://discordapp.com/api/v6"
@@ -63,4 +65,44 @@ func Oauth(code string) (OauthResp, error) {
 	}
 
 	return oauth, nil
+}
+
+// GetUserInfo - get user info
+func GetUserInfo(accessToken string) (model.User, error) {
+	req, err := http.NewRequest("GET", discordAPI+"/users/@me", nil)
+
+	if err != nil {
+		log.Error(err)
+		return model.User{}, err
+	}
+
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+
+	resp, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		log.Error(err)
+		return model.User{}, err
+	}
+
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Error(err)
+		return model.User{}, err
+	}
+
+	var userInfo model.User
+
+	err = json.Unmarshal(data, &userInfo)
+
+	if err != nil {
+		log.Error(err)
+		return model.User{}, err
+	}
+
+	// filter guild based on id
+	return userInfo, nil
 }

@@ -18,6 +18,8 @@ import (
 	"layeh.com/gopus"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/go-audio/audio"
+	"github.com/go-audio/wav"
 	"github.com/mgerb/go-discord-bot/server/config"
 	log "github.com/sirupsen/logrus"
 )
@@ -376,18 +378,54 @@ loop:
 		timestamp := time.Now().UTC().Format("2006-01-02") + "-" + strconv.Itoa(int(time.Now().Unix()))
 		filename := config.Config.ClipsPath + "/" + timestamp + "-" + strconv.Itoa(int(key)) + "-" + username + ".wav"
 
-		cmd := exec.Command("ffmpeg", "-f", "s16le", "-ar", strconv.Itoa(sampleRate), "-ac", strconv.Itoa(channels), "-i", "pipe:0", filename)
+		out, err := os.Create(filename)
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
+		// 8 kHz, 16 bit, 2 channel, WAV.
+		e := wav.NewEncoder(out, sampleRate, 16, channels, 1)
 
 		output := new(bytes.Buffer)
 
 		binary.Write(output, binary.LittleEndian, pcmData)
-		cmd.Stdin = bytes.NewReader(output.Bytes())
+		newReader := bytes.NewReader(output.Bytes())
 
-		err := cmd.Run()
+		// Create new audio.IntBuffer.
+		audioBuf, err := newAudioIntBuffer(newReader)
 
-		if err != nil {
+		// Write buffer to output file. This writes a RIFF header and the PCM chunks from the audio.IntBuffer.
+		if err := e.Write(audioBuf); err != nil {
+			log.Error(err)
+			out.Close()
+			continue
+		}
+		if err := e.Close(); err != nil {
 			log.Error(err)
 		}
+
+		out.Close()
+	}
+}
+
+func newAudioIntBuffer(r io.Reader) (*audio.IntBuffer, error) {
+	buf := &audio.IntBuffer{
+		Format: &audio.Format{
+			NumChannels: 1,
+			SampleRate:  8000,
+		},
+	}
+	for {
+		var sample int16
+		err := binary.Read(r, binary.LittleEndian, &sample)
+		switch {
+		case err == io.EOF:
+			return buf, nil
+		case err != nil:
+			return nil, err
+		}
+		buf.Data = append(buf.Data, int(sample))
 	}
 }
 

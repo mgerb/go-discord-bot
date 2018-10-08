@@ -1,8 +1,6 @@
-run:
-	go run ./main.go
-
 install:
-	go get ./server && cd client && npm install
+	cd server && dep ensure
+	cd client && npm install
 
 build-server:
 	cd ./server && packr build -o ../bot ./main.go

@@ -13,7 +13,10 @@ COPY --from=0 /home/dist /go/src/github.com/mgerb/go-discord-bot/dist
 ADD ./server .
 RUN apk add --no-cache git alpine-sdk
 RUN go get -u github.com/gobuffalo/packr/...
-RUN go get
+RUN go get -u github.com/golang/dep/cmd/dep
+RUN dep ensure
+# need to manually get this dependency because go dep doesn't work well with the C bindings
+RUN go get layeh.com/gopus
 RUN packr build -o /build/server
 
 

@@ -1,6 +1,6 @@
 # Discord Sound Bot
 
-A soundboard bot for discord with a Go back end and React front end.
+A soundboard bot for discord. Build with Go/React.
 
 ![Image](./screenshots/sound-bot.png)
 
@@ -39,6 +39,7 @@ services:
 - `summon` - summons the bot to your current channel
 - `dismiss` - dismisses the bot from the server
 - `<audio clip>` - play a named audio clip
+- `random` - play a random audio clip
 
 ### Uploading files
 
@@ -79,22 +80,19 @@ Check it out in the "Stats" page on the site.
 
 ### Dependencies
 
-- Go
-- node/npm
+- Go (1.10+)
+- node/npm (node 8)
 - make
 
 ### Compiling
 
-- Make sure dependencies are installed
-- install packr - `go get -u github.com/gobuffalo/packr/...`
+- Install dependencies
+  - packr - `go get -u github.com/gobuffalo/packr/...`
+  - [dep](https://github.com/golang/dep) - `go get -u github.com/golang/dep/cmd/dep`
 - Rename the `config.template.json` to `config.json`
 - add configurations to `config.json`
-- `cd client && npm run dev`
-- `go run main.go`
+- run `make all`
 - open a browser `localhost:<config_port>`
 
 [Packr](https://github.com/gobuffalo/packr) is used to bundle the static web assets into the binary.
 Use these commands to compile the project. The client must be built first.
-
-- `packr build`
-- `packr install`

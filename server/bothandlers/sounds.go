@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"os/exec"
 	"strconv"
@@ -109,6 +110,9 @@ func (conn *AudioConnection) handleMessage(m *discordgo.MessageCreate) {
 		case "clip":
 			conn.clipAudio(m)
 
+		case "random":
+			conn.playRandomAudio(m)
+
 		default:
 			conn.PlayAudio(command, m)
 		}
@@ -170,6 +174,18 @@ func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
 }
 
 func (conn *AudioConnection) queueAudio(soundName string) {
+}
+
+// play a random sound clip
+func (conn *AudioConnection) playRandomAudio(m *discordgo.MessageCreate) {
+	files, _ := ioutil.ReadDir(config.Config.SoundsPath)
+	if len(files) > 0 {
+		randomIndex := rand.Intn(len(files))
+		arr := strings.Split(files[randomIndex].Name(), ".")
+		if len(arr) > 0 && arr[0] != "" {
+			conn.PlayAudio(arr[0], m)
+		}
+	}
 }
 
 // PlayAudio - play audio in channel that user is in

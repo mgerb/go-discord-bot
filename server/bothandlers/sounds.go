@@ -356,37 +356,38 @@ func writePacketsToFile(username string, packets chan *discordgo.Packet) {
 		os.Mkdir(config.Config.ClipsPath, os.ModePerm)
 	}
 
-	// construct filename
-	timestamp := time.Now().UTC().Format("2006-01-02") + "-" + strconv.Itoa(int(time.Now().Unix()))
-	filename := config.Config.ClipsPath + "/" + timestamp + "-" + username + ".wav"
-
 	// grab everything from the voice packet channel and dump it to the file
 	// close when there is nothing left
-	pcmOut := make([]int16, 0)
+	// split audio into specific voice streams
+	pcmOut := map[uint32][]int16{}
 
 loop:
 	for {
 		select {
 		case p := <-packets:
-			for _, pcm := range p.PCM {
-				pcmOut = append(pcmOut, pcm)
-			}
+			pcmOut[p.SSRC] = append(pcmOut[p.SSRC], p.PCM...)
 		default:
 			break loop
 		}
 	}
 
-	cmd := exec.Command("ffmpeg", "-f", "s16le", "-ar", strconv.Itoa(sampleRate), "-ac", strconv.Itoa(channels), "-i", "pipe:0", filename)
+	for key, pcmData := range pcmOut {
+		// construct filename
+		timestamp := time.Now().UTC().Format("2006-01-02") + "-" + strconv.Itoa(int(time.Now().Unix()))
+		filename := config.Config.ClipsPath + "/" + timestamp + "-" + strconv.Itoa(int(key)) + "-" + username + ".wav"
 
-	output := new(bytes.Buffer)
+		cmd := exec.Command("ffmpeg", "-f", "s16le", "-ar", strconv.Itoa(sampleRate), "-ac", strconv.Itoa(channels), "-i", "pipe:0", filename)
 
-	binary.Write(output, binary.LittleEndian, pcmOut)
-	cmd.Stdin = bytes.NewReader(output.Bytes())
+		output := new(bytes.Buffer)
 
-	err := cmd.Run()
+		binary.Write(output, binary.LittleEndian, pcmData)
+		cmd.Stdin = bytes.NewReader(output.Bytes())
 
-	if err != nil {
-		log.Error(err)
+		err := cmd.Run()
+
+		if err != nil {
+			log.Error(err)
+		}
 	}
 }
 

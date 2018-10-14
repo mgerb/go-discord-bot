@@ -1,42 +1,32 @@
 package bothandlers
 
 import (
-	"bufio"
-	"bytes"
-	"encoding/binary"
-	"errors"
-	"io"
 	"io/ioutil"
 	"math/rand"
 	"os"
-	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"layeh.com/gopus"
-
 	"github.com/bwmarrin/discordgo"
-	"github.com/go-audio/audio"
-	"github.com/go-audio/wav"
 	"github.com/mgerb/go-discord-bot/server/config"
+	"github.com/mgerb/go-discord-bot/server/util"
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	channels                 int = 2                   // 1 for mono, 2 for stereo
-	sampleRate               int = 48000               // audio sampling rate - apparently a standard for opus
-	frameSize                int = 960                 // uint16 size of each audio frame
-	maxBytes                 int = (frameSize * 2) * 2 // max size of opus data
-	maxSoundQueue            int = 10                  // max amount of sounds that can be queued at one time
-	voiceClipQueuePacketSize int = 2000                // this packet size equates to roughly 40 seconds of audio
+	channels                 int = 2     // 1 for mono, 2 for stereo
+	sampleRate               int = 48000 // audio sampling rate - apparently a standard for opus
+	opusFrameSize            int = 960   // at 48kHz the permitted values are 120, 240, 480, or 960
+	maxSoundQueue            int = 10    // max amount of sounds that can be queued at one time
+	voiceClipQueuePacketSize int = 2000  // this packet size equates to roughly 40 seconds of audio
 )
 
 // ActiveConnections - current active bot connections
 // store our connection objects in a map tied to a guild id
 var ActiveConnections = make(map[string]*AudioConnection)
-var speakers = make(map[uint32]*gopus.Decoder)
 
 // AudioConnection -
 type AudioConnection struct {
@@ -52,6 +42,7 @@ type AudioConnection struct {
 	Mutex             *sync.Mutex                `json:"-"` // mutex for single audio connection
 }
 
+// AudioClip -
 type AudioClip struct {
 	Name      string
 	Extension string
@@ -175,9 +166,6 @@ func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
 	}
 }
 
-func (conn *AudioConnection) queueAudio(soundName string) {
-}
-
 // play a random sound clip
 func (conn *AudioConnection) playRandomAudio(m *discordgo.MessageCreate) {
 	files, _ := ioutil.ReadDir(config.Config.SoundsPath)
@@ -268,78 +256,25 @@ func (conn *AudioConnection) toggleSoundPlayingLock(playing bool) {
 // load audio file into memory
 func (conn *AudioConnection) loadFile(fileName string) error {
 
-	// scan directory for file
-	files, _ := ioutil.ReadDir(config.Config.SoundsPath)
-	var fextension string
-	var fname string
-	for _, f := range files {
-		fname = strings.Split(f.Name(), ".")[0]
-		fextension = "." + strings.Split(f.Name(), ".")[1]
-
-		if fname == fileName {
-			break
-		}
-
-		fname = ""
-	}
-
-	if fname == "" {
-		return errors.New("File not found")
-	}
-
-	log.Debug("Loading file: " + fname + fextension)
-
-	// use ffmpeg to convert file into a format we can use
-	cmd := exec.Command("ffmpeg", "-i", config.Config.SoundsPath+"/"+fname+fextension, "-f", "s16le", "-ar", strconv.Itoa(sampleRate), "-ac", strconv.Itoa(channels), "pipe:1")
-
-	ffmpegout, err := cmd.StdoutPipe()
+	extension, err := util.GetFileExtension(config.Config.SoundsPath, fileName)
 
 	if err != nil {
 		return err
 	}
 
-	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16348)
-
-	err = cmd.Start()
+	opusData, err := util.GetFileOpusData(path.Join(config.Config.SoundsPath, fileName+extension), channels, opusFrameSize, sampleRate)
 
 	if err != nil {
 		return err
-	}
-
-	// crate encoder to convert audio to opus codec
-	opusEncoder, err := gopus.NewEncoder(sampleRate, channels, gopus.Audio)
-
-	if err != nil {
-		return errors.New("NewEncoder error.")
 	}
 
 	conn.Sounds[fileName] = &AudioClip{
-		Content:   make([][]byte, 0),
+		Content:   opusData,
 		Name:      fileName,
-		Extension: fextension,
+		Extension: extension,
 	}
 
-	for {
-		// read data from ffmpeg stdout
-		audiobuf := make([]int16, frameSize*channels)
-		err = binary.Read(ffmpegbuf, binary.LittleEndian, &audiobuf)
-		if err == io.EOF || err == io.ErrUnexpectedEOF {
-			return nil
-		}
-		if err != nil {
-			return errors.New("Error reading from ffmpeg stdout.")
-		}
-
-		// convert audio to opus codec
-		opus, err := opusEncoder.Encode(audiobuf, frameSize, maxBytes)
-		if err != nil {
-			return errors.New("Encoding error.")
-		}
-
-		// append sound bytes to the content for this audio file
-		conn.Sounds[fileName].Content = append(conn.Sounds[fileName].Content, opus)
-	}
-
+	return nil
 }
 
 func (conn *AudioConnection) clipAudio(m *discordgo.MessageCreate) {
@@ -367,7 +302,13 @@ loop:
 	for {
 		select {
 		case p := <-packets:
-			pcmOut[p.SSRC] = append(pcmOut[p.SSRC], p.PCM...)
+			// convert opus to pcm
+			pcm, err := util.OpusToPCM(p.Opus, sampleRate, channels)
+			if err != nil {
+				log.Error(err)
+				return
+			}
+			pcmOut[p.SSRC] = append(pcmOut[p.SSRC], pcm...)
 		default:
 			break loop
 		}
@@ -378,54 +319,11 @@ loop:
 		timestamp := time.Now().UTC().Format("2006-01-02") + "-" + strconv.Itoa(int(time.Now().Unix()))
 		filename := config.Config.ClipsPath + "/" + timestamp + "-" + strconv.Itoa(int(key)) + "-" + username + ".wav"
 
-		out, err := os.Create(filename)
+		err := util.SavePCMToWavFile(pcmData, filename, sampleRate, channels)
+
 		if err != nil {
 			log.Error(err)
-			continue
 		}
-
-		// 8 kHz, 16 bit, 2 channel, WAV.
-		e := wav.NewEncoder(out, sampleRate, 16, channels, 1)
-
-		output := new(bytes.Buffer)
-
-		binary.Write(output, binary.LittleEndian, pcmData)
-		newReader := bytes.NewReader(output.Bytes())
-
-		// Create new audio.IntBuffer.
-		audioBuf, err := newAudioIntBuffer(newReader)
-
-		// Write buffer to output file. This writes a RIFF header and the PCM chunks from the audio.IntBuffer.
-		if err := e.Write(audioBuf); err != nil {
-			log.Error(err)
-			out.Close()
-			continue
-		}
-		if err := e.Close(); err != nil {
-			log.Error(err)
-		}
-
-		out.Close()
-	}
-}
-
-func newAudioIntBuffer(r io.Reader) (*audio.IntBuffer, error) {
-	buf := &audio.IntBuffer{
-		Format: &audio.Format{
-			NumChannels: 1,
-			SampleRate:  8000,
-		},
-	}
-	for {
-		var sample int16
-		err := binary.Read(r, binary.LittleEndian, &sample)
-		switch {
-		case err == io.EOF:
-			return buf, nil
-		case err != nil:
-			return nil, err
-		}
-		buf.Data = append(buf.Data, int(sample))
 	}
 }
 
@@ -438,6 +336,20 @@ func (conn *AudioConnection) startAudioListener() {
 		conn.VoiceClipQueue = make(chan *discordgo.Packet, voiceClipQueuePacketSize)
 	}
 
+	// create new channel to watch for voice connection
+	// when voice connection is not ready the loop will exit
+	exitChan := make(chan bool)
+
+	go func() {
+		for {
+			if !conn.VoiceConnection.Ready {
+				exitChan <- true
+				break
+			}
+			time.Sleep(time.Second * 1)
+		}
+	}()
+
 loop:
 	for {
 
@@ -445,23 +357,6 @@ loop:
 		// grab incomming audio
 		case opusChannel, ok := <-conn.VoiceConnection.OpusRecv:
 			if !ok {
-				continue
-			}
-
-			var err error
-			_, ok = speakers[opusChannel.SSRC]
-
-			if !ok {
-				speakers[opusChannel.SSRC], err = gopus.NewDecoder(sampleRate, channels)
-				if err != nil {
-					log.Error("error creating opus decoder", err)
-					continue
-				}
-			}
-
-			opusChannel.PCM, err = speakers[opusChannel.SSRC].Decode(opusChannel.Opus, frameSize, false)
-			if err != nil {
-				log.Error("Error decoding opus data", err)
 				continue
 			}
 
@@ -474,11 +369,8 @@ loop:
 			conn.VoiceClipQueue <- opusChannel
 
 		// check if voice connection fails then break out of audio listener
-		default:
-			if !conn.VoiceConnection.Ready {
-				break loop
-			}
-			time.Sleep(time.Second * 1)
+		case <-exitChan:
+			break loop
 		}
 	}
 

@@ -34,7 +34,7 @@
   revision = "22d885f9ecc78bf4ee5d72b937e4bbcdc58e8cae"
 
 [[projects]]
-  digest = "1:9a20e959f4a4b52a79155282a67046fa49869993732ef6d5bc3c48b3e18692cc"
+  digest = "1:d5083934eb25e45d17f72ffa86cae3814f4a9d6c073c4f16b64147169b245606"
   name = "github.com/gin-gonic/gin"
   packages = [
     ".",
@@ -87,7 +87,15 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:111ff38c0376c091da851d34ad991fbce6a679a8b53fcc5ebd61b52f07ed197d"
+  branch = "v2"
+  digest = "1:92ac5796b86f454e9b8a9f0f2ceba033747aa8d8fe1fda89b9ec6d6176a431b6"
+  name = "github.com/hraban/opus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0f2e0b4fc6cd5710fddbb74ba2e5e02c1c1bc22b"
+
+[[projects]]
+  digest = "1:2a21d36a5ab33e6e4ce82b3c7ba45c2330ca6e9af247382475e056b06395b8a9"
   name = "github.com/jinzhu/gorm"
   packages = [
     ".",
@@ -211,7 +219,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a6c91777916f37c288a9f2e352feb7567c3ff4c47a3880b391070740d3357e4f"
+  digest = "1:207d2e280e7a43845b12d07437538d22d02dbd4c274b49f3940bb3dce2ed70d7"
   name = "golang.org/x/crypto"
   packages = [
     "internal/subtle",
@@ -225,7 +233,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:17a5cb5dbf1abd5193243c18a6d7edcad08fb01a3b75c96ed050623ce69efb16"
+  digest = "1:1a1ecfa7b54ca3f7a0115ab5c578d7d6a5d8b605839c549e80260468c42f8be7"
   name = "golang.org/x/net"
   packages = [
     "html",
@@ -236,7 +244,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:19b2eb89a60dafcfe5c699fa21ef51143d9bc4825c155608f81e56e0a9a4bba4"
+  digest = "1:850d28ab022512e2cd3cf511a77f363c29e22689b4031f2050871f5de47ae4a0"
   name = "golang.org/x/sys"
   packages = [
     "unix",
@@ -278,6 +286,7 @@
     "github.com/go-audio/audio",
     "github.com/go-audio/wav",
     "github.com/gobuffalo/packr",
+    "github.com/hraban/opus",
     "github.com/jinzhu/gorm",
     "github.com/jinzhu/gorm/dialects/sqlite",
     "github.com/rylio/ytdl",

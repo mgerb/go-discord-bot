@@ -1,5 +1,5 @@
 install:
-	cd server && dep ensure
+	cd server && dep ensure && go get
 	cd client && npm install
 
 build-server:

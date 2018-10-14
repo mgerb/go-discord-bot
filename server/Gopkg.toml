@@ -4,7 +4,6 @@
 # for detailed Gopkg.toml documentation.
 #
 # required = ["github.com/user/thing/cmd/thing"]
-ignored = ["layeh.com/gopus"]
 #
 # [[constraint]]
 #   name = "github.com/user/project"

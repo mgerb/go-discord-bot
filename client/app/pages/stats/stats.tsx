@@ -1,30 +1,45 @@
+import { chain, map } from 'lodash';
+import { inject, observer } from 'mobx-react';
 import React, { Component } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
-import { chain, map } from 'lodash';
-import { axios } from '../../services';
+import { UploadHistory } from '../../components';
+import { ISound } from '../../model';
+import { axios, SoundService } from '../../services';
+import { AppStore } from '../../stores';
 import './stats.scss';
+
+interface IProps {
+  appStore: AppStore;
+}
 
 interface IState {
   data: {
     username: string;
     count: number;
   }[];
+  sounds: ISound[];
 }
 
 /**
  * a page to show discord chat statistics
  * currently keeps track of number messages that contain external links
  */
-export class Stats extends Component<any, IState> {
+@inject('appStore')
+@observer
+export class Stats extends Component<IProps, IState> {
   constructor(props: any) {
     super(props);
     this.state = {
       data: [],
+      sounds: [],
     };
   }
 
   componentDidMount() {
     this.getdata();
+    SoundService.getSounds().then(sounds => {
+      this.setState({ sounds });
+    });
   }
 
   async getdata() {
@@ -59,12 +74,15 @@ export class Stats extends Component<any, IState> {
       },
     };
 
+    const { claims } = this.props.appStore;
+
     return (
       <div className="content">
-        <div className="card" style={{ maxWidth: '1000px' }}>
+        <div className="card">
           <div className="card__header">Posts containing links</div>
           <HorizontalBar data={data} />
         </div>
+        {claims && <UploadHistory sounds={this.state.sounds} />}
       </div>
     );
   }

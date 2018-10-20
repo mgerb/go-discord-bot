@@ -1,0 +1,14 @@
+.table {
+  width: 100%;
+
+  thead {
+    text-align: left;
+  }
+
+  td,
+  th {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}

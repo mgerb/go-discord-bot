@@ -71,3 +71,9 @@ body {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
+.hide-tiny {
+  @include tinyScreen {
+    display: none;
+  }
+}

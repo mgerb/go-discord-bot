@@ -1,3 +1,4 @@
+export * from './admin';
 export * from './clips/clips';
 export * from './downloader/downloader';
 export * from './not-found/not-found';

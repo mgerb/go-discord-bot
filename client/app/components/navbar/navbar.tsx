@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { IClaims } from '../../model';
+import { IClaims, Permissions } from '../../model';
 import { OauthService, StorageService } from '../../services';
 import './navbar.scss';
 
@@ -78,6 +78,10 @@ export class Navbar extends React.Component<Props, State> {
         {this.renderNavLink('Youtube Downloader', '/downloader')}
         {this.renderNavLink('Clips', '/clips')}
         {this.renderNavLink('Stats', '/stats')}
+        {claims &&
+          claims.permissions &&
+          claims.permissions === Permissions.Admin &&
+          this.renderNavLink('Admin', '/admin')}
         {this.renderLoginButton()}
 
         {claims && claims.email && <div className="navbar__email">{claims.email}</div>}

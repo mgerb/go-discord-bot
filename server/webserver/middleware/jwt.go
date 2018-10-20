@@ -31,22 +31,12 @@ type CustomClaims struct {
 // GetJWT - get json web token
 func GetJWT(user model.User) (string, error) {
 
-	permissions := PermUser
-
-	if checkEmailPermissions(user.Email, config.Config.ModEmails) {
-		permissions = PermMod
-	}
-
-	if checkEmailPermissions(user.Email, config.Config.AdminEmails) {
-		permissions = PermAdmin
-	}
-
 	claims := CustomClaims{
 		user.ID,
 		user.Username,
 		user.Discriminator,
 		user.Email,
-		permissions,
+		*user.Permissions,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().AddDate(0, 1, 0).Unix(), // one month
 			Issuer:    "Go Discord Bot",
@@ -55,15 +45,6 @@ func GetJWT(user model.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(config.Config.JWTSecret))
-}
-
-func checkEmailPermissions(email string, emails []string) bool {
-	for _, e := range emails {
-		if email == e {
-			return true
-		}
-	}
-	return false
 }
 
 // AuthPermissions - secure end points based on auth levels

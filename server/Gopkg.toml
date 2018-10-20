@@ -64,6 +64,10 @@
   name = "gopkg.in/dgrijalva/jwt-go.v3"
   version = "3.2.0"
 
+[[constraint]]
+  branch = "master"
+  name = "github.com/jinzhu/copier"
+
 [prune]
   go-tests = true
   unused-packages = true

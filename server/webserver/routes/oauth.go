@@ -9,8 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const cashGuildID = "101198129352691712"
-
 type oauthReq struct {
 	Code string `json:"code"`
 }
@@ -50,8 +48,8 @@ func oauthHandler(c *gin.Context) {
 		return
 	}
 
-	// generate json web token
-	token, err := middleware.GetJWT(user)
+	// save/update user in database
+	err = model.UserSave(db.GetConn(), &user)
 
 	if err != nil {
 		log.Error(err)
@@ -59,11 +57,13 @@ func oauthHandler(c *gin.Context) {
 		return
 	}
 
-	// save/update user in database
-	err = model.UserSave(db.GetConn(), &user)
+	// generate json web token
+	token, err := middleware.GetJWT(user)
 
 	if err != nil {
 		log.Error(err)
+		c.JSON(500, err)
+		return
 	}
 
 	c.JSON(200, token)

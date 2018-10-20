@@ -1,5 +1,9 @@
 package main
 
+/**
+This script will fetch all messages for the provided channel and store them in the database.
+*/
+
 import (
 	"log"
 
@@ -10,13 +14,15 @@ import (
 	"github.com/mgerb/go-discord-bot/server/db"
 )
 
-const everyoneChannel = "101198129352691712"
+// var everyoneChannel = "101198129352691712"
+var everyoneChannel string
 
 // this is a script to go through chat history and log old message into database
-func main() {
+func restoreMessages(channelID string) {
 	config.Init()
 	db.Init()
 	session := bot.Start(config.Config.Token)
+	everyoneChannel = channelID
 	fetchMessages(session, "")
 }
 

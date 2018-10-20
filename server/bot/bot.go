@@ -16,10 +16,7 @@ func Start(token string) *discordgo.Session {
 
 	// add bot handlers
 	addHandler(session, bothandlers.SoundsHandler)
-
-	if config.Config.Logger {
-		addHandler(session, bothandlers.LoggerHandler)
-	}
+	addHandler(session, bothandlers.LoggerHandler)
 
 	// start listening for commands
 	startListener(session)

@@ -33,6 +33,22 @@ services:
       - <path to your data directory>:/bot
 ```
 
+#### Running Bot Scripts
+
+Use the following scripts
+
+- restore-messages
+  - used to search message history and store in database
+- update-db
+  - used to run additional DB change scripts (will likely never have to be run)
+
+Example:
+
+```
+docker-compose exec go-discord-bot /server/bot-scripts update-db
+docker-compose exec go-discord-bot /server/bot-scripts restore-message <roomID>
+```
+
 ### Commands
 
 - `clip` - clips the past minute of audio (currently bugged if more than one user is speaking)

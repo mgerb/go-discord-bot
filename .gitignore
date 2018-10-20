@@ -3,7 +3,8 @@ dist
 node_modules
 yarn-error*
 vendor
-bot
+/bot
+/bot-scripts
 debug
 go-discord-bot
 .wwp-cache

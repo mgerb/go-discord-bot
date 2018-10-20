@@ -95,6 +95,14 @@
   revision = "0f2e0b4fc6cd5710fddbb74ba2e5e02c1c1bc22b"
 
 [[projects]]
+  branch = "master"
+  digest = "1:5c3444689562053b027ef3b96372e306adbe0d7d109b6cdd48d01eb80f8bab14"
+  name = "github.com/jinzhu/copier"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7e38e58719c33e0d44d585c4ab477a30f8cb82dd"
+
+[[projects]]
   digest = "1:2a21d36a5ab33e6e4ce82b3c7ba45c2330ca6e9af247382475e056b06395b8a9"
   name = "github.com/jinzhu/gorm"
   packages = [
@@ -287,6 +295,7 @@
     "github.com/go-audio/wav",
     "github.com/gobuffalo/packr",
     "github.com/hraban/opus",
+    "github.com/jinzhu/copier",
     "github.com/jinzhu/gorm",
     "github.com/jinzhu/gorm/dialects/sqlite",
     "github.com/rylio/ytdl",

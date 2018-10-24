@@ -90,30 +90,26 @@ func GetFileExtension(path, fileName string) (string, error) {
 	return "", errors.New("file not found")
 }
 
-// cache the opusDecoder so we don't have to make a new one every time
-// was causing audio issues creating a new instance of this every time
-var opusDecoder *opus.Decoder
-
 // OpusToPCM - convert opus to pcm
-func OpusToPCM(data []byte, sampleRate, channels int) ([]int16, error) {
-	if opusDecoder == nil {
-		var err error
-		opusDecoder, err = opus.NewDecoder(sampleRate, channels)
-		if err != nil {
-			return []int16{}, err
-		}
-	}
-
-	// create pcm list with more than enough space
-	pcm := make([]int16, 10000)
-	n, err := opusDecoder.Decode(data, pcm)
+func OpusToPCM(opusData [][]byte, sampleRate, channels int) ([]int16, error) {
+	opusDecoder, err := opus.NewDecoder(sampleRate, channels)
+	pcm := []int16{}
 
 	if err != nil {
-		return []int16{}, err
+		return pcm, err
 	}
 
-	// trim the remaining space
-	pcm = pcm[:n*channels]
+	for _, o := range opusData {
+		// create pcm slice with more than enough space
+		p := make([]int16, 10000)
+		n, err := opusDecoder.Decode(o, p)
+
+		if err != nil {
+			return pcm, err
+		}
+
+		pcm = append(pcm, p[:n*channels]...)
+	}
 
 	return pcm, nil
 }

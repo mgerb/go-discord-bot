@@ -220,7 +220,7 @@ func (conn *AudioConnection) playSoundsInQueue() {
 	conn.toggleSoundPlayingLock(true)
 
 	// Start speaking.
-	_ = conn.VoiceConnection.Speaking(true)
+	conn.VoiceConnection.Speaking(true)
 
 	for {
 		select {
@@ -240,7 +240,7 @@ func (conn *AudioConnection) playSoundsInQueue() {
 
 		default:
 			// Stop speaking
-			_ = conn.VoiceConnection.Speaking(false)
+			conn.VoiceConnection.Speaking(false)
 			conn.toggleSoundPlayingLock(false)
 			return
 		}
@@ -293,33 +293,33 @@ func writePacketsToFile(username string, packets chan *discordgo.Packet) {
 		os.Mkdir(config.Config.ClipsPath, os.ModePerm)
 	}
 
-	// grab everything from the voice packet channel and dump it to the file
-	// close when there is nothing left
-	// split audio into specific voice streams
-	pcmOut := map[uint32][]int16{}
+	opusData := map[uint32][][]byte{}
 
 loop:
 	for {
 		select {
 		case p := <-packets:
-			// convert opus to pcm
-			pcm, err := util.OpusToPCM(p.Opus, sampleRate, channels)
-			if err != nil {
-				log.Error(err)
-				return
-			}
-			pcmOut[p.SSRC] = append(pcmOut[p.SSRC], pcm...)
+			// separate opus data for each channel
+			opusData[p.SSRC] = append(opusData[p.SSRC], p.Opus)
 		default:
 			break loop
 		}
 	}
 
-	for key, pcmData := range pcmOut {
+	for key, opus := range opusData {
+
+		pcmData, err := util.OpusToPCM(opus, sampleRate, channels)
+
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+
 		// construct filename
 		timestamp := time.Now().UTC().Format("2006-01-02") + "-" + strconv.Itoa(int(time.Now().Unix()))
 		filename := config.Config.ClipsPath + "/" + timestamp + "-" + strconv.Itoa(int(key)) + "-" + username + ".wav"
 
-		err := util.SavePCMToWavFile(pcmData, filename, sampleRate, channels)
+		err = util.SavePCMToWavFile(pcmData, filename, sampleRate, channels)
 
 		if err != nil {
 			log.Error(err)

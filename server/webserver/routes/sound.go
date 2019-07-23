@@ -46,7 +46,11 @@ func postSoundPlayHandler(c *gin.Context) {
 	// will need selector on UI if used for multiple servers
 	if len(connections) == 1 && params.Name != "" {
 		for _, con := range connections {
-			con.PlayAudio(params.Name, nil)
+			if params.Name == "random" {
+				con.PlayRandomAudio(nil)
+			} else {
+				con.PlayAudio(params.Name, nil)
+			}
 		}
 	}
 

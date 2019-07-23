@@ -104,7 +104,7 @@ func (conn *AudioConnection) handleMessage(m *discordgo.MessageCreate) {
 			conn.clipAudio(m)
 
 		case "random":
-			conn.playRandomAudio(m)
+			conn.PlayRandomAudio(m)
 
 		default:
 			conn.PlayAudio(command, m)
@@ -167,7 +167,7 @@ func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
 }
 
 // play a random sound clip
-func (conn *AudioConnection) playRandomAudio(m *discordgo.MessageCreate) {
+func (conn *AudioConnection) PlayRandomAudio(m *discordgo.MessageCreate) {
 	files, _ := ioutil.ReadDir(config.Config.SoundsPath)
 	if len(files) > 0 {
 		randomIndex := rand.Intn(len(files))

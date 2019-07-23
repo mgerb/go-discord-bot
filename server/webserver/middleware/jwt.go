@@ -38,7 +38,7 @@ func GetJWT(user model.User) (string, error) {
 		user.Email,
 		*user.Permissions,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().AddDate(0, 1, 0).Unix(), // one month
+			ExpiresAt: time.Now().AddDate(0, 12, 0).Unix(), // twelve months
 			Issuer:    "Go Discord Bot",
 		},
 	}

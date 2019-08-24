@@ -185,7 +185,7 @@ func (conn *AudioConnection) PlayAudio(soundName string, m *discordgo.MessageCre
 	// summon bot to channel if new message passed in
 	if m != nil {
 		conn.summon(m)
-	} else if !conn.VoiceConnection.Ready {
+	} else if conn.VoiceConnection == nil || !conn.VoiceConnection.Ready {
 		return
 	}
 

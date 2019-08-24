@@ -74,7 +74,7 @@ export class Stats extends Component<IProps, IState> {
       },
     };
 
-    const { claims } = this.props.appStore;
+    const { claims, hasModPermissions } = this.props.appStore;
 
     return (
       <div className="content">
@@ -82,7 +82,7 @@ export class Stats extends Component<IProps, IState> {
           <div className="card__header">Posts containing links</div>
           <HorizontalBar data={data} />
         </div>
-        {claims && <UploadHistory sounds={this.state.sounds} />}
+        {claims && <UploadHistory sounds={this.state.sounds} showDiscordPlay={hasModPermissions()} />}
       </div>
     );
   }

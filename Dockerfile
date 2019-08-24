@@ -1,12 +1,11 @@
-FROM node:8.11.1-alpine
+FROM node:10.16-alpine
 
 WORKDIR /home/client
-ADD ./client .
+ADD ./client/ /home/client/
 RUN npm install
 RUN npm run build
 
-
-FROM golang:1.10.2-alpine3.7
+FROM golang:1.12.9-alpine3.10
 
 WORKDIR /go/src/github.com/mgerb/go-discord-bot/server
 COPY --from=0 /home/dist /go/src/github.com/mgerb/go-discord-bot/dist
@@ -19,7 +18,7 @@ RUN packr build -o /build/bot
 RUN go build -o /build/bot-scripts ./scripts
 
 
-FROM wernight/youtube-dl
+FROM wernight/youtube-dl:latest
 
 RUN apk update
 RUN apk add ca-certificates opus-dev opusfile-dev

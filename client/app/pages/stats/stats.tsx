@@ -1,16 +1,11 @@
 import { chain, map } from 'lodash';
-import { inject, observer } from 'mobx-react';
 import React, { Component } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
-import { UploadHistory } from '../../components';
 import { ISound } from '../../model';
 import { axios, SoundService } from '../../services';
-import { AppStore } from '../../stores';
 import './stats.scss';
 
-interface IProps {
-  appStore: AppStore;
-}
+interface IProps {}
 
 interface IState {
   data: {
@@ -24,8 +19,6 @@ interface IState {
  * a page to show discord chat statistics
  * currently keeps track of number messages that contain external links
  */
-@inject('appStore')
-@observer
 export class Stats extends Component<IProps, IState> {
   constructor(props: any) {
     super(props);
@@ -74,15 +67,12 @@ export class Stats extends Component<IProps, IState> {
       },
     };
 
-    const { claims, hasModPermissions } = this.props.appStore;
-
     return (
       <div className="content">
         <div className="card">
           <div className="card__header">Posts containing links</div>
           <HorizontalBar data={data} />
         </div>
-        {claims && <UploadHistory sounds={this.state.sounds} showDiscordPlay={hasModPermissions()} />}
       </div>
     );
   }

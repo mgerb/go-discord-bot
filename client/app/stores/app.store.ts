@@ -41,7 +41,11 @@ export class AppStore {
     this.navbarOpen = !this.navbarOpen;
   };
 
-  public hasModPermissions = () => {
-    return this.claims && this.claims.permissions >= Permissions.Mod;
+  public hasModPermissions = (): boolean => {
+    return !!this.claims && this.claims.permissions >= Permissions.Mod;
+  };
+
+  public hasAdminPermissions = (): boolean => {
+    return !!this.claims && this.claims.permissions >= Permissions.Admin;
   };
 }

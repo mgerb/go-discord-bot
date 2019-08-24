@@ -72,6 +72,7 @@ export class Soundboard extends React.Component<Props, State> {
         <Uploader onComplete={this.onUploadComplete} />
         <SoundList
           soundList={soundList}
+          title="Sounds"
           type="sounds"
           onPlayDiscord={this.onPlayDiscord}
           showDiscordPlay={appStore!.hasModPermissions()}

@@ -18,7 +18,7 @@ export const Wrapper = inject('appStore')(
       return (
         <div>
           <Header onButtonClick={appStore.toggleNavbar} />
-          <Navbar claims={appStore.claims} open={appStore.navbarOpen} onNavClick={onNavClick} />
+          <Navbar appStore={appStore} onNavClick={onNavClick} />
           <div className={'wrapper ' + openClass}>{children}</div>
         </div>
       );

@@ -5,6 +5,7 @@ import './sound-list.scss';
 interface Props {
   soundList: SoundType[];
   type: 'sounds' | 'clips';
+  title: string;
   onPlayDiscord?: (sound: SoundType) => void;
   showDiscordPlay?: boolean;
 }
@@ -47,13 +48,13 @@ export class SoundList extends React.Component<Props, State> {
   }
 
   render() {
-    const { showDiscordPlay, soundList, type } = this.props;
+    const { showDiscordPlay, soundList, title, type } = this.props;
 
     return (
       <div className="card">
         <div className="card__header" style={{ display: 'flex' }}>
           <div>
-            <span>{type}</span>
+            <span>{title}</span>
             <i className="fa fa fa-volume-up" aria-hidden="true" />
           </div>
           <div style={{ flex: 1 }} />

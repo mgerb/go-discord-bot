@@ -43,7 +43,7 @@ export class ClipPlayerControl extends React.Component<IProps, IState> {
 
     return (
       this.checkExtension(sound.extension) && (
-        <div className="flex flex--v-center">
+        <div className="flex flex--center">
           <a
             href={`/public/${type.toLowerCase()}/` + sound.name + '.' + sound.extension}
             download

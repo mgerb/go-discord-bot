@@ -14,14 +14,14 @@ export const UploadHistory = ({ sounds, showDiscordPlay }: IProps) => {
   return (
     <div className="card">
       <div className="card__header">Upload History</div>
-      <table className="table">
+      <table className="table table--ellipsis">
         <thead>
           <tr>
-            <th className="hide-tiny">Date</th>
+            <th className="hide-small">Date</th>
             <th>Sound</th>
-            <th className="hide-tiny">Ext</th>
-            <th>Username</th>
-            <th className="hide-tiny">Email</th>
+            <th className="hide-small">Ext</th>
+            <th>User</th>
+            <th className="hide-small">Email</th>
           </tr>
         </thead>
         <tbody>
@@ -29,15 +29,15 @@ export const UploadHistory = ({ sounds, showDiscordPlay }: IProps) => {
             const formattedDate = DateTime.fromISO(s.created_at).toLocaleString();
             return (
               <tr key={i}>
-                <td className="hide-tiny" title={formattedDate}>
+                <td className="hide-small" title={formattedDate}>
                   {formattedDate}
                 </td>
                 <td title={s.name}>{s.name}</td>
-                <td className="hide-tiny" title={s.extension}>
+                <td className="hide-small" title={s.extension}>
                   {s.extension}
                 </td>
                 <td title={s.user.username}>{s.user.username}</td>
-                <td className="hide-tiny" title={s.user.email}>
+                <td className="hide-small" title={s.user.email}>
                   {s.user.email}
                 </td>
                 <td>

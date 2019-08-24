@@ -64,7 +64,9 @@ export class SoundList extends React.Component<Props, State> {
           ? soundList.map((sound: SoundType, index: number) => {
               return (
                 <div key={index} className="sound-list__item">
-                  <div className="text-wrap">{(sound.prefix || '') + sound.name}</div>
+                  <div className="text-wrap">
+                    {(type === 'sounds' && sound.prefix ? sound.prefix : '') + sound.name}
+                  </div>
 
                   <ClipPlayerControl showDiscordPlay={showDiscordPlay} sound={sound} type={type} />
                 </div>

@@ -10,6 +10,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mgerb/go-discord-bot/server/db"
+	"github.com/mgerb/go-discord-bot/server/webserver/model"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/mgerb/go-discord-bot/server/config"
 	"github.com/mgerb/go-discord-bot/server/util"
@@ -104,10 +107,10 @@ func (conn *AudioConnection) handleMessage(m *discordgo.MessageCreate) {
 			conn.clipAudio(m)
 
 		case "random":
-			conn.PlayRandomAudio(m)
+			conn.PlayRandomAudio(m, nil)
 
 		default:
-			conn.PlayAudio(command, m)
+			conn.PlayAudio(command, m, nil)
 		}
 	}
 }
@@ -167,25 +170,25 @@ func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
 }
 
 // play a random sound clip
-func (conn *AudioConnection) PlayRandomAudio(m *discordgo.MessageCreate) {
+func (conn *AudioConnection) PlayRandomAudio(m *discordgo.MessageCreate, userID *string) {
 	files, _ := ioutil.ReadDir(config.Config.SoundsPath)
 	if len(files) > 0 {
 		randomIndex := rand.Intn(len(files))
 		arr := strings.Split(files[randomIndex].Name(), ".")
 		if len(arr) > 0 && arr[0] != "" {
-			conn.PlayAudio(arr[0], m)
+			conn.PlayAudio(arr[0], m, userID)
 		}
 	}
 }
 
 // PlayAudio - play audio in channel that user is in
 // if MessageCreate is null play in current channel
-func (conn *AudioConnection) PlayAudio(soundName string, m *discordgo.MessageCreate) {
+func (conn *AudioConnection) PlayAudio(soundName string, m *discordgo.MessageCreate, userID *string) {
 
 	// summon bot to channel if new message passed in
 	if m != nil {
 		conn.summon(m)
-	} else if !conn.VoiceConnection.Ready {
+	} else if conn.VoiceConnection == nil || !conn.VoiceConnection.Ready {
 		return
 	}
 
@@ -203,6 +206,24 @@ func (conn *AudioConnection) PlayAudio(soundName string, m *discordgo.MessageCre
 	// add sound to queue if queue isn't full
 	select {
 	case conn.SoundQueue <- soundName:
+
+		var newUserID string
+		fromWebUI := false
+
+		// from discord
+		if m != nil && m.Author != nil {
+			newUserID = m.Author.ID
+		} else {
+			fromWebUI = true
+			newUserID = *userID
+		}
+
+		// log event when user plays sound clip
+		err := model.LogSoundPlayedEvent(db.GetConn(), newUserID, soundName, fromWebUI)
+
+		if err != nil {
+			log.Error(err)
+		}
 
 	default:
 		break

@@ -1,7 +1,6 @@
 import { inject, observer } from 'mobx-react';
 import React from 'react';
 import { SoundList, SoundType, Uploader } from '../../components';
-import { Permissions } from '../../model';
 import { axios, SoundService } from '../../services';
 import { AppStore } from '../../stores';
 import './soundboard.scss';
@@ -73,9 +72,10 @@ export class Soundboard extends React.Component<Props, State> {
         <Uploader onComplete={this.onUploadComplete} />
         <SoundList
           soundList={soundList}
-          type="Sounds"
+          title="Sounds"
+          type="sounds"
           onPlayDiscord={this.onPlayDiscord}
-          showDiscordPlay={appStore!.claims && appStore!.claims!.permissions >= Permissions.Mod}
+          showDiscordPlay={appStore!.hasModPermissions()}
         />
       </div>
     );

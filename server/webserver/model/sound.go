@@ -17,11 +17,11 @@ type Sound struct {
 	User      User       `json:"user"`
 }
 
-func SoundCreate(conn *gorm.DB, sound *Sound) error {
+func SoundSave(conn *gorm.DB, sound *Sound) error {
 	return conn.Create(sound).Error
 }
 
-func SoundList(conn *gorm.DB) ([]Sound, error) {
+func SoundGet(conn *gorm.DB) ([]Sound, error) {
 	sound := []Sound{}
 	err := conn.Set("gorm:auto_preload", true).Find(&sound).Error
 	return sound, err

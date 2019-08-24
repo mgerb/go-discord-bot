@@ -1,12 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { IClaims, Permissions } from '../../model';
 import { OauthService, StorageService } from '../../services';
+import { AppStore } from '../../stores';
 import './navbar.scss';
 
 interface Props {
-  claims?: IClaims;
-  open: boolean;
+  appStore: AppStore;
   onNavClick: () => void;
 }
 
@@ -37,7 +36,7 @@ export class Navbar extends React.Component<Props, State> {
   };
 
   renderLoginButton() {
-    const { claims } = this.props;
+    const { claims } = this.props.appStore;
 
     if (!this.state.oauthUrl) {
       return null;
@@ -69,19 +68,17 @@ export class Navbar extends React.Component<Props, State> {
   };
 
   render() {
-    const { claims, open } = this.props;
-    const openClass = open ? 'navbar--open' : '';
+    const { claims, navbarOpen, hasModPermissions, hasAdminPermissions } = this.props.appStore;
+    const openClass = navbarOpen ? 'navbar--open' : '';
     return (
       <div className={'navbar ' + openClass}>
         {this.renderNavLink('Soundboard', '/', { exact: true })}
+        {hasModPermissions() && this.renderNavLink('Upload History', '/upload-history')}
         {this.renderNavLink('Video Archive', '/video-archive')}
         {this.renderNavLink('Youtube Downloader', '/downloader')}
         {this.renderNavLink('Clips', '/clips')}
         {this.renderNavLink('Stats', '/stats')}
-        {claims &&
-          claims.permissions &&
-          claims.permissions === Permissions.Admin &&
-          this.renderNavLink('Admin', '/admin')}
+        {hasAdminPermissions() && this.renderNavLink('Admin', '/admin')}
         {this.renderLoginButton()}
 
         {claims && claims.email && <div className="navbar__email">{claims.email}</div>}

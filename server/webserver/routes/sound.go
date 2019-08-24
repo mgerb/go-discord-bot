@@ -23,7 +23,7 @@ func AddSoundRoutes(group *gin.RouterGroup) {
 }
 
 func listSoundHandler(c *gin.Context) {
-	archives, err := model.SoundList(db.GetConn())
+	archives, err := model.SoundGet(db.GetConn())
 
 	if err != nil {
 		response.InternalError(c, err)
@@ -36,6 +36,9 @@ func listSoundHandler(c *gin.Context) {
 func postSoundPlayHandler(c *gin.Context) {
 	connections := bothandlers.ActiveConnections
 
+	oc, _ := c.Get("claims")
+	claims, _ := oc.(*middleware.CustomClaims)
+
 	params := struct {
 		Name string `json:"name"`
 	}{}
@@ -47,9 +50,9 @@ func postSoundPlayHandler(c *gin.Context) {
 	if len(connections) == 1 && params.Name != "" {
 		for _, con := range connections {
 			if params.Name == "random" {
-				con.PlayRandomAudio(nil)
+				con.PlayRandomAudio(nil, &claims.UserID)
 			} else {
-				con.PlayAudio(params.Name, nil)
+				con.PlayAudio(params.Name, nil, &claims.UserID)
 			}
 		}
 	}
@@ -89,7 +92,7 @@ func postSoundHandler(c *gin.Context) {
 	log.Info(claims.Username, "uploaded", config.Config.SoundsPath+"/"+file.Filename)
 
 	// save who uploaded the clip into the database
-	uploadSaveDB(claims.ID, file.Filename)
+	uploadSaveDB(claims.UserID, file.Filename)
 
 	if err != nil {
 		log.Error(err)
@@ -106,7 +109,7 @@ func uploadSaveDB(userID, filename string) {
 	extension := splitFilename[len(splitFilename)-1]
 	name := strings.Join(splitFilename[:len(splitFilename)-1], ".")
 
-	model.SoundCreate(db.GetConn(), &model.Sound{
+	model.SoundSave(db.GetConn(), &model.Sound{
 		UserID:    userID,
 		Name:      name,
 		Extension: extension,

@@ -4,7 +4,13 @@
   thead {
     text-align: left;
   }
+  td,
+  th {
+    padding: 10px 5px;
+  }
+}
 
+.table--ellipsis {
   td,
   th {
     white-space: nowrap;

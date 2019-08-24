@@ -20,7 +20,7 @@ const (
 
 // CustomClaims -
 type CustomClaims struct {
-	ID            string `json:"id"`
+	UserID        string `json:"id"`
 	Username      string `json:"username"`
 	Discriminator string `json:"discriminator"`
 	Email         string `json:"email"`

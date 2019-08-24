@@ -1,6 +1,6 @@
 import jwt_decode from 'jwt-decode';
 import { action, observable } from 'mobx';
-import { IClaims } from '../model';
+import { IClaims, Permissions } from '../model';
 import { axios, StorageService } from '../services';
 import { Util } from '../util';
 
@@ -39,5 +39,13 @@ export class AppStore {
   @action
   public toggleNavbar = () => {
     this.navbarOpen = !this.navbarOpen;
+  };
+
+  public hasModPermissions = (): boolean => {
+    return !!this.claims && this.claims.permissions >= Permissions.Mod;
+  };
+
+  public hasAdminPermissions = (): boolean => {
+    return !!this.claims && this.claims.permissions >= Permissions.Admin;
   };
 }

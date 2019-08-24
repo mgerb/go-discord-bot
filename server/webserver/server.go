@@ -31,6 +31,7 @@ func getRouter() *gin.Engine {
 	routes.AddConfigRoutes(api)
 	routes.AddSoundRoutes(api)
 	routes.AddVideoArchiveRoutes(api)
+	routes.AddUserEventLogRoutes(api)
 
 	router.NoRoute(func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.String(), "/api/") {

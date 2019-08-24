@@ -32,8 +32,17 @@ body {
   display: flex;
 }
 
+.flex--center {
+  align-items: center;
+  justify-content: center;
+}
+
 .flex--v-center {
   align-items: center;
+}
+
+.flex--h-center {
+  justify-content: center;
 }
 
 .content {
@@ -74,6 +83,12 @@ body {
 
 .hide-tiny {
   @include tinyScreen {
+    display: none;
+  }
+}
+
+.hide-small {
+  @include smallScreen {
     display: none;
   }
 }

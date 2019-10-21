@@ -47,6 +47,7 @@ Example:
 ```
 docker-compose exec go-discord-bot /server/bot-scripts update-db
 docker-compose exec go-discord-bot /server/bot-scripts restore-message <roomID>
+(_(_)|||||||||||||||||D~~~~~~~~~
 ```
 
 ### Commands

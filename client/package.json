@@ -1,6 +1,6 @@
 {
   "name": "go-discord-bot",
-  "version": "0.15.0",
+  "version": "0.17.0",
   "description": "Client for go-discord-bot",
   "scripts": {
     "build": "NODE_ENV=prod webpack -p --progress --colors",

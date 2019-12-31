@@ -36,7 +36,7 @@ export class UploadHistory extends React.Component<IProps, IState> {
     return (
       <div className="card">
         <div className="card__header">Upload History</div>
-        <table className="table table--ellipsis">
+        <table className="table table--ellipsis table--fixed">
           <thead>
             <tr>
               <th className="hide-small">Date</th>

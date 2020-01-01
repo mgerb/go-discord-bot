@@ -23,7 +23,7 @@
     "@types/react-dropzone": "^4.2.0",
     "@types/react-router-dom": "^4.2.7",
     "autoprefixer": "^8.6.3",
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
     "babel-plugin-add-module-exports": "^0.2.1",

@@ -26,12 +26,12 @@ export class UploadHistory extends React.Component<IProps, IState> {
   }
 
   componentDidMount() {
-    SoundService.getSounds().then(sounds => {
+    SoundService.getSounds().then((sounds) => {
       this.setState({ sounds });
     });
   }
 
-  renderUploadHistory = (sounds: ISound[], showDiscordPlay: boolean) => {
+  renderUploadHistory = (sounds: ISound[], hasModPermissions: boolean) => {
     const sortedSounds = orderBy(sounds, 'created_at', 'desc');
     return (
       <div className="card">
@@ -63,7 +63,13 @@ export class UploadHistory extends React.Component<IProps, IState> {
                     {s.user.email}
                   </td>
                   <td>
-                    <ClipPlayerControl showDiscordPlay={showDiscordPlay} sound={s} type="sounds"></ClipPlayerControl>
+                    <ClipPlayerControl
+                      onPlayBrowser={(sound) => SoundService.playAudioInBrowser(sound, 'sounds')}
+                      onPlayDiscord={SoundService.playSound}
+                      hasModPermissions={hasModPermissions}
+                      sound={s}
+                      type="sounds"
+                    ></ClipPlayerControl>
                   </td>
                 </tr>
               );

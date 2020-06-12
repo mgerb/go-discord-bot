@@ -1,6 +1,7 @@
 import { inject, observer } from 'mobx-react';
 import React from 'react';
-import { SoundList, SoundType, Uploader } from '../../components';
+import { SoundList, Uploader } from '../../components';
+import { SoundType } from '../../model';
 import { axios, SoundService } from '../../services';
 import { AppStore } from '../../stores';
 import './soundboard.scss';
@@ -39,7 +40,7 @@ export class Soundboard extends React.Component<Props, State> {
     if (!this.soundListCache) {
       axios
         .get('/api/soundlist')
-        .then(response => {
+        .then((response) => {
           this.soundListCache = response.data;
           this.setState({
             soundList: response.data,
@@ -64,18 +65,42 @@ export class Soundboard extends React.Component<Props, State> {
     SoundService.playSound(sound);
   };
 
+  onFavorite = (sound: SoundType) => {
+    this.props.appStore?.addFavorite(sound);
+  };
+
+  onDeleteFavorite = (sound: SoundType) => {
+    this.props.appStore?.removeFavorite(sound);
+  };
+
   render() {
     const { soundList } = this.state;
-    const { appStore } = this.props;
+
+    if (!this.props.appStore) {
+      return null;
+    }
+    const { hasModPermissions, getFavorites } = this.props.appStore;
+
     return (
       <div className="content">
         <Uploader onComplete={this.onUploadComplete} />
+        {((hasModPermissions && getFavorites().length) || 0 > 0) && (
+          <SoundList
+            soundList={getFavorites()}
+            title="Favorites"
+            type="favorites"
+            onPlayDiscord={this.onPlayDiscord}
+            hasModPermissions={hasModPermissions()}
+            onFavorite={this.onDeleteFavorite}
+          />
+        )}
         <SoundList
           soundList={soundList}
           title="Sounds"
           type="sounds"
           onPlayDiscord={this.onPlayDiscord}
-          showDiscordPlay={appStore!.hasModPermissions()}
+          hasModPermissions={hasModPermissions()}
+          onFavorite={this.onFavorite}
         />
       </div>
     );

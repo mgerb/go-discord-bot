@@ -1,23 +1,21 @@
 import React from 'react';
+import { SoundListType, SoundType } from '../../model';
+import { SoundService } from '../../services';
 import { ClipPlayerControl } from '../clip-player-control/clip-player-control';
 import './sound-list.scss';
 
 interface Props {
   soundList: SoundType[];
-  type: 'sounds' | 'clips';
+  type: SoundListType;
   title: string;
   onPlayDiscord?: (sound: SoundType) => void;
-  showDiscordPlay?: boolean;
+  hasModPermissions: boolean;
+  onFavorite?: (sound: SoundType) => void;
+  deleteFavorite?: (sound: SoundType) => void;
 }
 
 interface State {
   showAudioControls: boolean[];
-}
-
-export interface SoundType {
-  extension: string;
-  name: string;
-  prefix?: string;
 }
 
 export class SoundList extends React.Component<Props, State> {
@@ -41,14 +39,8 @@ export class SoundList extends React.Component<Props, State> {
     }
   }
 
-  handlePlayAudioInBrowser(sound: SoundType, type: string) {
-    const url = `/public/${type.toLowerCase()}/` + sound.name + '.' + sound.extension;
-    const audio = new Audio(url);
-    audio.play();
-  }
-
   render() {
-    const { showDiscordPlay, soundList, title, type } = this.props;
+    const { hasModPermissions, onFavorite, soundList, title, type } = this.props;
 
     return (
       <div className="card">
@@ -66,10 +58,18 @@ export class SoundList extends React.Component<Props, State> {
               return (
                 <div key={index} className="sound-list__item">
                   <div className="text-wrap">
-                    {(type === 'sounds' && sound.prefix ? sound.prefix : '') + sound.name}
+                    {((type === 'sounds' || type === 'favorites') && sound.prefix ? sound.prefix : '') + sound.name}
                   </div>
 
-                  <ClipPlayerControl showDiscordPlay={showDiscordPlay} sound={sound} type={type} />
+                  <ClipPlayerControl
+                    showFavorite={type !== 'clips'}
+                    onFavorite={() => !onFavorite || onFavorite(sound)}
+                    hasModPermissions={hasModPermissions}
+                    sound={sound}
+                    type={type}
+                    onPlayBrowser={(sound) => SoundService.playAudioInBrowser(sound, type)}
+                    onPlayDiscord={SoundService.playSound}
+                  />
                 </div>
               );
             })

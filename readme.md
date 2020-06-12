@@ -16,21 +16,22 @@ A soundboard bot for discord. Build with Go/React.
 ### With docker-compose
 
 Make sure to create a `config.json` file in your data volume.
-Take a look at `config.template.json` for example congurations.
+Take a look at `config.template.json` for example configurations.
 
 docker-compose.yml
 
 ```
-version: "2"
+version: "3"
 
 services:
   go-discord-bot:
     image: mgerb/go-discord-bot:latest
     restart: unless-stopped
     ports:
-      - 8080:8080
+      - 8088:8080
     volumes:
       - <path to your data directory>:/bot
+      - /usr/local/bin/youtube-dl:/usr/bin/youtube-dl
 ```
 
 #### Running Bot Scripts

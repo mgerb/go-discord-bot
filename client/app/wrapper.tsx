@@ -7,7 +7,7 @@ import './wrapper.scss';
 
 export const Wrapper = inject('appStore')(
   withRouter(
-    observer(({ appStore, children }) => {
+    observer(({ appStore, children }: any) => {
       const openClass = appStore.navbarOpen ? 'wrapper--open' : '';
       const onNavClick = () => {
         if (Util.isMobileScreen()) {

@@ -1,5 +1,6 @@
 import React from 'react';
-import { SoundList, SoundType } from '../../components';
+import { SoundList } from '../../components';
+import { SoundType } from '../../model';
 import { axios } from '../../services';
 
 interface Props {}
@@ -23,7 +24,7 @@ export class Clips extends React.Component<Props, State> {
   private getClipList() {
     axios
       .get('/api/cliplist')
-      .then(response => {
+      .then((response) => {
         this.setState({
           clipList: response.data,
         });
@@ -37,7 +38,8 @@ export class Clips extends React.Component<Props, State> {
     return (
       <div className="content">
         <div className="column">
-          <SoundList soundList={this.state.clipList} type="clips" title="Clips" />
+          {/* no need for permissions on this component - set false */}
+          <SoundList soundList={this.state.clipList} type="clips" title="Clips" hasModPermissions={false} />
         </div>
       </div>
     );

@@ -1,5 +1,4 @@
-import { SoundType } from '../components/sound-list/sound-list';
-import { ISound } from '../model';
+import { ISound, SoundListType, SoundType } from '../model';
 import { axios } from './axios.service';
 
 const playSound = (sound: SoundType): Promise<any> => {
@@ -11,7 +10,15 @@ const getSounds = async (): Promise<ISound[]> => {
   return res.data.data;
 };
 
+export const playAudioInBrowser = (sound: SoundType, type: SoundListType) => {
+  const t = type === 'favorites' ? 'sounds' : type;
+  const url = `/public/${t.toLowerCase()}/` + sound.name + '.' + sound.extension;
+  const audio = new Audio(url);
+  audio.play();
+};
+
 export const SoundService = {
   getSounds,
   playSound,
+  playAudioInBrowser,
 };

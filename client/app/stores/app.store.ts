@@ -1,6 +1,7 @@
 import jwt_decode from 'jwt-decode';
+import { filter, uniqBy } from 'lodash';
 import { action, observable } from 'mobx';
-import { IClaims, Permissions } from '../model';
+import { IClaims, Permissions, SoundType } from '../model';
 import { axios, StorageService } from '../services';
 import { Util } from '../util';
 
@@ -11,9 +12,12 @@ export class AppStore {
   public jwt?: string;
   @observable
   public claims?: IClaims;
+  @observable
+  private favorites: SoundType[] = [];
 
   constructor() {
     const jwt = StorageService.getJWT();
+    this.favorites = StorageService.getFavorites();
     this.setJWT(jwt as string);
     this.initNavbar();
   }
@@ -24,7 +28,7 @@ export class AppStore {
     }
   }
 
-  private setJWT(jwt?: string) {
+  private setJWT = (jwt?: string) => {
     if (!jwt) {
       return;
     }
@@ -34,7 +38,21 @@ export class AppStore {
     if (claims) {
       this.claims = claims as IClaims;
     }
-  }
+  };
+
+  public getFavorites = (): SoundType[] => {
+    return this.favorites;
+  };
+
+  public addFavorite = (f: SoundType): void => {
+    this.favorites = uniqBy([...this.favorites, f], 'name');
+    StorageService.setFavorites(this.favorites);
+  };
+
+  public removeFavorite = (f: SoundType): void => {
+    this.favorites = filter(this.favorites, (fa) => fa.name !== f.name);
+    StorageService.setFavorites(this.favorites);
+  };
 
   @action
   public toggleNavbar = () => {

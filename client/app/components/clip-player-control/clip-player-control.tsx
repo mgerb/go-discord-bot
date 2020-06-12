@@ -1,18 +1,17 @@
 import React from 'react';
-import { SoundService } from '../../services';
+import { SoundListType, SoundType } from '../../model';
 
 interface IProps {
   sound: SoundType;
-  type: 'sounds' | 'clips';
-  showDiscordPlay?: boolean;
+  type: SoundListType;
+  hasModPermissions: boolean;
+  showFavorite?: boolean;
+  onFavorite?: () => void;
+  onPlayBrowser: (sound: SoundType) => void;
+  onPlayDiscord: (sound: SoundType) => void;
 }
 
 interface IState {}
-
-export interface SoundType {
-  extension: string;
-  name: string;
-}
 
 export class ClipPlayerControl extends React.Component<IProps, IState> {
   checkExtension(extension: string) {
@@ -28,22 +27,21 @@ export class ClipPlayerControl extends React.Component<IProps, IState> {
     }
   }
 
-  handlePlayAudioInBrowser(sound: SoundType, type: string) {
-    const url = `/public/${type.toLowerCase()}/` + sound.name + '.' + sound.extension;
-    const audio = new Audio(url);
-    audio.play();
-  }
-
-  onPlayDiscord = (sound: SoundType) => {
-    SoundService.playSound(sound);
-  };
-
   render() {
-    const { sound, showDiscordPlay, type } = this.props;
+    const { onPlayBrowser, onPlayDiscord, sound, hasModPermissions, showFavorite, type } = this.props;
 
     return (
       this.checkExtension(sound.extension) && (
         <div className="flex flex--center">
+          {showFavorite && hasModPermissions && (
+            <i
+              title="Favorite"
+              className={'fa link fa-lg ' + (type === 'favorites' ? 'fa-trash' : 'fa-heart color__red')}
+              aria-hidden="true"
+              style={{ paddingRight: '5px' }}
+              onClick={() => !this.props.onFavorite || this.props.onFavorite()}
+            />
+          )}
           <a
             href={`/public/${type.toLowerCase()}/` + sound.name + '.' + sound.extension}
             download
@@ -56,15 +54,15 @@ export class ClipPlayerControl extends React.Component<IProps, IState> {
             className="fa fa-play link"
             aria-hidden="true"
             style={{ paddingLeft: '15px' }}
-            onClick={() => this.handlePlayAudioInBrowser(sound, type)}
+            onClick={() => onPlayBrowser(sound)}
           />
-          {showDiscordPlay && (
+          {hasModPermissions && (
             <i
               title="Play in discord"
               className="fa fa-play-circle link fa-lg"
               aria-hidden="true"
               style={{ paddingLeft: '10px' }}
-              onClick={() => this.onPlayDiscord(sound)}
+              onClick={() => onPlayDiscord(sound)}
             />
           )}
         </div>

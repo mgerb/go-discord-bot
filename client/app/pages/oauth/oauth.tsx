@@ -13,7 +13,7 @@ export class Oauth extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const params = queryString.parse(this.props.location.search);
+    const params: any = queryString.parse(this.props.location.search);
 
     if (params['code']) {
       // do stuff here

@@ -11,6 +11,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// There's an issue with sqlite currently: https://github.com/mattn/go-sqlite3/issues/803
+// Set env variables to fix temporarily
+// export CGO_CFLAGS="-g -O2 -Wno-return-local-addr"
+
 func init() {
 	log.SetLevel(log.DebugLevel)
 	log.SetOutput(os.Stdout)

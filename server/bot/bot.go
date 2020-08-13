@@ -31,7 +31,7 @@ func SendEmbeddedNotification(title, description string) {
 }
 
 // Start bot - this is a blocking function
-func Start(token string) {
+func Start(token string) *discordgo.Session {
 	_token = token
 
 	// initialize connection
@@ -52,10 +52,12 @@ func Start(token string) {
 
 	if err != nil {
 		log.Error("error opening connection,", err)
-		return
+		return nil
 	}
 
 	log.Debug("Bot is now running...")
+
+	return _session
 }
 
 func Stop() {

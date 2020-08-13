@@ -27,7 +27,7 @@ func LoggerHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Timestamp:       timestamp,
 		EditedTimestamp: editedTimestamp,
 		MentionRoles:    strings.Join(m.Message.MentionRoles, ","),
-		Tts:             m.Message.Tts,
+		TTS:             m.Message.TTS,
 		MentionEveryone: m.Message.MentionEveryone,
 		UserID:          m.Author.ID,
 		Attachments:     attachments,

@@ -109,6 +109,10 @@ func (conn *AudioConnection) handleMessage(m *discordgo.MessageCreate) {
 		case "random":
 			conn.PlayRandomAudio(m, nil)
 
+		// restart command handled in bot file - needed here to break out
+		case "restart":
+			break
+
 		default:
 			conn.PlayAudio(command, m, nil)
 		}
@@ -375,7 +379,7 @@ loop:
 	for {
 
 		select {
-		// grab incomming audio
+		// grab incoming audio
 		case opusChannel, ok := <-conn.VoiceConnection.OpusRecv:
 			if !ok {
 				continue

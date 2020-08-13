@@ -1,37 +1,23 @@
 package bot
 
 import (
+	"os"
+	"time"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/mgerb/go-discord-bot/server/bothandlers"
 	"github.com/mgerb/go-discord-bot/server/config"
 	log "github.com/sirupsen/logrus"
 )
 
-var session *discordgo.Session
-
-// Start the bot
-func Start(token string) *discordgo.Session {
-	// initialize connection
-	session := connect(token)
-
-	// add bot handlers
-	addHandler(session, bothandlers.SoundsHandler)
-	addHandler(session, bothandlers.LoggerHandler)
-
-	// start listening for commands
-	startListener(session)
-
-	return session
-}
-
-// GetSession - get current discord session
-func GetSession() *discordgo.Session {
-	return session
-}
+// keep reference to discord session
+var _session *discordgo.Session
+var _token string
+var _sc chan os.Signal
 
 // SendEmbeddedNotification - sends notification to default room
 func SendEmbeddedNotification(title, description string) {
-	if session == nil || config.Config.DefaultRoomID == "" {
+	if _session == nil || config.Config.DefaultRoomID == "" {
 		return
 	}
 
@@ -41,17 +27,70 @@ func SendEmbeddedNotification(title, description string) {
 		Description: description,
 	}
 
-	session.ChannelMessageSendEmbed(config.Config.DefaultRoomID, embed)
+	_session.ChannelMessageSendEmbed(config.Config.DefaultRoomID, embed)
 }
 
-func addHandler(session *discordgo.Session, handler interface{}) {
-	session.AddHandler(handler)
+// Start bot - this is a blocking function
+func Start(token string) {
+	_token = token
+
+	// initialize connection
+	_session = connect(token)
+
+	// add bot handlers
+	_session.AddHandler(bothandlers.SoundsHandler)
+	_session.AddHandler(bothandlers.LoggerHandler)
+	_session.AddHandler(func(_s *discordgo.Session, m *discordgo.MessageCreate) {
+		if m.Content == config.Config.BotPrefix+"restart" {
+			restart()
+		}
+	})
+
+	// start listening for commands
+	// Open the websocket and begin listening.
+	err := _session.Open()
+
+	if err != nil {
+		log.Error("error opening connection,", err)
+		return
+	}
+
+	log.Debug("Bot is now running...")
+}
+
+func Stop() {
+	_session.Close()
+}
+
+func restart() {
+	if _token == "" {
+		log.Warn("Unable to restart - token nil")
+		return
+	}
+
+	for _, vc := range _session.VoiceConnections {
+		vc.Disconnect()
+	}
+
+	// https://github.com/bwmarrin/discordgo/issues/759
+	// Might need to use this to reconnect
+	// err := _session.CloseWithCode(1012)
+	err := _session.Close()
+
+	if err != nil {
+		log.Error(err)
+	}
+
+	time.Sleep(time.Second * 5)
+
+	bothandlers.ActiveConnections = map[string]*bothandlers.AudioConnection{}
+
+	Start(_token)
 }
 
 func connect(token string) *discordgo.Session {
 	// Create a new Discord session using the provided bot token.
-	var err error
-	session, err = discordgo.New("Bot " + token)
+	session, err := discordgo.New("Bot " + token)
 
 	if err != nil {
 		log.Error(err)
@@ -69,22 +108,4 @@ func connect(token string) *discordgo.Session {
 	log.Debug("Bot connected")
 
 	return session
-}
-
-func startListener(session *discordgo.Session) {
-	// start new non blocking go routine
-	go func() {
-		// Open the websocket and begin listening.
-		err := session.Open()
-		if err != nil {
-			log.Error("error opening connection,", err)
-			return
-		}
-
-		log.Debug("Bot is now running...")
-
-		// Simple way to keep program running until CTRL-C is pressed.
-		<-make(chan struct{})
-		return
-	}()
 }

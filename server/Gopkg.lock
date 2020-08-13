@@ -18,12 +18,12 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:d87c9221a974263e3b369bfd3513707b2a53e27a6cd799d472f94dc6a6157e59"
+  digest = "1:99c79dc08249968d203bf4210220c01bd8250301600f5daf0a81f4c5f184f8d9"
   name = "github.com/bwmarrin/discordgo"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ed4d6904961d1688b3f5601b3d73e95a71046734"
-  version = "v0.20.3"
+  revision = "befbea878e0f1d0bb21be6723b6cf6db2689f6a8"
+  version = "v0.22.0"
 
 [[projects]]
   digest = "1:3ee1d175a75b911a659fbd860060874c4f503e793c5870d13e5a0ede529a63cf"

@@ -2,6 +2,8 @@ package main
 
 import (
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/mgerb/go-discord-bot/server/bot"
 	"github.com/mgerb/go-discord-bot/server/config"
@@ -33,9 +35,19 @@ func init() {
 
 func main() {
 
-	// start the bot
-	bot.Start(config.Config.Token)
-
 	// start the web server
-	webserver.Start()
+	go func() {
+		webserver.Start()
+	}()
+
+	// start the bot
+	go func() {
+		bot.Start(config.Config.Token)
+	}()
+
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	<-sc
+
+	bot.Stop()
 }

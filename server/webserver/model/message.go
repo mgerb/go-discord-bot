@@ -18,7 +18,7 @@ type Message struct {
 	Timestamp       time.Time    `json:"timestamp"`
 	EditedTimestamp time.Time    `json:"edited_timestamp"`
 	MentionRoles    string       `json:"mention_roles"`
-	Tts             bool         `json:"tts"`
+	TTS             bool         `json:"tts"`
 	MentionEveryone bool         `json:"mention_everyone"`
 	User            User         `json:"user"`
 	UserID          string       `json:"user_id"`

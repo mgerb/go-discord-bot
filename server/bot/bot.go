@@ -46,6 +46,16 @@ func Start(token string) *discordgo.Session {
 		}
 	})
 
+	// We need information about guilds (which includes their channels),
+	// messages and voice states.
+	_session.Identify.Intents = discordgo.MakeIntent(
+		discordgo.IntentsGuilds |
+			discordgo.IntentsGuildMessages |
+			discordgo.IntentsGuildVoiceStates |
+			discordgo.IntentsGuildMessages |
+			discordgo.IntentsGuildMessageReactions |
+			discordgo.IntentsAllWithoutPrivileged)
+
 	// start listening for commands
 	// Open the websocket and begin listening.
 	err := _session.Open()

@@ -8,5 +8,6 @@
   "bot_prefix": "#",
 
   "jwt_secret": "generate a random secret string here",
-  "server_addr": "0.0.0.0:80"
+  "server_addr": "0.0.0.0:80",
+  "logger": true
 }

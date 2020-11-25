@@ -153,10 +153,16 @@ func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
 		for _, vs := range g.VoiceStates {
 			if vs.UserID == m.Author.ID {
 
-				conn.VoiceConnection, err = conn.Session.ChannelVoiceJoin(g.ID, vs.ChannelID, false, false)
+				_, err = conn.Session.ChannelVoiceJoin(g.ID, vs.ChannelID, false, false)
 
 				if err != nil {
 					log.Error(err)
+					return
+				}
+				if _, ok := conn.Session.VoiceConnections[c.GuildID]; ok {
+					conn.VoiceConnection = conn.Session.VoiceConnections[c.GuildID]
+				} else {
+					log.Error("Voice connection not found on discord object")
 					return
 				}
 

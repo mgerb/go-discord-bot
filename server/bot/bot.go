@@ -39,6 +39,7 @@ func Start(token string) *discordgo.Session {
 
 	// add bot handlers
 	_session.AddHandler(bothandlers.SoundsHandler)
+	_session.AddHandler(bothandlers.VoiceStateHandler)
 	_session.AddHandler(bothandlers.LoggerHandler)
 	_session.AddHandler(func(_s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Content == config.Config.BotPrefix+"restart" {

@@ -33,16 +33,15 @@ var ActiveConnections = make(map[string]*AudioConnection)
 
 // AudioConnection -
 type AudioConnection struct {
-	Guild             *discordgo.Guild           `json:"guild"`
-	Session           *discordgo.Session         `json:"-"`
-	VoiceConnection   *discordgo.VoiceConnection `json:"-"`
-	CurrentChannel    *discordgo.Channel         `json:"current_channel"`
-	Sounds            map[string]*AudioClip      `json:"-"`
-	SoundQueue        chan string                `json:"-"`
-	VoiceClipQueue    chan *discordgo.Packet     `json:"-"`
-	SoundPlayingLock  bool                       `json:"-"`
-	AudioListenerLock bool                       `json:"-"`
-	Mutex             *sync.Mutex                `json:"-"` // mutex for single audio connection
+	Guild             *discordgo.Guild       `json:"guild"`
+	Session           *discordgo.Session     `json:"-"`
+	CurrentChannel    *discordgo.Channel     `json:"current_channel"`
+	Sounds            map[string]*AudioClip  `json:"-"`
+	SoundQueue        chan string            `json:"-"`
+	VoiceClipQueue    chan *discordgo.Packet `json:"-"`
+	SoundPlayingLock  bool                   `json:"-"`
+	AudioListenerLock bool                   `json:"-"`
+	Mutex             *sync.Mutex            `json:"-"` // mutex for single audio connection
 }
 
 // AudioClip -
@@ -52,9 +51,31 @@ type AudioClip struct {
 	Content   [][]byte
 }
 
-// SoundsHandler -
-func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+// VoiceStateHandler - when users enter voice channels
+func VoiceStateHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
+	if conn := ActiveConnections[v.GuildID]; conn != nil {
 
+		voiceConnection := conn.getVoiceConnection()
+
+		if voiceConnection.Ready && voiceConnection.ChannelID == v.VoiceState.ChannelID {
+
+			user, err := model.UserGet(db.GetConn(), v.VoiceState.UserID)
+
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			if user.VoiceJoinSound != nil {
+				time.Sleep(time.Second)
+				conn.PlayAudio(*user.VoiceJoinSound, nil, nil)
+			}
+		}
+	}
+}
+
+// SoundsHandler - play sounds
+func SoundsHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// get channel state to get guild id
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
@@ -119,18 +140,20 @@ func (conn *AudioConnection) handleMessage(m *discordgo.MessageCreate) {
 	}
 }
 
-// dismiss bot from currnet channel if it's in one
+// dismiss bot from current channel if it's in one
 func (conn *AudioConnection) dismiss() {
-	if conn.VoiceConnection != nil && !conn.SoundPlayingLock && len(conn.SoundQueue) == 0 {
-		conn.VoiceConnection.Disconnect()
+	voiceConnection := conn.getVoiceConnection()
+	if voiceConnection != nil && !conn.SoundPlayingLock && len(conn.SoundQueue) == 0 {
+		voiceConnection.Disconnect()
 	}
 }
 
 // summon bot to channel that user is currently in
 func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
+	voiceConnection := conn.getVoiceConnection()
 
 	// Join the channel the user issued the command from if not in it
-	if conn.VoiceConnection == nil || conn.VoiceConnection.ChannelID != m.ChannelID {
+	if voiceConnection == nil || voiceConnection.ChannelID != m.ChannelID {
 
 		var err error
 
@@ -159,27 +182,22 @@ func (conn *AudioConnection) summon(m *discordgo.MessageCreate) {
 					log.Error(err)
 					return
 				}
-				if _, ok := conn.Session.VoiceConnections[c.GuildID]; ok {
-					conn.VoiceConnection = conn.Session.VoiceConnections[c.GuildID]
-				} else {
-					log.Error("Voice connection not found on discord object")
-					return
-				}
 
 				// set the current channel
 				conn.CurrentChannel = c
 
-				// start listening to audio if not locked
-				if !conn.AudioListenerLock {
-					go conn.startAudioListener()
-				}
+				go conn.startAudioListener()
 			}
 		}
 
 	}
 }
 
-// play a random sound clip
+func (conn *AudioConnection) getVoiceConnection() *discordgo.VoiceConnection {
+	return conn.Session.VoiceConnections[conn.Guild.ID]
+}
+
+// PlayRandomAudio - play a random sound clip
 func (conn *AudioConnection) PlayRandomAudio(m *discordgo.MessageCreate, userID *string) {
 	files, _ := ioutil.ReadDir(config.Config.SoundsPath)
 	if len(files) > 0 {
@@ -195,10 +213,13 @@ func (conn *AudioConnection) PlayRandomAudio(m *discordgo.MessageCreate, userID 
 // if MessageCreate is null play in current channel
 func (conn *AudioConnection) PlayAudio(soundName string, m *discordgo.MessageCreate, userID *string) {
 
+	voiceConnection := conn.getVoiceConnection()
+
 	// summon bot to channel if new message passed in
 	if m != nil {
 		conn.summon(m)
-	} else if conn.VoiceConnection == nil || !conn.VoiceConnection.Ready {
+	} else if voiceConnection == nil || !voiceConnection.Ready {
+		log.Error("[PlayAudio] Voice connection is not ready")
 		return
 	}
 
@@ -217,22 +238,25 @@ func (conn *AudioConnection) PlayAudio(soundName string, m *discordgo.MessageCre
 	select {
 	case conn.SoundQueue <- soundName:
 
-		var newUserID string
+		var newUserID *string
 		fromWebUI := false
 
 		// from discord
 		if m != nil && m.Author != nil {
-			newUserID = m.Author.ID
+			newUserID = &m.Author.ID
 		} else {
 			fromWebUI = true
-			newUserID = *userID
+			newUserID = userID
 		}
 
-		// log event when user plays sound clip
-		err := model.LogSoundPlayedEvent(db.GetConn(), newUserID, soundName, fromWebUI)
+		// newUserID will be null if bot plays voice join sound
+		if newUserID != nil {
+			// log event when user plays sound clip
+			err := model.LogSoundPlayedEvent(db.GetConn(), *newUserID, soundName, fromWebUI)
 
-		if err != nil {
-			log.Error(err)
+			if err != nil {
+				log.Error(err)
+			}
 		}
 
 	default:
@@ -243,27 +267,26 @@ func (conn *AudioConnection) PlayAudio(soundName string, m *discordgo.MessageCre
 	if !conn.SoundPlayingLock {
 		conn.playSoundsInQueue()
 	}
-
 }
 
 // playSoundsInQueue - play sounds until audio queue is empty
 func (conn *AudioConnection) playSoundsInQueue() {
 	conn.toggleSoundPlayingLock(true)
-
+	voiceConnection := conn.getVoiceConnection()
 	// Start speaking.
-	conn.VoiceConnection.Speaking(true)
+	voiceConnection.Speaking(true)
 
 	for {
 		select {
 		case newSoundName := <-conn.SoundQueue:
 
-			if !conn.VoiceConnection.Ready {
+			if !voiceConnection.Ready {
 				return
 			}
 
 			// Send the buffer data.
 			for _, buff := range conn.Sounds[newSoundName].Content {
-				conn.VoiceConnection.OpusSend <- buff
+				voiceConnection.OpusSend <- buff
 			}
 
 			// Sleep for a specificed amount of time before ending.
@@ -271,7 +294,7 @@ func (conn *AudioConnection) playSoundsInQueue() {
 
 		default:
 			// Stop speaking
-			conn.VoiceConnection.Speaking(false)
+			voiceConnection.Speaking(false)
 			conn.toggleSoundPlayingLock(false)
 			return
 		}
@@ -359,7 +382,15 @@ loop:
 }
 
 // start listening to the voice channel
+// endless loop - look into closing if ever set up for multiple servers to prevent memory leak
+// should be fine to keep this open for now
 func (conn *AudioConnection) startAudioListener() {
+
+	if conn.AudioListenerLock {
+		return
+	}
+
+	log.Info("[startAudioListener] Voice connection listener started")
 
 	conn.AudioListenerLock = true
 
@@ -367,26 +398,49 @@ func (conn *AudioConnection) startAudioListener() {
 		conn.VoiceClipQueue = make(chan *discordgo.Packet, voiceClipQueuePacketSize)
 	}
 
-	// create new channel to watch for voice connection
-	// when voice connection is not ready the loop will exit
-	exitChan := make(chan bool)
+	localSleep := func() {
+		time.Sleep(time.Second / 10)
+	}
+	// Concurrently check and see if voice connection is not in ready state
+	// because we need to exit the sound handler.
+	vcExitChan := make(chan bool, 1)
 
 	go func() {
 		for {
-			if !conn.VoiceConnection.Ready {
-				exitChan <- true
-				break
+			voiceConnection := conn.getVoiceConnection()
+			if voiceConnection != nil {
+				voiceConnection.RLock()
+				ready := voiceConnection != nil && voiceConnection.Ready
+				voiceConnection.RUnlock()
+
+				if !ready {
+					vcExitChan <- true
+				}
 			}
-			time.Sleep(time.Second * 1)
+			localSleep()
 		}
 	}()
 
-loop:
 	for {
+		voiceConnection := conn.getVoiceConnection()
+		if voiceConnection == nil {
+			localSleep()
+			continue
+		}
+		voiceConnection.RLock()
+		ready := voiceConnection != nil && voiceConnection.Ready
+		voiceConnection.RUnlock()
+
+		// if connection lost wait for ready
+		if !ready {
+			localSleep()
+			continue
+		}
 
 		select {
 		// grab incoming audio
-		case opusChannel, ok := <-conn.VoiceConnection.OpusRecv:
+		case opusChannel, ok := <-voiceConnection.OpusRecv:
+
 			if !ok {
 				continue
 			}
@@ -398,13 +452,12 @@ loop:
 
 			// add current packet to channel queue
 			conn.VoiceClipQueue <- opusChannel
+			break
 
-		// check if voice connection fails then break out of audio listener
-		case <-exitChan:
-			break loop
+		// if voice is interrupted continue loop (e.g. disconnects)
+		case <-vcExitChan:
+			log.Info("[startAudioListener] exitChan is exiting")
+			localSleep()
 		}
 	}
-
-	// remove lock upon exit
-	conn.AudioListenerLock = false
 }

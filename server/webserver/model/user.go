@@ -9,19 +9,20 @@ import (
 
 // User -
 type User struct {
-	ID            string     `gorm:"primary_key" json:"id"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
-	DeletedAt     *time.Time `json:"deleted_at"`
-	Email         string     `json:"email"`
-	Username      string     `json:"username"`
-	Avatar        string     `json:"avatar"`
-	Discriminator string     `json:"discriminator"`
-	Token         string     `gorm:"-" json:"token"`
-	Verified      bool       `json:"verified"`
-	MFAEnabled    bool       `json:"mfa_enabled"`
-	Bot           bool       `json:"bot"`
-	Permissions   *int       `gorm:"default:1;not null" json:"permissions"`
+	ID             string     `gorm:"primary_key" json:"id"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
+	DeletedAt      *time.Time `json:"deleted_at"`
+	Email          string     `json:"email"`
+	Username       string     `json:"username"`
+	Avatar         string     `json:"avatar"`
+	Discriminator  string     `json:"discriminator"`
+	Token          string     `gorm:"-" json:"token"`
+	Verified       bool       `json:"verified"`
+	MFAEnabled     bool       `json:"mfa_enabled"`
+	Bot            bool       `json:"bot"`
+	Permissions    *int       `gorm:"default:1;not null" json:"permissions"`
+	VoiceJoinSound *string    `json:"voice_join_sound"` // sound clip that plays when user joins channel
 }
 
 // UserSave -
@@ -32,4 +33,11 @@ func UserSave(conn *gorm.DB, u *User) error {
 	// need to make copy of assign object because it must mess
 	// with the actual object in FirstOrCreate method
 	return conn.Where(&User{ID: u.ID}).Assign(userCopy).FirstOrCreate(u).Error
+}
+
+// UserGet - get user by id
+func UserGet(conn *gorm.DB, id string) (*User, error) {
+	user := &User{ID: id}
+	err := conn.First(user).Error
+	return user, err
 }

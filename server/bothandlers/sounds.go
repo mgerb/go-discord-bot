@@ -57,7 +57,7 @@ func VoiceStateHandler(s *discordgo.Session, v *discordgo.VoiceStateUpdate) {
 
 		voiceConnection := conn.getVoiceConnection()
 
-		if voiceConnection.Ready && voiceConnection.ChannelID == v.VoiceState.ChannelID {
+		if voiceConnection != nil && voiceConnection.Ready && voiceConnection.ChannelID == v.VoiceState.ChannelID {
 
 			user, err := model.UserGet(db.GetConn(), v.VoiceState.UserID)
 

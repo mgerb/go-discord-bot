@@ -1,6 +1,6 @@
 # Discord Sound Bot
 
-A soundboard bot for discord. Build with Go/React.
+A soundboard bot for discord. Built with Go/React.
 
 ![Image](./screenshots/sound-bot.png)
 
@@ -52,7 +52,7 @@ docker-compose exec go-discord-bot /server/bot-scripts restore-message <roomID>
 
 ### Commands
 
-- `clip` - clips the past minute of audio (currently bugged if more than one user is speaking)
+- `clip` - clips the past minute of audio
 - `summon` - summons the bot to your current channel
 - `dismiss` - dismisses the bot from the server
 - `<audio clip>` - play a named audio clip

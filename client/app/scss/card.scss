@@ -7,6 +7,10 @@
   border: 1px solid $gray3;
 }
 
+.card--wide {
+  max-width: 1200px;
+}
+
 .card__header {
   margin: -10px -10px 10px -10px;
   display: flex;

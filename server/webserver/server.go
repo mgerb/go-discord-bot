@@ -3,7 +3,6 @@ package webserver
 import (
 	"strings"
 
-	"github.com/gobuffalo/packr"
 	"github.com/mgerb/go-discord-bot/server/webserver/response"
 
 	"github.com/gin-gonic/gin"
@@ -14,9 +13,7 @@ import (
 func getRouter() *gin.Engine {
 	router := gin.Default()
 
-	box := packr.NewBox("../../dist/static")
-
-	router.StaticFS("/static", box)
+	router.Static("/static", "./dist/static")
 	router.Static("/public/sounds", config.Config.SoundsPath)
 	router.Static("/public/youtube", config.Config.YoutubePath)
 	router.Static("/public/clips", config.Config.ClipsPath)
@@ -32,12 +29,13 @@ func getRouter() *gin.Engine {
 	routes.AddSoundRoutes(api)
 	routes.AddVideoArchiveRoutes(api)
 	routes.AddUserEventLogRoutes(api)
+	routes.AddUserRoutes(api)
 
 	router.NoRoute(func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.String(), "/api/") {
 			response.BadRequest(c, "404 Not Found")
 		} else {
-			c.Data(200, "text/html", box.Bytes("index.html"))
+			c.File("./dist/static/index.html")
 		}
 	})
 

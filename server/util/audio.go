@@ -14,7 +14,7 @@ import (
 
 	"github.com/go-audio/audio"
 	"github.com/go-audio/wav"
-	"github.com/hraban/opus"
+	"gopkg.in/hraban/opus.v2"
 )
 
 // GetFileOpusData - uses ffmpeg to convert any audio

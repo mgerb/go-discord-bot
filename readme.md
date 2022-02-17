@@ -10,8 +10,8 @@ A soundboard bot for discord. Built with Go/React.
 - Install [youtube-dl](https://github.com/rg3/youtube-dl/blob/master/README.md#installation)
 - Install [ffmpeg](https://www.ffmpeg.org/download.html)
 - edit your config.json file
-- run the executable
-- visit http://localhost:8080
+- `docker-compose up`
+- go to http://localhost:8088
 
 ### With docker-compose
 
@@ -97,19 +97,11 @@ Check it out in the "Stats" page on the site.
 
 ### Dependencies
 
-- Go (1.10+)
-- node/npm (node 8)
-- make
+- Go (1.17+)
+- node/npm (node 16)
 
-### Compiling
+### Compiling and Running
 
-- Install dependencies
-  - packr - `go get -u github.com/gobuffalo/packr/...`
-  - [dep](https://github.com/golang/dep) - `go get -u github.com/golang/dep/cmd/dep`
-- Rename the `config.template.json` to `config.json`
-- add configurations to `config.json`
-- run `make all`
-- open a browser `localhost:<config_port>`
-
-[Packr](https://github.com/gobuffalo/packr) is used to bundle the static web assets into the binary.
-Use these commands to compile the project. The client must be built first.
+- `cd client && npm install && npm run build`
+- `cd server && go build -o ../bot`
+- `./bot`

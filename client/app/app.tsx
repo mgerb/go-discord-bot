@@ -2,7 +2,18 @@ import { Provider } from 'mobx-react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import { Admin, Clips, Downloader, NotFound, Oauth, Soundboard, Stats, UploadHistory, VideoArchive } from './pages';
+import {
+  Clips,
+  Downloader,
+  NotFound,
+  Oauth,
+  Soundboard,
+  Stats,
+  UploadHistory,
+  UserEventLog,
+  VideoArchive,
+} from './pages';
+import { Users } from './pages/users';
 import './scss/index.scss';
 import { rootStoreInstance } from './stores';
 import { Wrapper } from './wrapper';
@@ -20,7 +31,8 @@ const App: any = (): any => {
             <Route path="/oauth" component={Oauth} />
             <Route path="/stats" component={Stats} />
             <Route path="/video-archive" component={VideoArchive} />
-            <Route path="/admin" component={Admin} />
+            <Route path="/user-event-log" component={UserEventLog} />
+            <Route path="/users" component={Users} />
             <Route component={NotFound} />
           </Switch>
         </Wrapper>
@@ -29,4 +41,4 @@ const App: any = (): any => {
   );
 };
 
-ReactDOM.render(<App /> as any, document.getElementById('app'));
+ReactDOM.render((<App />) as any, document.getElementById('app'));

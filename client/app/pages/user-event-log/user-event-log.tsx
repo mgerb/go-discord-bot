@@ -8,15 +8,16 @@ interface IState {
   userEventLogs: IUserEventLog[];
 }
 
-export class Admin extends React.Component<IProps, IState> {
+export class UserEventLog extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
       userEventLogs: [],
     };
   }
+
   componentDidMount() {
-    UserEventLogService.getUserEventLogs().then(userEventLogs => {
+    UserEventLogService.getUserEventLogs().then((userEventLogs) => {
       this.setState({
         userEventLogs,
       });

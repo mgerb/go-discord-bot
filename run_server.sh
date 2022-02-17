@@ -1,1 +1,1 @@
-fresh -c fresh.conf
+cd ./server && go build -o ../bot && cd ../ && ./bot

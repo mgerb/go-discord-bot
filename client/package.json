@@ -44,7 +44,7 @@
     "mini-css-extract-plugin": "^0.4.2",
     "mobx": "^5.15.4",
     "mobx-react": "^5.2.5",
-    "node-sass": "^4.14.1",
+    "node-sass": "^7.0.1",
     "normalize.css": "^8.0.1",
     "nprogress": "^0.2.0",
     "postcss-loader": "^2.1.5",

@@ -67,8 +67,23 @@ export class Navbar extends React.Component<Props, State> {
     );
   };
 
+  renderAuthLinks = () => {
+    const { hasAdminPermissions } = this.props.appStore;
+
+    if (hasAdminPermissions()) {
+      return (
+        <>
+          {this.renderNavLink('User Event Log', '/user-event-log')}
+          {this.renderNavLink('Users', '/users')}
+        </>
+      );
+    }
+
+    return null;
+  };
+
   render() {
-    const { claims, navbarOpen, hasModPermissions, hasAdminPermissions } = this.props.appStore;
+    const { claims, navbarOpen, hasModPermissions } = this.props.appStore;
     const openClass = navbarOpen ? 'navbar--open' : '';
     return (
       <div className={'navbar ' + openClass}>
@@ -78,7 +93,7 @@ export class Navbar extends React.Component<Props, State> {
         {this.renderNavLink('Youtube Downloader', '/downloader')}
         {this.renderNavLink('Clips', '/clips')}
         {this.renderNavLink('Stats', '/stats')}
-        {hasAdminPermissions() && this.renderNavLink('Admin', '/admin')}
+        {this.renderAuthLinks()}
         {this.renderLoginButton()}
 
         {claims && claims.email && <div className="navbar__email">{claims.email}</div>}

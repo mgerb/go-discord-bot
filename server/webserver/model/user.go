@@ -41,3 +41,14 @@ func UserGet(conn *gorm.DB, id string) (*User, error) {
 	err := conn.First(user).Error
 	return user, err
 }
+
+func UserGetAll(conn *gorm.DB) (*[]User, error) {
+	users := &[]User{}
+	err := conn.Find(users).Error
+	return users, err
+}
+
+func UserUpdate(conn *gorm.DB, user *User) (*User, error) {
+	err := conn.Save(user).Error
+	return user, err
+}

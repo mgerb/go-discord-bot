@@ -4,12 +4,12 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kkdai/youtube/v2"
 	"github.com/mgerb/go-discord-bot/server/bot"
 	"github.com/mgerb/go-discord-bot/server/db"
 	"github.com/mgerb/go-discord-bot/server/webserver/middleware"
 	"github.com/mgerb/go-discord-bot/server/webserver/model"
 	"github.com/mgerb/go-discord-bot/server/webserver/response"
-	"github.com/rylio/ytdl"
 )
 
 // AddVideoArchiveRoutes -
@@ -70,7 +70,9 @@ func postVideoArchiveHandler(c *gin.Context) {
 		return
 	}
 
-	info, err := ytdl.GetVideoInfo(params.URL)
+	client := youtube.Client{}
+
+	info, err := client.GetVideo(params.URL)
 
 	if err != nil {
 		response.InternalError(c, err)
@@ -85,7 +87,7 @@ func postVideoArchiveHandler(c *gin.Context) {
 
 	videoArchive := model.VideoArchive{
 		Author:        info.Author,
-		DatePublished: info.DatePublished,
+		DatePublished: info.PublishDate,
 		Description:   info.Description,
 		Duration:      int(info.Duration.Seconds()),
 		Title:         info.Title,

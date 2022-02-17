@@ -5,7 +5,13 @@ services:
     image: mgerb/go-discord-bot:latest
     restart: unless-stopped
     ports:
-      - 8088:8080
+      - 8080:8080
     volumes:
-      - ./:/bot
+      - ./clips:/server/clips
+      - ./sounds:/server/sounds
+      - ./youtube:/server/youtube
+      - ./config.json:/server/config.json:ro
+      - ./data.db:/server/data.db
+      - ./logrus.log:/server/logrus.log  
+
       - /usr/local/bin/youtube-dl:/usr/bin/youtube-dl

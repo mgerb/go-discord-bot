@@ -13,5 +13,6 @@ export interface IUser {
   token: string;
   updated_at: string;
   username: string;
+  voice_join_sound: string;
   verified: boolean;
 }

@@ -30,7 +30,8 @@ func fetchMessages(s *discordgo.Session, beforeID string) {
 
 	messages, err := s.ChannelMessages(everyoneChannel, 100, beforeID, "", "")
 
-	log.Println("Fetching new messages: " + messages[0].Timestamp)
+	log.Print("Fetching new messages: ")
+	log.Println(messages[0].Timestamp)
 
 	if err != nil {
 		log.Fatal(err)

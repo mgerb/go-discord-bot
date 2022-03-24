@@ -2,6 +2,7 @@ package bothandlers
 
 import (
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/mgerb/go-discord-bot/server/db"
@@ -16,8 +17,11 @@ func LoggerHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	model.UserSave(db.GetConn(), user)
 
 	// create and save message
-	timestamp, _ := m.Message.Timestamp.Parse()
-	editedTimestamp, _ := m.Message.EditedTimestamp.Parse()
+	timestamp := m.Message.Timestamp
+	var editedTimestamp time.Time
+	if m.Message.EditedTimestamp != nil {
+		editedTimestamp = *m.Message.EditedTimestamp
+	}
 	attachments := getAttachments(m.Message.Attachments)
 
 	message := &model.Message{

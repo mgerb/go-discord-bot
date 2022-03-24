@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"os"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -13,7 +12,6 @@ import (
 // keep reference to discord session
 var _session *discordgo.Session
 var _token string
-var _sc chan os.Signal
 
 // SendEmbeddedNotification - sends notification to default room
 func SendEmbeddedNotification(title, description string) {

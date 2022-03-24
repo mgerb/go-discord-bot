@@ -3,7 +3,7 @@ module github.com/mgerb/go-discord-bot/server
 go 1.17
 
 require (
-	github.com/bwmarrin/discordgo v0.23.2
+	github.com/bwmarrin/discordgo v0.24.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-audio/audio v1.0.0
 	github.com/go-audio/wav v1.0.0

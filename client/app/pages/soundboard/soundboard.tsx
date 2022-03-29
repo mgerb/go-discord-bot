@@ -20,7 +20,7 @@ interface State {
 @inject('appStore')
 @observer
 export class Soundboard extends React.Component<Props, State> {
-  private soundListCache: any;
+  private soundListCache: SoundType[];
 
   constructor(props: Props) {
     super(props);
@@ -46,6 +46,7 @@ export class Soundboard extends React.Component<Props, State> {
             soundList: response.data,
           });
         })
+        // eslint-disable-next-line
         .catch((error: any) => {
           console.error(error.response.data);
         });

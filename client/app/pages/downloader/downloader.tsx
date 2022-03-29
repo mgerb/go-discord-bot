@@ -2,8 +2,6 @@ import React from 'react';
 import { axios } from '../../services';
 import './downloader.scss';
 
-interface Props {}
-
 interface State {
   fileType: string;
   url: string;
@@ -14,8 +12,8 @@ interface State {
   dataLoaded: boolean;
 }
 
-export class Downloader extends React.Component<Props, State> {
-  constructor(props: Props) {
+export class Downloader extends React.Component<unknown, State> {
+  constructor(props: unknown) {
     super(props);
     this.state = {
       fileType: 'mp3',
@@ -51,7 +49,7 @@ export class Downloader extends React.Component<Props, State> {
           url: this.state.url,
         },
       })
-      .then(res => {
+      .then((res) => {
         this.setState({
           dataLoaded: true,
           dataLoading: false,
@@ -77,7 +75,7 @@ export class Downloader extends React.Component<Props, State> {
             placeholder="Enter Youtube URL"
             className="input downloader__input"
             value={this.state.url}
-            onChange={event => this.setState({ url: event.target.value })}
+            onChange={(event) => this.setState({ url: event.target.value })}
           />
 
           <div style={{ marginBottom: '10px' }}>

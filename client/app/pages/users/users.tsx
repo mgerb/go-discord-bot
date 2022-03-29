@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEvent, FormEvent } from 'react';
 import { IUser } from '../../model';
 import { UserService } from '../../services/user.service';
 
@@ -7,8 +7,8 @@ interface IState {
   showSavedMessage: boolean;
 }
 
-export class Users extends React.Component<any, IState> {
-  constructor(props: any) {
+export class Users extends React.Component<unknown, IState> {
+  constructor(props: unknown) {
     super(props);
     this.state = {
       users: [],
@@ -22,10 +22,10 @@ export class Users extends React.Component<any, IState> {
     });
   }
 
-  onUserChange = (type: 'permissions' | 'voice_join_sound', event: any, index: number) => {
+  onUserChange = (type: 'permissions' | 'voice_join_sound', event: ChangeEvent<HTMLInputElement>, index: number) => {
     this.setState({ showSavedMessage: false });
 
-    let users = [...this.state.users];
+    const users = [...this.state.users];
     const val = type === 'permissions' ? parseInt(event.target.value) : event.target.value;
     users[index] = {
       ...users[index],
@@ -64,7 +64,7 @@ export class Users extends React.Component<any, IState> {
     });
   };
 
-  save = (event: any) => {
+  save = (event: FormEvent<HTMLFormElement>) => {
     this.setState({ showSavedMessage: false });
     event.preventDefault();
     UserService.putUsers(this.state.users).then((users: IUser[]) => {

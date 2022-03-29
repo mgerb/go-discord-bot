@@ -18,7 +18,7 @@ import './scss/index.scss';
 import { rootStoreInstance } from './stores';
 import { Wrapper } from './wrapper';
 
-const App: any = (): any => {
+const App = () => {
   return (
     <BrowserRouter>
       <Provider {...rootStoreInstance}>
@@ -41,4 +41,4 @@ const App: any = (): any => {
   );
 };
 
-ReactDOM.render((<App />) as any, document.getElementById('app'));
+ReactDOM.render(<App />, document.getElementById('app'));

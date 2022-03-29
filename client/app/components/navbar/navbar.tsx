@@ -53,7 +53,7 @@ export class Navbar extends React.Component<Props, State> {
     );
   }
 
-  renderNavLink = (title: string, to: string, params?: any) => {
+  renderNavLink = (title: string, to: string, params?: unknown) => {
     return (
       <NavLink
         {...params}

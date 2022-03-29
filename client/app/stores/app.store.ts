@@ -7,7 +7,7 @@ import { Util } from '../util';
 
 export class AppStore {
   @observable
-  public navbarOpen: boolean = false;
+  public navbarOpen = false;
   @observable
   public jwt?: string;
   @observable

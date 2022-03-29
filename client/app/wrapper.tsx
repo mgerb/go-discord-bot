@@ -7,6 +7,7 @@ import './wrapper.scss';
 
 export const Wrapper = inject('appStore')(
   withRouter(
+    // eslint-disable-next-line
     observer(({ appStore, children }: any) => {
       const openClass = appStore.navbarOpen ? 'wrapper--open' : '';
       const onNavClick = () => {

@@ -1,23 +1,18 @@
-import queryString from 'query-string';
+import queryString, { ParsedQuery } from 'query-string';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { axios, StorageService } from '../../services';
 
-interface Props extends RouteComponentProps<any> {}
-
-interface State {}
-
-export class Oauth extends React.Component<Props, State> {
-  constructor(props: Props) {
+export class Oauth extends React.Component<RouteComponentProps<unknown>, unknown> {
+  constructor(props: RouteComponentProps<unknown>) {
     super(props);
   }
 
   componentDidMount() {
-    const params: any = queryString.parse(this.props.location.search);
+    const params: ParsedQuery<string> = queryString.parse(this.props.location.search);
 
     if (params['code']) {
-      // do stuff here
-      this.fetchOauth(params['code']);
+      this.fetchOauth(params['code'] as string);
     }
   }
 

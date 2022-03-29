@@ -3,14 +3,12 @@ import { SoundList } from '../../components';
 import { SoundType } from '../../model';
 import { axios } from '../../services';
 
-interface Props {}
-
 interface State {
   clipList: SoundType[];
 }
 
-export class Clips extends React.Component<Props, State> {
-  constructor(props: Props) {
+export class Clips extends React.Component<unknown, State> {
+  constructor(props: unknown) {
     super(props);
     this.state = {
       clipList: [],
@@ -29,6 +27,7 @@ export class Clips extends React.Component<Props, State> {
           clipList: response.data,
         });
       })
+      /* eslint-disable-next-line */
       .catch((error: any) => {
         console.error(error.response.data);
       });

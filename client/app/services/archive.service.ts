@@ -8,7 +8,7 @@ export class ArchiveService {
     return _.orderBy(data, 'created_at', ['desc']);
   }
 
-  public static postVideoArchive(data: any): Promise<any> {
+  public static postVideoArchive(data: { url: string }): Promise<unknown> {
     return axios.post('/api/video-archive', data);
   }
 }

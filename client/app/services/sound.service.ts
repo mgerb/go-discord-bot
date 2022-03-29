@@ -1,7 +1,7 @@
 import { ISound, SoundListType, SoundType } from '../model';
 import { axios } from './axios.service';
 
-const playSound = (sound: SoundType): Promise<any> => {
+const playSound = (sound: SoundType): Promise<unknown> => {
   return axios.post('/api/sound/play', { name: sound.name });
 };
 

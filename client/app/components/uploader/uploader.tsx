@@ -1,5 +1,5 @@
 import React from 'react';
-import Dropzone from 'react-dropzone';
+import Dropzone, { ImageFile } from 'react-dropzone';
 import { axios } from '../../services';
 import './uploader.scss';
 
@@ -27,21 +27,21 @@ export class Uploader extends React.Component<IProps, IState> {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
-    onUploadProgress: (progressEvent: any) => {
+    onUploadProgress: (progressEvent: { loaded: number; total: number }) => {
       this.setState({
         percentCompleted: Math.round((progressEvent.loaded * 100) / progressEvent.total),
       });
     },
   };
 
-  onDrop = (acceptedFiles: any) => {
+  private onDrop = (acceptedFiles: ImageFile[]) => {
     if (acceptedFiles.length > 0) {
       this.uploadFile(acceptedFiles[0]);
     }
   };
 
-  uploadFile(file: any) {
-    let formData = new FormData();
+  private uploadFile(file: ImageFile) {
+    const formData = new FormData();
     formData.append('name', file.name);
     formData.append('file', file);
 
@@ -56,7 +56,7 @@ export class Uploader extends React.Component<IProps, IState> {
 
         this.props.onComplete();
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
           percentCompleted: 0,
           uploaded: false,
@@ -65,7 +65,7 @@ export class Uploader extends React.Component<IProps, IState> {
       });
   }
 
-  render() {
+  public render() {
     return (
       <Dropzone
         className="dropzone"

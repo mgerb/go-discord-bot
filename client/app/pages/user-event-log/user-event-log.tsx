@@ -2,14 +2,12 @@ import React from 'react';
 import { IUserEventLog } from '../../model';
 import { UserEventLogService } from '../../services';
 
-interface IProps {}
-
 interface IState {
   userEventLogs: IUserEventLog[];
 }
 
-export class UserEventLog extends React.Component<IProps, IState> {
-  constructor(props: IProps) {
+export class UserEventLog extends React.Component<unknown, IState> {
+  constructor(props: unknown) {
     super(props);
     this.state = {
       userEventLogs: [],

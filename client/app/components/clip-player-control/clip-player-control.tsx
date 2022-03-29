@@ -11,9 +11,7 @@ interface IProps {
   onPlayDiscord: (sound: SoundType) => void;
 }
 
-interface IState {}
-
-export class ClipPlayerControl extends React.Component<IProps, IState> {
+export class ClipPlayerControl extends React.Component<IProps, unknown> {
   checkExtension(extension: string) {
     switch (extension) {
       case 'wav':

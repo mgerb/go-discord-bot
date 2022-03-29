@@ -41,7 +41,7 @@ export class VideoArchive extends React.Component<IProps, IState> {
     }
   }
 
-  onSubmit = async (e: any) => {
+  onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { url } = this.state;
     this.setState({ error: undefined });
@@ -65,7 +65,7 @@ export class VideoArchive extends React.Component<IProps, IState> {
           className="input video-archive__text-input"
           placeholder="Enter Youtube URL or ID..."
           value={url}
-          onChange={e => this.setState({ url: e.target.value })}
+          onChange={(e) => this.setState({ url: e.target.value })}
         />
         <input type="submit" className="button button--primary" style={{ marginLeft: '10px' }} />
         {error && (

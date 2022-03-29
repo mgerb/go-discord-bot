@@ -4,8 +4,7 @@ import { HorizontalBar } from 'react-chartjs-2';
 import { ISound } from '../../model';
 import { axios, SoundService } from '../../services';
 import './stats.scss';
-
-interface IProps {}
+import { AxiosResponse } from 'axios';
 
 interface IState {
   data: {
@@ -19,8 +18,8 @@ interface IState {
  * a page to show discord chat statistics
  * currently keeps track of number messages that contain external links
  */
-export class Stats extends Component<IProps, IState> {
-  constructor(props: any) {
+export class Stats extends Component<unknown, IState> {
+  constructor(props: unknown) {
     super(props);
     this.state = {
       data: [],
@@ -30,18 +29,18 @@ export class Stats extends Component<IProps, IState> {
 
   componentDidMount() {
     this.getdata();
-    SoundService.getSounds().then(sounds => {
+    SoundService.getSounds().then((sounds) => {
       this.setState({ sounds });
     });
   }
 
   async getdata() {
-    const messages = await axios.get('/api/logger/linkedmessages');
-    const data: any = chain(messages.data)
+    const messages: AxiosResponse<{ [key: string]: number }> = await axios.get('/api/logger/linkedmessages');
+    const data = chain(messages.data)
       .map((v, k) => {
         return { username: k, count: v };
       })
-      .orderBy(v => v.count, 'desc')
+      .orderBy((v) => v.count, 'desc')
       .slice(0, 10)
       .value();
 
@@ -49,8 +48,8 @@ export class Stats extends Component<IProps, IState> {
   }
 
   render() {
-    const data: any = {
-      labels: map(this.state.data, v => v.username),
+    const data = {
+      labels: map(this.state.data, (v) => v.username),
       datasets: [
         {
           label: 'Count',
@@ -59,7 +58,7 @@ export class Stats extends Component<IProps, IState> {
           borderWidth: 1,
           hoverBackgroundColor: 'rgba(114,137,218, 0.7)',
           hoverBorderColor: 'rgba(114,137,218, 1)',
-          data: map(this.state.data, v => v.count),
+          data: map(this.state.data, (v) => v.count),
         },
       ],
       options: {

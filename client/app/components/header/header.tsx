@@ -5,7 +5,7 @@ interface IProps {
   onButtonClick: () => void;
 }
 
-export class Header extends React.Component<IProps, any> {
+export class Header extends React.Component<IProps, unknown> {
   constructor(props: IProps) {
     super(props);
   }
@@ -19,7 +19,12 @@ export class Header extends React.Component<IProps, any> {
           </button>
           <h2 style={{ margin: 0 }}>Sound Bot</h2>
         </div>
-        <a href="https://github.com/mgerb/go-discord-bot" className="fa fa-lg fa-github" target="_blank" />
+        <a
+          rel="noreferrer"
+          href="https://github.com/mgerb/go-discord-bot"
+          className="fa fa-lg fa-github"
+          target="_blank"
+        />
       </div>
     );
   }

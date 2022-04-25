@@ -145,7 +145,10 @@ func (conn *AudioConnection) handleMessage(m *discordgo.MessageCreate) {
 func (conn *AudioConnection) dismiss() {
 	voiceConnection := conn.getVoiceConnection()
 	if voiceConnection != nil && !conn.SoundPlayingLock && len(conn.SoundQueue) == 0 {
-		voiceConnection.Disconnect()
+		err := voiceConnection.Disconnect()
+		if err != nil {
+			log.Error(err)
+		}
 	}
 }
 
@@ -274,8 +277,17 @@ func (conn *AudioConnection) PlayAudio(soundName string, m *discordgo.MessageCre
 func (conn *AudioConnection) playSoundsInQueue() {
 	conn.toggleSoundPlayingLock(true)
 	voiceConnection := conn.getVoiceConnection()
+
+	if voiceConnection == nil {
+		return
+	}
+
 	// Start speaking.
-	voiceConnection.Speaking(true)
+	err := voiceConnection.Speaking(true)
+
+	if err != nil {
+		log.Error(err)
+	}
 
 	for {
 		select {
@@ -295,7 +307,10 @@ func (conn *AudioConnection) playSoundsInQueue() {
 
 		default:
 			// Stop speaking
-			voiceConnection.Speaking(false)
+			err := voiceConnection.Speaking(false)
+			if err != nil {
+				log.Error(err)
+			}
 			conn.toggleSoundPlayingLock(false)
 			return
 		}
@@ -334,10 +349,16 @@ func (conn *AudioConnection) loadFile(fileName string) error {
 
 func (conn *AudioConnection) clipAudio(m *discordgo.MessageCreate) {
 	if len(conn.VoiceClipQueue) < 10 {
-		conn.Session.ChannelMessageSend(m.ChannelID, "Clip failed.")
+		_, err := conn.Session.ChannelMessageSend(m.ChannelID, "Clip failed.")
+		if err != nil {
+			log.Error(err)
+		}
 	} else {
 		writePacketsToFile(m.Author.Username, conn.VoiceClipQueue)
-		conn.Session.ChannelMessageSend(m.ChannelID, "Sound clipped!")
+		_, err := conn.Session.ChannelMessageSend(m.ChannelID, "Sound clipped!")
+		if err != nil {
+			log.Error(err)
+		}
 	}
 }
 
@@ -345,7 +366,10 @@ func writePacketsToFile(username string, packets chan *discordgo.Packet) {
 
 	// create clips folder if it does not exist
 	if _, err := os.Stat(config.Config.ClipsPath); os.IsNotExist(err) {
-		os.Mkdir(config.Config.ClipsPath, os.ModePerm)
+		err := os.Mkdir(config.Config.ClipsPath, os.ModePerm)
+		if err != nil {
+			log.Error(err)
+		}
 	}
 
 	opusData := map[uint32][][]byte{}
@@ -411,7 +435,7 @@ func (conn *AudioConnection) startAudioListener() {
 			voiceConnection := conn.getVoiceConnection()
 			if voiceConnection != nil {
 				voiceConnection.RLock()
-				ready := voiceConnection != nil && voiceConnection.Ready
+				ready := voiceConnection.Ready
 				voiceConnection.RUnlock()
 
 				if !ready {
@@ -429,7 +453,7 @@ func (conn *AudioConnection) startAudioListener() {
 			continue
 		}
 		voiceConnection.RLock()
-		ready := voiceConnection != nil && voiceConnection.Ready
+		ready := voiceConnection.Ready
 		voiceConnection.RUnlock()
 
 		// if connection lost wait for ready

@@ -7,7 +7,7 @@ A soundboard bot for discord. Built with Go/React.
 ## How to use
 
 - [Download latest release here](https://github.com/mgerb/go-discord-bot/releases)
-- Install [youtube-dl](https://github.com/rg3/youtube-dl/blob/master/README.md#installation)
+- Install [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - Install [ffmpeg](https://www.ffmpeg.org/download.html)
 - edit your config.json file
 - `docker-compose up`

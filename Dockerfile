@@ -19,6 +19,8 @@ FROM jrottenberg/ffmpeg:4.1-alpine
 
 RUN apk update
 RUN apk add ca-certificates opus-dev opusfile-dev
+# add python for yt-dlp
+RUN apk add python3
 WORKDIR /server
 COPY --from=0 /home/dist /server/dist
 COPY --from=1 /build/bot /server/bot

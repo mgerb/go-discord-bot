@@ -26,7 +26,7 @@ func getDownloaderHandler(c *gin.Context) {
 	}
 
 	// get the video title
-	titleCmd := exec.Command("youtube-dl", "--get-title", url)
+	titleCmd := exec.Command("yt-dlp", "--get-title", url)
 	var titleOut bytes.Buffer
 	titleCmd.Stdout = &titleOut
 
@@ -46,7 +46,7 @@ func getDownloaderHandler(c *gin.Context) {
 	cleanTitle := cleanseTitle(titleOut.String())
 	log.Debug(cleanTitle)
 
-	cmd := exec.Command("youtube-dl", "-x", "--audio-format", "mp3", "-o", config.Config.YoutubePath+"/"+cleanTitle+".%(ext)s", url)
+	cmd := exec.Command("yt-dlp", "-x", "--audio-format", "mp3", "-o", config.Config.YoutubePath+"/"+cleanTitle+".%(ext)s", url)
 
 	var out bytes.Buffer
 	cmd.Stdout = &out

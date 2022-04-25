@@ -14,4 +14,4 @@ services:
       - ./data.db:/server/data.db
       - ./logrus.log:/server/logrus.log  
 
-      - /usr/local/bin/youtube-dl:/usr/bin/youtube-dl
+      - /usr/local/bin/yt-dlp:/usr/bin/yt-dlp

@@ -3,7 +3,7 @@ module github.com/mgerb/go-discord-bot/server
 go 1.17
 
 require (
-	github.com/bwmarrin/discordgo v0.24.0
+	github.com/bwmarrin/discordgo v0.27.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-audio/audio v1.0.0
 	github.com/go-audio/wav v1.0.0
@@ -11,7 +11,6 @@ require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/kkdai/youtube/v2 v2.7.10
 	github.com/sirupsen/logrus v1.8.1
-	github.com/tidwall/gjson v1.14.0
 	gopkg.in/dgrijalva/jwt-go.v3 v3.2.0
 	gopkg.in/hraban/opus.v2 v2.0.0-20211030232353-1a9beeaf0764
 )
@@ -38,8 +37,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
-	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/sys v0.0.0-20211214234402-4825e8c3871d // indirect
